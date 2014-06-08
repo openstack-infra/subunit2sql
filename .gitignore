@@ -1,0 +1,16 @@
+AUTHORS
+ChangeLog
+*.pyc
+*.log
+*.swp
+*.swo
+*.egg*
+.tox
+.venv
+*.db
+dist
+build
+.testrepository
+.coverage*
+!.coveragerc
+cover/
