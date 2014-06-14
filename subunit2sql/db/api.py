@@ -117,9 +117,23 @@ def get_all_runs():
     return query.all()
 
 
-def get_all_test_runs(test_id):
+def get_all_test_runs():
     query = db_utils.models_query(models.TestRun)
     return query.all()
+
+
+def get_test_by_id(id, session=None):
+    session = session or get_session()
+    test = db.utils.models_query(models.Test, session).filter_by(
+        id=id).first()
+    return test
+
+
+def get_test_by_test_id(test_id, session=None):
+    session = session or get_session()
+    test = db.utils.models_query(models.Test, session).filter_by(
+        test_id=test_id).first()
+    return test
 
 
 def get_test_run_by_id(test_run_id, session=None):

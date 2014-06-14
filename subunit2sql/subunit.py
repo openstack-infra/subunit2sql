@@ -13,11 +13,68 @@
 # under the License.
 
 import subunit
-
-DAY_SECONDS = 60 * 60 * 24
+import testtools
 
 
 class ReadSubunit(object):
 
-    def __init__(self, stream):
-        self.stream = subunit.ByteStreamToStreamResult(stream)
+    def __init__(self, stream_file):
+        self.stream = subunit.ByteStreamToStreamResult(stream_file)
+        summary = testtools.StreamSummary()
+        outcomes = testtools.StreamToDict(functools.partial(parse_outcome))
+        self.result = testtools.CopyStreamResult([outcomes, summary])
+        self.results = {}
+
+    def get_results():
+        try:
+            self.stream.run(self.result)
+        finally:
+            self.result.stopTestRun()
+        return self.results
+
+    def parse_outcome(self, test):
+        status = test['status']
+        # TODO(sdague): ask lifeless why on this?
+        if status == 'exists':
+            return
+    
+        worker = find_worker(test)
+        name = cleanup_test_name(test['id']) 
+    
+        # don't count the end of the return code as a fail
+        if name == 'process-returncode':
+            return
+    
+        self.result[name] = {
+            'status': status,
+            'start_time': test['timestamps'][0],
+            'end_time': test['timestamps'][1],
+        }
+        stream.flush()
+
+    def cleanup_test_name(name, strip_tags=True, strip_scenarios=False):
+        """Clean up the test name for display.
+
+        By default we strip out the tags in the test because they don't help us
+        in identifying the test that is run to it's result.
+
+        Make it possible to strip out the testscenarios information (not to
+        be confused with tempest scenarios) however that's often needed to
+        indentify generated negative tests.
+        """
+        if strip_tags:
+            tags_start = name.find('[')
+            tags_end = name.find(']')
+            if tags_start > 0 and tags_end > tags_start:
+                newname = name[:tags_start]
+                newname += name[tags_end + 1:]
+                name = newname
+
+        if strip_scenarios:
+            tags_start = name.find('(')
+            tags_end = name.find(')')
+            if tags_start > 0 and tags_end > tags_start:
+                newname = name[:tags_start]
+                newname += name[tags_end + 1:]
+                name = newname
+        return name

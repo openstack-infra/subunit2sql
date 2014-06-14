@@ -14,11 +14,11 @@
 
 import uuid
 
-from oslo.db import models  # noqa
+from oslo.db.sqlalchemy import models  # noqa
 import sqlalchemy as sa
 
 
-class SubunitBase(models.ModelBase, models.TimeStampMixin):
+class SubunitBase(models.ModelBase, models.TimestampMixin):
     """Base class for Subunit Models."""
     __table_args__ = {'mysql_engine': 'InnoDB'}
     __table_initialized__ = False
