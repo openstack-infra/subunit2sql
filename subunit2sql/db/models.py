@@ -65,7 +65,7 @@ class Run(BASE, SubunitBase):
     skips = sa.Column(sa.Integer())
     fails = sa.Column(sa.Integer())
     passes = sa.Column(sa.Integer())
-    run_time = sa.Column(sa.Integer())
+    run_time = sa.Column(sa.Float())
     artifacts = sa.Column(sa.Text())
 
 

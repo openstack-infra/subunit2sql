@@ -35,7 +35,7 @@ def upgrade():
                     sa.Column('skips', sa.Integer()),
                     sa.Column('fails', sa.Integer()),
                     sa.Column('passes', sa.Integer()),
-                    sa.Column('run_time', sa.Integer()),
+                    sa.Column('run_time', sa.Float()),
                     sa.Column('artifacts', sa.Text()),
                     mysql_engine=True)
 

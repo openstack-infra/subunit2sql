@@ -51,7 +51,7 @@ def parse_args(argv, default_config_files=None):
 
 def process_results(results):
     session = api.get_session()
-    db_run = api.create_run()
+    db_run = api.create_run(run_time=results.pop('run_time'))
     for test in results:
         db_test = api.get_test_by_test_id(test, session)
         if not db_test:

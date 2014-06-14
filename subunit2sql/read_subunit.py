@@ -17,6 +17,8 @@ import functools
 import subunit
 import testtools
 
+DAY_SECONDS = 60 * 60 * 24
+
 
 class ReadSubunit(object):
 
@@ -36,6 +38,7 @@ class ReadSubunit(object):
             self.stream.run(self.result)
         finally:
             self.result.stopTestRun()
+        self.results['run_time'] = self.run_time()
         return self.results
 
     def parse_outcome(self, test):
@@ -80,3 +83,19 @@ class ReadSubunit(object):
                 newname += name[tags_end + 1:]
                 name = newname
         return name
+
+    def get_duration(self, start, end):
+        if not start or not end:
+            duration = ''
+        else:
+            delta = end - start
+            duration = '%d.%06ds' % (
+                delta.days * DAY_SECONDS + delta.seconds, delta.microseconds)
+            return duration
+
+    def run_time(self):
+        runtime = 0.0
+        for name, data in self.results.items():
+            runtime += float(self.get_duration(data['start_time'],
+                                               data['end_time']).strip('s'))
+        return runtime
