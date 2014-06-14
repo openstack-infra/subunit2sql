@@ -34,7 +34,7 @@ def upgrade():
                     sa.Column('id', sa.String(36), primary_key=True),
                     sa.Column('skips', sa.Integer()),
                     sa.Column('fails', sa.Integer()),
-                    sa.Column('pass', sa.Integer()),
+                    sa.Column('passes', sa.Integer()),
                     sa.Column('run_time', sa.Integer()),
                     sa.Column('artifacts', sa.Text()),
                     mysql_engine=True)

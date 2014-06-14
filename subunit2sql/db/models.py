@@ -16,9 +16,12 @@ import uuid
 
 from oslo.db.sqlalchemy import models  # noqa
 import sqlalchemy as sa
+from sqlalchemy.ext import declarative
+
+BASE = declarative.declarative_base()
 
 
-class SubunitBase(models.ModelBase, models.TimestampMixin):
+class SubunitBase(models.ModelBase):
     """Base class for Subunit Models."""
     __table_args__ = {'mysql_engine': 'InnoDB'}
     __table_initialized__ = False
@@ -37,34 +40,37 @@ class SubunitBase(models.ModelBase, models.TimestampMixin):
         return self.__dict__.items()
 
     def to_dict(self):
+        d = self.__dict__.copy()
+        d.pop("_sa_instance_state")
         return self.__dict__.copy()
 
 
-class Test(SubunitBase):
+class Test(BASE, SubunitBase):
     __tablename__ = 'tests'
-    __table_args__ = ()
+    __table_args__ = (sa.Index('ix_id', 'id'),
+                      sa.Index('ix_test_id', 'test_id'))
     id = sa.Column(sa.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
-    test_id = sa.String(256)
-    run_count = sa.Integer()
-    success = sa.Integer()
-    failure = sa.Integer()
+    test_id = sa.Column(sa.String(256))
+    run_count = sa.Column(sa.Integer())
+    success = sa.Column(sa.Integer())
+    failure = sa.Column(sa.Integer())
 
 
-class Run(SubunitBase):
+class Run(BASE, SubunitBase):
     __tablename__ = 'runs'
-    __table_args__ = ()
+#    __table_args__ = (sa.Index('ix_run_id', 'id'), )
     id = sa.Column(sa.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
-    skips = sa.Integer()
-    fails = sa.Integer()
-    passes = sa.Integer()
-    run_time = sa.Integer()
-    artifacts = sa.Text()
+    skips = sa.Column(sa.Integer())
+    fails = sa.Column(sa.Integer())
+    passes = sa.Column(sa.Integer())
+    run_time = sa.Column(sa.Integer())
+    artifacts = sa.Column(sa.Text())
 
 
-class TestRun(SubunitBase):
-    __tablename__ = 'test_run'
+class TestRun(BASE, SubunitBase):
+    __tablename__ = 'test_runs'
     __table_args__ = (sa.Index('ix_test_run_test_id', 'test_id'),
                       sa.Index('ix_test_run_run_id', 'run_id'),
                       sa.UniqueConstraint('test_id', 'run_id',
@@ -76,5 +82,5 @@ class TestRun(SubunitBase):
                         nullable=False)
     run_id = sa.Column(sa.String(36), sa.ForeignKey('runs.id'), nullable=False)
     status = sa.Column(sa.String(256))
-    start_time = sa.DateTime()
-    end_time = sa.DateTime()
+    start_time = sa.Column(sa.DateTime())
+    stop_time = sa.Column(sa.DateTime())

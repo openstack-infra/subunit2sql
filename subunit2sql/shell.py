@@ -56,8 +56,9 @@ def process_results(results):
         db_test = api.get_test_by_test_id(test, session)
         if not db_test:
             db_test = api.create_test(test)
-        api.create_test_run(db_test.id, db_run.id, test['status'],
-                            test['start_time'], test['end_time'])
+        api.create_test_run(db_test.id, db_run.id, results[test]['status'],
+                            results[test]['start_time'],
+                            results[test]['end_time'])
 
 
 def main():

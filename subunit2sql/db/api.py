@@ -41,7 +41,7 @@ def get_session(autocommit=True, expire_on_commit=False):
                               expire_on_commit=expire_on_commit)
 
 
-def create_test(test_id, run_count=0, success=0, failure=0):
+def create_test(test_id, run_count=0, success=0, failure=0, session=None):
     """Create a new test record in the database
 
     :param test_id: test_id identifying the test
@@ -65,7 +65,8 @@ def create_test(test_id, run_count=0, success=0, failure=0):
     return test
 
 
-def create_run(skips=0, fails=0, passes=0, run_time=0, artifacts=None):
+def create_run(skips=0, fails=0, passes=0, run_time=0, artifacts=None,
+               session=None):
     """Create a new run record in the database
 
     :param skips: total number of skiped tests
@@ -79,9 +80,8 @@ def create_run(skips=0, fails=0, passes=0, run_time=0, artifacts=None):
     run.fails = fails
     run.passes = passes
     run.run_time = run_time
-    if artifacts:
-        run.artifacts = artifacts
-    session = get_session()
+    run.artifacts = artifacts
+    session = session or get_session()
     with session.begin():
         session.add(run)
     return run
@@ -99,7 +99,7 @@ def create_test_run(test_id, run_id, status, start_time=None,
     test_run = models.TestRun()
     test_run.test_id = test_id
     test_run.run_id = run_id
-    test_run.end_time = end_time
+    test_run.stop_time = end_time
     test_run.start_time = start_time
     session = get_session()
     with session.begin():
@@ -113,25 +113,25 @@ def get_all_tests():
 
 
 def get_all_runs():
-    query = db_utils.models_query(models.Run)
+    query = db_utils.model_query(models.Run)
     return query.all()
 
 
 def get_all_test_runs():
-    query = db_utils.models_query(models.TestRun)
+    query = db_utils.model_query(models.TestRun)
     return query.all()
 
 
 def get_test_by_id(id, session=None):
     session = session or get_session()
-    test = db_utils.models_query(models.Test, session).filter_by(
+    test = db_utils.model_query(models.Test, session).filter_by(
         id=id).first()
     return test
 
 
 def get_test_by_test_id(test_id, session=None):
     session = session or get_session()
-    test = db_utils.models_query(models.Test, session).filter_by(
+    test = db_utils.model_query(models.Test, session).filter_by(
         test_id=test_id).first()
     return test
 

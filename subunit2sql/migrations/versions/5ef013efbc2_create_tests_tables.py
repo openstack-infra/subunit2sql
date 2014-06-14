@@ -31,8 +31,9 @@ import sqlalchemy as sa
 
 def upgrade():
     op.create_table('tests',
-                    sa.Column('id', sa.String(36), primary_key=True),
-                    sa.Column('test_id', sa.String(256)),
+                    sa.Column('id', sa.String(36), primary_key=True,
+                              nullable=False),
+                    sa.Column('test_id', sa.String(256), nullable=False),
                     sa.Column('run_count', sa.Integer()),
                     sa.Column('success', sa.Integer()),
                     sa.Column('failure', sa.Integer()),
