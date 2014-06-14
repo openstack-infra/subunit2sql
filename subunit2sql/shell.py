@@ -20,7 +20,7 @@ from oslo.config import cfg
 from oslo.db import options
 
 from subunit2sql.db import api
-from subunit2sql import subunit
+from subunit2sql import read_subunit as subunit
 
 shell_opts = [
     cfg.StrOpt('state_path', default='$pybasedir',
@@ -63,7 +63,8 @@ def process_results(results):
 def main():
     parse_args(sys.argv)
     if CONF.subunit_files:
-        streams = [subunit.ReadSubunit(s) for s in CONF.subunit_files]
+        streams = [subunit.ReadSubunit(open(s, 'r')) for s in
+                   CONF.subunit_files]
     else:
         streams = [subunit.ReadSubunit(sys.stdin)]
     for stream in streams:

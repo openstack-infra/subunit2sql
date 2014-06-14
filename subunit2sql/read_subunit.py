@@ -21,14 +21,17 @@ import testtools
 class ReadSubunit(object):
 
     def __init__(self, stream_file):
+        self.stream_file = stream_file
         self.stream = subunit.ByteStreamToStreamResult(stream_file)
+        starts = testtools.StreamResult()
         summary = testtools.StreamSummary()
         outcomes = testtools.StreamToDict(functools.partial(
             self.parse_outcome))
-        self.result = testtools.CopyStreamResult([outcomes, summary])
+        self.result = testtools.CopyStreamResult([starts, outcomes, summary])
         self.results = {}
 
     def get_results(self):
+        self.result.startTestRun()
         try:
             self.stream.run(self.result)
         finally:
@@ -37,21 +40,21 @@ class ReadSubunit(object):
 
     def parse_outcome(self, test):
         status = test['status']
-        # TODO(sdague): ask lifeless why on this?
         if status == 'exists':
             return
         name = self.cleanup_test_name(test['id'])
-        # don't count the end of the return code as a fail
+        # Return code is a a fail don't process it
         if name == 'process-returncode':
             return
-        self.result[name] = {
+        timestamps = test['timestamps']
+        self.results[name] = {
             'status': status,
-            'start_time': test['timestamps'][0],
-            'end_time': test['timestamps'][1],
+            'start_time': timestamps[0],
+            'end_time': timestamps[1],
         }
-        self.stream.flush()
+        self.stream_file.flush()
 
-    def cleanup_test_name(name, strip_tags=True, strip_scenarios=False):
+    def cleanup_test_name(self, name, strip_tags=True, strip_scenarios=False):
         """Clean up the test name for display.
 
         By default we strip out the tags in the test because they don't help us
