@@ -48,11 +48,12 @@ def parse_args(argv, default_config_files=None):
     cfg.CONF(argv[1:], project='subunit2sql',
              default_config_files=default_config_files)
 
+
 def process_results(results):
     session = api.get_session()
     db_run = api.create_run()
     for test in results:
-        db_test =  api.get_test_by_test_id(test, session)
+        db_test = api.get_test_by_test_id(test, session)
         if not db_test:
             db_test = api.create_test(test)
         api.create_test_run(db_test.id, db_run.id, test['status'],
@@ -62,9 +63,9 @@ def process_results(results):
 def main():
     parse_args(sys.argv)
     if CONF.subunit_files:
-        streams = [ subunit.ReadSubunit(s) for s in CONF.subunit_files ]
+        streams = [subunit.ReadSubunit(s) for s in CONF.subunit_files]
     else:
-        steams = [ subunit.ReadSubunit(sys.stdin) ]
+        streams = [subunit.ReadSubunit(sys.stdin)]
     for stream in streams:
         process_results(stream.get_results())
 

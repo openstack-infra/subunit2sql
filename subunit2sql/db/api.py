@@ -124,14 +124,14 @@ def get_all_test_runs():
 
 def get_test_by_id(id, session=None):
     session = session or get_session()
-    test = db.utils.models_query(models.Test, session).filter_by(
+    test = db_utils.models_query(models.Test, session).filter_by(
         id=id).first()
     return test
 
 
 def get_test_by_test_id(test_id, session=None):
     session = session or get_session()
-    test = db.utils.models_query(models.Test, session).filter_by(
+    test = db_utils.models_query(models.Test, session).filter_by(
         test_id=test_id).first()
     return test
 
