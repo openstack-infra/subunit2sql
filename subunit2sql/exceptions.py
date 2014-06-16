@@ -44,3 +44,7 @@ class Subunit2SQLException(Exception):
 
 class InvalidRunCount(Subunit2SQLException):
     message = "Invalid Run Count"
+
+
+class UnknownStatus(Subunit2SQLException):
+    message = "Unknown test status"

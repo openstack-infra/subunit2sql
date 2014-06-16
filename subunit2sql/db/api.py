@@ -59,9 +59,17 @@ def create_test(test_id, run_count=0, success=0, failure=0, session=None):
     test.run_count = run_count
     test.success = success
     test.failure = failure
-    session = get_session()
+    session = session or get_session()
     with session.begin():
         session.add(test)
+    return test
+
+
+def update_test(values, test_id, session=None):
+    session = session or get_session()
+    with session.begin():
+        test = get_test_by_id(test_id, session)
+        test.update(values)
     return test
 
 
@@ -87,8 +95,16 @@ def create_run(skips=0, fails=0, passes=0, run_time=0, artifacts=None,
     return run
 
 
+def update_run(values, run_id, session=None):
+    session = session or get_session()
+    with session.begin():
+        run = get_run_by_id(run_id, session)
+        run.update(values)
+    return run
+
+
 def create_test_run(test_id, run_id, status, start_time=None,
-                    end_time=None):
+                    end_time=None, session=None):
     """Create a new test run record in the database
 
     :param test_id: uuid for test that was run
@@ -101,7 +117,7 @@ def create_test_run(test_id, run_id, status, start_time=None,
     test_run.run_id = run_id
     test_run.stop_time = end_time
     test_run.start_time = start_time
-    session = get_session()
+    session = session or get_session()
     with session.begin():
         session.add(test_run)
     return test_run
@@ -134,6 +150,12 @@ def get_test_by_test_id(test_id, session=None):
     test = db_utils.model_query(models.Test, session).filter_by(
         test_id=test_id).first()
     return test
+
+
+def get_run_by_id(id, session=None):
+    session = session or get_session()
+    run = db_utils.model_query(models.Run, session).filter_by(id=id).first()
+    return run
 
 
 def get_test_run_by_id(test_run_id, session=None):

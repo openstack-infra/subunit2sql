@@ -20,6 +20,7 @@ from oslo.config import cfg
 from oslo.db import options
 
 from subunit2sql.db import api
+from subunit2sql import exceptions
 from subunit2sql import read_subunit as subunit
 
 shell_opts = [
@@ -49,6 +50,27 @@ def parse_args(argv, default_config_files=None):
              default_config_files=default_config_files)
 
 
+def increment_counts(run, test, status, session=None):
+    test_values = {'run_count': test.run_count + 1}
+    run_values = {}
+    run = api.get_run_by_id(run.id, session)
+    if status == 'success':
+        test_values['success'] = test.success + 1
+        run_values['passes'] = run.passes + 1
+    elif status == 'fail':
+        test_values['failure'] = test.failure + 1
+        run_values['fails'] = run.fails + 1
+    elif status == 'skip':
+        test_values = {}
+        run_values['skips'] = run.skips + 1
+    else:
+        msg = "Unknown test status %s" % status
+        raise exceptions.UnknownStatus(msg)
+    if test_values:
+        api.update_test(test_values, test.id)
+    api.update_run(run_values, run.id)
+
+
 def process_results(results):
     session = api.get_session()
     db_run = api.create_run(run_time=results.pop('run_time'))
@@ -56,6 +78,7 @@ def process_results(results):
         db_test = api.get_test_by_test_id(test, session)
         if not db_test:
             db_test = api.create_test(test)
+        increment_counts(db_run, db_test, results[test]['status'], session)
         api.create_test_run(db_test.id, db_run.id, results[test]['status'],
                             results[test]['start_time'],
                             results[test]['end_time'])

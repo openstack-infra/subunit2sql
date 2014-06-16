@@ -3,7 +3,6 @@ Work Items for Subunit2SQL
 
 Short Term
 ----------
- * Store counts to everything in the DB from the shell script
  * Add a new metadata table for each existing table (run_metadata,
    test_metadata, test_run_metadata) to store extra info from stream like
    tags, or attrs and other information about runs like job name.
