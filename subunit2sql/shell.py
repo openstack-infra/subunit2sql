@@ -50,9 +50,24 @@ def parse_args(argv, default_config_files=None):
              default_config_files=default_config_files)
 
 
-def increment_counts(run, test, status, session=None):
+def running_avg(test, values, result):
+    count = test.success
+    avg_prev = test.run_time
+    curr_runtime = float(subunit.get_duration(result['start_time'],
+                                              result['end_time']).strip('s'))
+    if isinstance(avg_prev, float):
+        # Using a smoothed moving avg to limit the affect of a single outlier
+        new_avg = ((count * avg_prev) + curr_runtime) / (count + 1)
+        values['run_time'] = new_avg
+    else:
+        values['run_time'] = curr_runtime
+    return values
+
+
+def increment_counts(run, test, results, session=None):
     test_values = {'run_count': test.run_count + 1}
     run_values = {}
+    status = results.get('status')
     run = api.get_run_by_id(run.id, session)
     if status == 'success':
         test_values['success'] = test.success + 1
@@ -66,6 +81,7 @@ def increment_counts(run, test, status, session=None):
     else:
         msg = "Unknown test status %s" % status
         raise exceptions.UnknownStatus(msg)
+    test_values = running_avg(test, test_values, results)
     if test_values:
         api.update_test(test_values, test.id)
     api.update_run(run_values, run.id)
@@ -78,7 +94,7 @@ def process_results(results):
         db_test = api.get_test_by_test_id(test, session)
         if not db_test:
             db_test = api.create_test(test)
-        increment_counts(db_run, db_test, results[test]['status'], session)
+        increment_counts(db_run, db_test, results[test], session)
         api.create_test_run(db_test.id, db_run.id, results[test]['status'],
                             results[test]['start_time'],
                             results[test]['end_time'])

@@ -20,6 +20,16 @@ import testtools
 DAY_SECONDS = 60 * 60 * 24
 
 
+def get_duration(start, end):
+    if not start or not end:
+        duration = ''
+    else:
+        delta = end - start
+        duration = '%d.%06ds' % (
+            delta.days * DAY_SECONDS + delta.seconds, delta.microseconds)
+        return duration
+
+
 class ReadSubunit(object):
 
     def __init__(self, stream_file):
@@ -84,18 +94,9 @@ class ReadSubunit(object):
                 name = newname
         return name
 
-    def get_duration(self, start, end):
-        if not start or not end:
-            duration = ''
-        else:
-            delta = end - start
-            duration = '%d.%06ds' % (
-                delta.days * DAY_SECONDS + delta.seconds, delta.microseconds)
-            return duration
-
     def run_time(self):
         runtime = 0.0
         for name, data in self.results.items():
-            runtime += float(self.get_duration(data['start_time'],
-                                               data['end_time']).strip('s'))
+            runtime += float(get_duration(data['start_time'],
+                                          data['end_time']).strip('s'))
         return runtime

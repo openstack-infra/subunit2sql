@@ -55,6 +55,7 @@ class Test(BASE, SubunitBase):
     run_count = sa.Column(sa.Integer())
     success = sa.Column(sa.Integer())
     failure = sa.Column(sa.Integer())
+    run_time = sa.Column(sa.Float())
 
 
 class Run(BASE, SubunitBase):
