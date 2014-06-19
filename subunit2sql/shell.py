@@ -26,7 +26,9 @@ from subunit2sql import read_subunit as subunit
 shell_opts = [
     cfg.StrOpt('state_path', default='$pybasedir',
                help='Top level dir for maintaining subunit2sql state'),
-    cfg.MultiStrOpt('subunit_files', positional=True)
+    cfg.MultiStrOpt('subunit_files', positional=True),
+    cfg.DictOpt('run_meta', short='r', default=None,
+                help='Dict of metadata about the run(s)'),
 ]
 
 CONF = cfg.CONF
@@ -90,6 +92,8 @@ def increment_counts(run, test, results, session=None):
 def process_results(results):
     session = api.get_session()
     db_run = api.create_run(run_time=results.pop('run_time'))
+    if CONF.run_meta:
+        api.add_run_metadata(CONF.run_meta, db_run.id, session)
     for test in results:
         db_test = api.get_test_by_test_id(test, session)
         if not db_test:

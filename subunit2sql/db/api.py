@@ -103,6 +103,19 @@ def update_run(values, run_id, session=None):
     return run
 
 
+def add_run_metadata(meta_dict, run_id, session=None):
+    metadata = []
+    for key, value in meta_dict.items():
+        meta = models.RunMetadata()
+        meta.key = key
+        meta.value = value
+        meta.run_id = run_id
+        with session.begin():
+            session.add(meta)
+        metadata.append(meta)
+    return metadata
+
+
 def create_test_run(test_id, run_id, status, start_time=None,
                     end_time=None, session=None):
     """Create a new test run record in the database

@@ -60,7 +60,7 @@ class Test(BASE, SubunitBase):
 
 class Run(BASE, SubunitBase):
     __tablename__ = 'runs'
-#    __table_args__ = (sa.Index('ix_run_id', 'id'), )
+    __table_args__ = (sa.Index('ix_run_id', 'id'), )
     id = sa.Column(sa.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
     skips = sa.Column(sa.Integer())
@@ -85,3 +85,38 @@ class TestRun(BASE, SubunitBase):
     status = sa.Column(sa.String(256))
     start_time = sa.Column(sa.DateTime())
     stop_time = sa.Column(sa.DateTime())
+
+
+class RunMetadata(BASE, SubunitBase):
+    __tablename__ = 'run_metadata'
+    __table_args__ = (sa.Index('ix_run_metadata_run_id', 'run_id'),)
+
+    id = sa.Column(sa.String(36), primary_key=True,
+                   default=lambda: str(uuid.uuid4()))
+    key = sa.Column(sa.String(255))
+    value = sa.Column(sa.String(255))
+    run_id = sa.Column(sa.String(36), sa.ForeignKey('runs.id'))
+
+
+class TestRunMetadata(BASE, SubunitBase):
+    __tablename__ = 'test_run_metadata'
+    __table_args__ = (sa.Index('ix_test_run_metadata_test_run_id',
+                               'test_run_id'),)
+
+    id = sa.Column(sa.String(36), primary_key=True,
+                   default=lambda: str(uuid.uuid4()))
+    key = sa.Column(sa.String(255))
+    value = sa.Column(sa.String(255))
+    test_run_id = sa.Column(sa.String(36), sa.ForeignKey('test_runs.id'))
+
+
+class TestMetadata(BASE, SubunitBase):
+    __tablename__ = 'test_metadata'
+    __table_args__ = (sa.Index('ix_test_metadata_test_id',
+                               'test_id'),)
+
+    id = sa.Column(sa.String(36), primary_key=True,
+                   default=lambda: str(uuid.uuid4()))
+    key = sa.Column(sa.String(255))
+    value = sa.Column(sa.String(255))
+    test_id = sa.Column(sa.String(36), sa.ForeignKey('tests.id'))
