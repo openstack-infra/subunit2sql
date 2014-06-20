@@ -54,7 +54,7 @@ def upgrade():
                     sa.Column('key', sa.String(255)),
                     sa.Column('value', sa.String(255)),
                     sa.Column('test_run_id', sa.String(36),
-                              sa.ForeignKey('test_runs.id'),
+                              sa.ForeignKey('tests.id'),
                               nullable=False),
                     mysql_engine='InnoDB')
 

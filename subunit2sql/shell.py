@@ -47,7 +47,6 @@ _DEFAULT_SQL_CONNECTION = 'sqlite:///' + state_path_def('subunit2sql.sqlite')
 def parse_args(argv, default_config_files=None):
     options.set_defaults(CONF, connection=_DEFAULT_SQL_CONNECTION,
                          sqlite_db='subunit2sql.sqlite')
-    CONF.register_opts(options.database_opts)
     cfg.CONF(argv[1:], project='subunit2sql',
              default_config_files=default_config_files)
 
