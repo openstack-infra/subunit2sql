@@ -98,9 +98,14 @@ def process_results(results):
         if not db_test:
             db_test = api.create_test(test)
         increment_counts(db_run, db_test, results[test], session)
-        api.create_test_run(db_test.id, db_run.id, results[test]['status'],
-                            results[test]['start_time'],
-                            results[test]['end_time'])
+        test_run = api.create_test_run(db_test.id, db_run.id,
+                                       results[test]['status'],
+                                       results[test]['start_time'],
+                                       results[test]['end_time'],
+                                       session)
+        if results[test]['metadata']:
+            api.add_test_run_metadata(results[test]['metadata'], test_run.id,
+                                      session)
 
 
 def main():

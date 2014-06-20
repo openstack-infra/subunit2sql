@@ -136,6 +136,20 @@ def create_test_run(test_id, run_id, status, start_time=None,
     return test_run
 
 
+def add_test_run_metadata(meta_dict, test_run_id, session=None):
+    metadata = []
+    for key, value in meta_dict.items():
+        meta = models.TestRunMetadata()
+        meta.key = key
+        meta.value = value
+        meta.test_run_id = test_run_id
+        session = session or get_session()
+        with session.begin():
+            session.add(meta)
+        metadata.append(meta)
+    return metadata
+
+
 def get_all_tests():
     query = db_utils.model_query(models.Test)
     return query.all()

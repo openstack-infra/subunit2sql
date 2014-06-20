@@ -52,10 +52,16 @@ class ReadSubunit(object):
         return self.results
 
     def parse_outcome(self, test):
+        metadata = {}
         status = test['status']
         if status == 'exists':
             return
         name = self.cleanup_test_name(test['id'])
+        attrs = self.get_attrs(test['id'])
+        if attrs:
+            metadata['attrs'] = attrs
+        if test['tags']:
+            metadata['tags'] = test['tags']
         # Return code is a a fail don't process it
         if name == 'process-returncode':
             return
@@ -64,8 +70,17 @@ class ReadSubunit(object):
             'status': status,
             'start_time': timestamps[0],
             'end_time': timestamps[1],
+            'metadata': metadata
         }
         self.stream_file.flush()
+
+    def get_attrs(self, name):
+        tags_start = name.find('[')
+        tags_end = name.find(']')
+        attrs = None
+        if tags_start > 0 and tags_end > tags_start:
+            attrs = name[(tags_start + 1):tags_end]
+        return attrs
 
     def cleanup_test_name(self, name, strip_tags=True, strip_scenarios=False):
         """Clean up the test name for display.
