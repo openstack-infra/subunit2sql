@@ -37,7 +37,7 @@ def upgrade():
                     sa.Column('passes', sa.Integer()),
                     sa.Column('run_time', sa.Float()),
                     sa.Column('artifacts', sa.Text()),
-                    mysql_engine=True)
+                    mysql_engine='InnoDB')
 
 
 def downgrade():
