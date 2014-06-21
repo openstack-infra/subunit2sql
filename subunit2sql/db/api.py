@@ -128,6 +128,7 @@ def create_test_run(test_id, run_id, status, start_time=None,
     test_run = models.TestRun()
     test_run.test_id = test_id
     test_run.run_id = run_id
+    test_run.status = status
     test_run.stop_time = end_time.replace(tzinfo=None)
     test_run.start_time = start_time.replace(tzinfo=None)
     session = session or get_session()
