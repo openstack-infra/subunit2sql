@@ -41,7 +41,8 @@ def get_session(autocommit=True, expire_on_commit=False):
                               expire_on_commit=expire_on_commit)
 
 
-def create_test(test_id, run_count=0, success=0, failure=0, session=None):
+def create_test(test_id, run_count=0, success=0, failure=0, run_time=0.0,
+                session=None):
     """Create a new test record in the database
 
     :param test_id: test_id identifying the test
@@ -59,6 +60,7 @@ def create_test(test_id, run_count=0, success=0, failure=0, session=None):
     test.run_count = run_count
     test.success = success
     test.failure = failure
+    test.run_time = run_time
     session = session or get_session()
     with session.begin():
         session.add(test)

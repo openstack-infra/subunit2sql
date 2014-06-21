@@ -65,39 +65,72 @@ def running_avg(test, values, result):
     return values
 
 
-def increment_counts(run, test, results, session=None):
+def increment_counts(run, test, results, session):
     test_values = {'run_count': test.run_count + 1}
     run_values = {}
     status = results.get('status')
     run = api.get_run_by_id(run.id, session)
     if status == 'success':
         test_values['success'] = test.success + 1
-        run_values['passes'] = run.passes + 1
     elif status == 'fail':
         test_values['failure'] = test.failure + 1
-        run_values['fails'] = run.fails + 1
     elif status == 'skip':
         test_values = {}
-        run_values['skips'] = run.skips + 1
     else:
         msg = "Unknown test status %s" % status
         raise exceptions.UnknownStatus(msg)
     test_values = running_avg(test, test_values, results)
-    if test_values:
-        api.update_test(test_values, test.id)
-    api.update_run(run_values, run.id)
+    return test_values
+
+
+def get_run_totals(results):
+    success = len([x for x in results if results[x]['status'] == 'success'])
+    fails = len([x for x in results if results[x]['status'] == 'fail'])
+    skips = len([x for x in results if results[x]['status'] == 'skip'])
+    totals = {
+        'success': success,
+        'fails': fails,
+        'skips': skips,
+    }
+    return totals
 
 
 def process_results(results):
     session = api.get_session()
-    db_run = api.create_run(run_time=results.pop('run_time'))
+    run_time = results.pop('run_time')
+    totals = get_run_totals(results)
+    db_run = api.create_run(totals['skips'], totals['fails'],
+                            totals['success'], run_time, session=session)
     if CONF.run_meta:
-        api.add_run_metadata(CONF.run_meta, db_run.id, session)
+        api.add_run_metadata(CONF.run_meta, db_run.id, session) 
     for test in results:
         db_test = api.get_test_by_test_id(test, session)
         if not db_test:
-            db_test = api.create_test(test)
-        increment_counts(db_run, db_test, results[test], session)
+            if results[test]['status'] == 'success':
+                success = 1
+                fails = 0
+            elif results[test]['status'] == 'fail':
+                fails = 1
+                success = 0
+            else:
+                fails = 0
+                success = 0
+            run_time = subunit.get_duration(
+                results[test]['start_time'],
+                results[test]['end_time']).strip('s')
+            if run_time:
+                run_time = float(run_time)
+            else:
+                run_time = None
+            db_test = api.create_test(test, (success + fails), success,
+                                      fails, run_time,
+                                      session)
+        else:
+            test_values = increment_counts(db_run, db_test, results[test],
+                                           session)
+            # If skipped nothing to update
+            if test_values:
+                api.update_test(test_values, db_test.id, session)
         test_run = api.create_test_run(db_test.id, db_run.id,
                                        results[test]['status'],
                                        results[test]['start_time'],
@@ -106,6 +139,7 @@ def process_results(results):
         if results[test]['metadata']:
             api.add_test_run_metadata(results[test]['metadata'], test_run.id,
                                       session)
+    session.close()
 
 
 def main():
