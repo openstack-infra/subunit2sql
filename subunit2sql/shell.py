@@ -30,7 +30,7 @@ shell_opts = [
     cfg.DictOpt('run_meta', short='r', default=None,
                 help='Dict of metadata about the run(s)'),
     cfg.StrOpt('artifacts', short='a', default=None,
-               help='Link to test artifacts')
+               help='Location of run artifacts')
 ]
 
 CONF = cfg.CONF
@@ -69,7 +69,6 @@ def running_avg(test, values, result):
 
 def increment_counts(run, test, results, session):
     test_values = {'run_count': test.run_count + 1}
-    run_values = {}
     status = results.get('status')
     run = api.get_run_by_id(run.id, session)
     if status == 'success':
@@ -105,7 +104,7 @@ def process_results(results):
                             totals['success'], run_time, CONF.artifacts,
                             session=session)
     if CONF.run_meta:
-        api.add_run_metadata(CONF.run_meta, db_run.id, session) 
+        api.add_run_metadata(CONF.run_meta, db_run.id, session)
     for test in results:
         db_test = api.get_test_by_test_id(test, session)
         if not db_test:

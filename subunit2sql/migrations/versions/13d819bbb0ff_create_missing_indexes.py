@@ -25,7 +25,6 @@ revision = '13d819bbb0ff'
 down_revision = '4ca26dac400e'
 
 from alembic import op
-import sqlalchemy as sa
 
 
 def upgrade():
@@ -34,6 +33,7 @@ def upgrade():
     op.create_index('ix_test_run_run_id', 'test_runs', ['run_id'])
     op.create_unique_constraint('uq_test_runs', 'test_runs',
                                 ['test_id', 'run_id'])
+
 
 def downgrade():
     op.drop_constraint('uq_test_runs')
