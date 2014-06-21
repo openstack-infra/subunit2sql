@@ -29,6 +29,8 @@ shell_opts = [
     cfg.MultiStrOpt('subunit_files', positional=True),
     cfg.DictOpt('run_meta', short='r', default=None,
                 help='Dict of metadata about the run(s)'),
+    cfg.StrOpt('artifacts', short='a', default=None,
+               help='Link to test artifacts')
 ]
 
 CONF = cfg.CONF
@@ -100,7 +102,8 @@ def process_results(results):
     run_time = results.pop('run_time')
     totals = get_run_totals(results)
     db_run = api.create_run(totals['skips'], totals['fails'],
-                            totals['success'], run_time, session=session)
+                            totals['success'], run_time, CONF.artifacts,
+                            session=session)
     if CONF.run_meta:
         api.add_run_metadata(CONF.run_meta, db_run.id, session) 
     for test in results:
