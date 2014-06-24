@@ -6,6 +6,8 @@ Short Term
  * Add unit tests
  * Flesh out query side of DB API to make it useful for building additional
    tooling.
+ * Drop Oslo.DB from requirements to enable using other config/cli tooling
+ * Improve documentation
 
 Longer Term
 -----------
