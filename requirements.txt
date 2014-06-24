@@ -3,4 +3,4 @@ oslo.config>=1.2.0
 oslo.db
 pbr>=0.6,<1.0
 six>=1.5.2
-SQLAlchemy>=0.7.8,<=0.8.99
+SQLAlchemy>=0.7.8
