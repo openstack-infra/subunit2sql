@@ -22,12 +22,12 @@ DAY_SECONDS = 60 * 60 * 24
 
 def get_duration(start, end):
     if not start or not end:
-        duration = ''
+        duration = None
     else:
         delta = end - start
-        duration = '%d.%06ds' % (
+        duration = '%d.%06d' % (
             delta.days * DAY_SECONDS + delta.seconds, delta.microseconds)
-        return duration
+        return float(duration)
 
 
 class ReadSubunit(object):
@@ -112,6 +112,5 @@ class ReadSubunit(object):
     def run_time(self):
         runtime = 0.0
         for name, data in self.results.items():
-            runtime += float(get_duration(data['start_time'],
-                                          data['end_time']).strip('s'))
+            runtime += get_duration(data['start_time'], data['end_time'])
         return runtime

@@ -23,4 +23,14 @@ class TestReadSubunit(base.TestCase):
     def test_get_duration(self):
         dur = subunit.get_duration(datetime.datetime(1914, 6, 28, 10, 45, 0),
                                    datetime.datetime(1914, 6, 28, 10, 45, 50))
-        self.assertEqual(dur, '50.000000s')
+        self.assertEqual(dur, 50.000000)
+
+    def test_get_duration_no_start(self):
+        dur = subunit.get_duration(None,
+                                   datetime.datetime(1914, 6, 28, 10, 45, 50))
+        self.assertIsNone(dur)
+
+    def test_get_duration_no_end(self):
+        dur = subunit.get_duration(datetime.datetime(1914, 6, 28, 10, 45, 50),
+                                   None)
+        self.assertIsNone(dur)

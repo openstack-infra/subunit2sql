@@ -58,8 +58,8 @@ def parse_args(argv, default_config_files=None):
 def running_avg(test, values, result):
     count = test.success
     avg_prev = test.run_time
-    curr_runtime = float(subunit.get_duration(result['start_time'],
-                                              result['end_time']).strip('s'))
+    curr_runtime = subunit.get_duration(result['start_time'],
+                                        result['end_time'])
     if isinstance(avg_prev, float):
         # Using a smoothed moving avg to limit the affect of a single outlier
         new_avg = ((count * avg_prev) + curr_runtime) / (count + 1)
@@ -119,13 +119,8 @@ def process_results(results):
             else:
                 fails = 0
                 success = 0
-            run_time = subunit.get_duration(
-                results[test]['start_time'],
-                results[test]['end_time']).strip('s')
-            if run_time:
-                run_time = float(run_time)
-            else:
-                run_time = None
+            run_time = subunit.get_duration(results[test]['start_time'],
+                                            results[test]['end_time'])
             db_test = api.create_test(test, (success + fails), success,
                                       fails, run_time,
                                       session)
