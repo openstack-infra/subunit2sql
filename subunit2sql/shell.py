@@ -69,12 +69,12 @@ def running_avg(test, values, result):
     return values
 
 
-def increment_counts(run, test, results, session):
+def increment_counts(test, results):
     test_values = {'run_count': test.run_count + 1}
     status = results.get('status')
-    run = api.get_run_by_id(run.id, session)
     if status == 'success':
         test_values['success'] = test.success + 1
+        test_values = running_avg(test, test_values, results)
     elif status == 'fail':
         test_values['failure'] = test.failure + 1
     elif status == 'skip':
@@ -82,7 +82,6 @@ def increment_counts(run, test, results, session):
     else:
         msg = "Unknown test status %s" % status
         raise exceptions.UnknownStatus(msg)
-    test_values = running_avg(test, test_values, results)
     return test_values
 
 
@@ -125,8 +124,7 @@ def process_results(results):
                                       fails, run_time,
                                       session)
         else:
-            test_values = increment_counts(db_run, db_test, results[test],
-                                           session)
+            test_values = increment_counts(db_test, results[test])
             # If skipped nothing to update
             if test_values:
                 api.update_test(test_values, db_test.id, session)

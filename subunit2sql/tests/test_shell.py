@@ -17,6 +17,7 @@ import datetime
 
 import mock
 
+from subunit2sql import exceptions
 from subunit2sql import shell
 from subunit2sql.tests import base
 
@@ -68,3 +69,64 @@ class TestShell(base.TestCase):
         result = shell.running_avg(fake_test, fake_values, fake_result)
         expected_avg = 50
         self.assertEqual(expected_avg, result['run_time'])
+
+    def test_increment_counts_success(self):
+        fake_test = mock.MagicMock()
+        fake_test.run_count = 15
+        fake_test.success = 5
+        fake_test.run_time = 45.0
+        fake_result = {
+            'status': 'success',
+            'start_time': datetime.datetime(1914, 6, 28, 10, 45, 0),
+            'end_time': datetime.datetime(1914, 6, 28, 10, 45, 50),
+        }
+        values = shell.increment_counts(fake_test, fake_result)
+        # Check to ensure counts incrememented properly
+        self.assertEqual(values['run_count'], 16)
+        self.assertEqual(values['success'], 6)
+        # Ensure run_time is updated on success
+        expected_avg = ((5 * 45.0) + 50) / 6
+        self.assertEqual(values['run_time'], expected_avg)
+
+    def test_increment_counts_failure(self):
+        fake_test = mock.MagicMock()
+        fake_test.run_count = 15
+        fake_test.success = 5
+        fake_test.failure = 10
+        fake_test.run_time = 45.0
+        fake_result = {
+            'status': 'fail',
+            'start_time': datetime.datetime(1914, 6, 28, 10, 45, 0),
+            'end_time': datetime.datetime(1914, 6, 28, 10, 45, 50),
+        }
+        values = shell.increment_counts(fake_test, fake_result)
+        # Check to ensure counts incrememented properly
+        self.assertEqual(values['run_count'], 16)
+        self.assertEqual(values['failure'], 11)
+        # Avg runtime should only be updated on success
+        self.assertNotIn('run_time', values)
+
+    def test_increment_counts_skip(self):
+        fake_test = mock.MagicMock()
+        fake_test.run_count = 15
+        fake_test.success = 5
+        fake_test.failure = 10
+        fake_test.run_time = 45.0
+        fake_result = {
+            'status': 'skip',
+            'start_time': datetime.datetime(1914, 6, 28, 10, 45, 0),
+            'end_time': datetime.datetime(1914, 6, 28, 10, 45, 2),
+        }
+        values = shell.increment_counts(fake_test, fake_result)
+        # No test counts incrememented with a skip
+        self.assertEqual(values, {})
+
+    def test_increment_counts_unknown_status(self):
+        fake_test = mock.MagicMock()
+        fake_result = {
+            'status': 'explody',
+            'start_time': datetime.datetime(1914, 6, 28, 10, 45, 0),
+            'end_time': datetime.datetime(1914, 6, 28, 10, 45, 2),
+        }
+        self.assertRaises(exceptions.UnknownStatus,
+                          shell.increment_counts, fake_test, fake_result)
