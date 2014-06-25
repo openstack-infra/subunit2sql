@@ -15,6 +15,8 @@
 
 import datetime
 
+import mock
+
 from subunit2sql import read_subunit as subunit
 from subunit2sql.tests import base
 
@@ -34,3 +36,51 @@ class TestReadSubunit(base.TestCase):
         dur = subunit.get_duration(datetime.datetime(1914, 6, 28, 10, 45, 50),
                                    None)
         self.assertIsNone(dur)
+
+    def test_get_attrs(self):
+        fake_subunit = subunit.ReadSubunit(mock.MagicMock())
+        fake_name = 'fake_dir.fake_module.fakeClass.test_fake[attr1,attr2]'
+        attrs = fake_subunit.get_attrs(fake_name)
+        self.assertEqual(attrs, 'attr1,attr2')
+
+    def test_cleanup_test_name_with_attrs(self):
+        fake_subunit = subunit.ReadSubunit(mock.MagicMock())
+        fake_name = 'fake_dir.fake_module.fakeClass.test_fake[attr1,attr2]'
+        name = fake_subunit.cleanup_test_name(fake_name)
+        self.assertEqual(name, 'fake_dir.fake_module.fakeClass.test_fake')
+
+    def test_cleanup_test_name_with_attrs_leave_scenarios(self):
+        fake_subunit = subunit.ReadSubunit(mock.MagicMock())
+        fake_name = ('fake_dir.fake_module.fakeClass.test_fake[attr1,attr2]'
+                     '(scenario)')
+        name = fake_subunit.cleanup_test_name(fake_name)
+        self.assertEqual(name, 'fake_dir.fake_module.fakeClass.test_fake'
+                         '(scenario)')
+
+    def test_cleanup_test_name_with_strip_scenarios_and_attrs(self):
+        fake_subunit = subunit.ReadSubunit(mock.MagicMock())
+        fake_name = ('fake_dir.fake_module.fakeClass.test_fake[attr1,attr2]'
+                     '(scenario)')
+        name = fake_subunit.cleanup_test_name(fake_name, strip_scenarios=True)
+        self.assertEqual(name, 'fake_dir.fake_module.fakeClass.test_fake')
+
+    def test_cleanup_test_name_strip_nothing(self):
+        fake_subunit = subunit.ReadSubunit(mock.MagicMock())
+        fake_name = ('fake_dir.fake_module.fakeClass.test_fake[attr1,attr2]'
+                     '(scenario)')
+        name = fake_subunit.cleanup_test_name(fake_name, strip_tags=False)
+        self.assertEqual(name, fake_name)
+
+    def test_run_time(self):
+        fake_subunit = subunit.ReadSubunit(mock.MagicMock())
+        fake_results = {}
+        fifty_sec_run_result = {
+            'start_time': datetime.datetime(1914, 6, 28, 10, 45, 0),
+            'end_time': datetime.datetime(1914, 6, 28, 10, 45, 50),
+        }
+        for num in range(100):
+            test_name = 'test_fake_' + str(num)
+            fake_results[test_name] = fifty_sec_run_result
+        fake_subunit.results = fake_results
+        runtime = fake_subunit.run_time()
+        self.assertEqual(runtime, 5000.0)
