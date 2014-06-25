@@ -13,21 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+import datetime
 
-import fixtures
-import testtools
+from subunit2sql import read_subunit as subunit
+from subunit2sql.tests import base
 
 
-class TestCase(testtools.TestCase):
-
-    true = ('True', 'true', '1', 'yes')
-
-    def setUp(self):
-        super(TestCase, self).setUp()
-        if os.environ.get('OS_STDOUT_CAPTURE') in self.true:
-            stdout = self.useFixture(fixtures.StringStream('stdout')).stream
-            self.useFixture(fixtures.MonkeyPatch('sys.stdout', stdout))
-        if os.environ.get('OS_STDERR_CAPTURE') in self.true:
-            stderr = self.useFixture(fixtures.StringStream('stderr')).stream
-            self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
+class TestReadSubunit(base.TestCase):
+    def test_get_duration(self):
+        dur = subunit.get_duration(datetime.datetime(1914, 6, 28, 10, 45, 0),
+                                   datetime.datetime(1914, 6, 28, 10, 45, 50))
+        self.assertEqual(dur, '50.000000s')

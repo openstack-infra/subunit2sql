@@ -2,5 +2,6 @@ alembic>=0.4.1
 oslo.config>=1.2.0
 oslo.db
 pbr>=0.6,<1.0
+python-subunit>=0.0.18
 six>=1.5.2
 SQLAlchemy>=0.7.8
