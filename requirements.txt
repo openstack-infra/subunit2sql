@@ -1,5 +1,5 @@
 alembic>=0.4.1
-oslo.config>=1.2.0
+oslo.config>=1.4.0.0a3
 oslo.db
 pbr>=0.6,<1.0
 python-subunit>=0.0.18
