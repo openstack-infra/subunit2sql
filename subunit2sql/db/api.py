@@ -153,6 +153,13 @@ def add_test_run_metadata(meta_dict, test_run_id, session=None):
     return metadata
 
 
+def get_test_run_metadata(test_run_id, session=None):
+    session = session or get_session()
+    query = db_utils.model_query(models.TestRunMetadata, session).filter_by(
+        test_run_id=test_run_id)
+    return query.all()
+
+
 def get_all_tests():
     query = db_utils.model_query(models.Test)
     return query.all()

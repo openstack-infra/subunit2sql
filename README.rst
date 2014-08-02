@@ -75,3 +75,17 @@ run(s) being added. The artifacts option should be used to pass in a url or
 path that points to any logs or other external test artifacts related to the
 run being added. The run_meta option takes in a dictionary which will be added
 to the database as key value pairs associated with the run being added.
+
+Creating a v2 Subunit Stream from the DB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The sql2subunit utility is used for taking a run_id and creating a subunit
+v2 stream from the data in the DB about that run. To create a new subunit
+stream run::
+
+    sql2subunit $RUN_ID
+
+along with any options that you would normally use to either specify a config
+file or the DB connection info. Running this command will print to stdout the
+subunit v2 stream for the run specified by $RUN_ID, unless the --out_path
+argument is specified to write it to a file instead.

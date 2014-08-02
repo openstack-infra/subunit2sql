@@ -23,19 +23,22 @@ from subunit2sql.db import api
 from subunit2sql import exceptions
 from subunit2sql import read_subunit as subunit
 
-shell_opts = [
-    cfg.StrOpt('state_path', default='$pybasedir',
-               help='Top level dir for maintaining subunit2sql state'),
-    cfg.MultiStrOpt('subunit_files', positional=True),
-    cfg.DictOpt('run_meta', short='r', default=None,
-                help='Dict of metadata about the run(s)'),
-    cfg.StrOpt('artifacts', short='a', default=None,
-               help='Location of run artifacts')
-]
-
 CONF = cfg.CONF
-for opt in shell_opts:
-    CONF.register_cli_opt(opt)
+
+
+def cli_opts():
+    shell_opts = [
+        cfg.StrOpt('state_path', default='$pybasedir',
+                   help='Top level dir for maintaining subunit2sql state'),
+        cfg.MultiStrOpt('subunit_files', positional=True),
+        cfg.DictOpt('run_meta', short='r', default=None,
+                    help='Dict of metadata about the run(s)'),
+        cfg.StrOpt('artifacts', short='a', default=None,
+                   help='Location of run artifacts')
+    ]
+
+    for opt in shell_opts:
+        CONF.register_cli_opt(opt)
 
 
 def state_path_def(*args):
@@ -140,6 +143,7 @@ def process_results(results):
 
 
 def main():
+    cli_opts()
     parse_args(sys.argv)
     if CONF.subunit_files:
         streams = [subunit.ReadSubunit(open(s, 'r')) for s in
