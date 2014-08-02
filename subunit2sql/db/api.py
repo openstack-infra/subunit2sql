@@ -205,7 +205,8 @@ def get_test_runs_by_test_id(test_id, session=None):
 
 def get_test_runs_by_run_id(run_id, session=None):
     session = session or get_session()
-    test_runs = db_utils.model_query(models.Run, session=session).filter_by(
+    test_runs = db_utils.model_query(models.TestRun,
+                                     session=session).filter_by(
         run_id=run_id).all()
     return test_runs
 
