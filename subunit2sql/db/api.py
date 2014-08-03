@@ -175,6 +175,13 @@ def get_all_test_runs():
     return query.all()
 
 
+def get_failing_from_run(run_id, session=None):
+    session = session or get_session()
+    query = db_utils.model_query(models.TestRun, session).filter_by(
+        run_id=run_id, status='fail')
+    return query.all()
+
+
 def get_test_by_id(id, session=None):
     session = session or get_session()
     test = db_utils.model_query(models.Test, session).filter_by(
