@@ -3,6 +3,7 @@ Work Items for Subunit2SQL
 
 Short Term
 ----------
+ * Add a migration that adds an ordering to the runs table
  * Add more unit tests
    * Migration tests
    * DB API unit tests
