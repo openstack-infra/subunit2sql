@@ -161,18 +161,21 @@ def get_test_run_metadata(test_run_id, session=None):
     return query.all()
 
 
-def get_all_tests():
-    query = db_utils.model_query(models.Test)
+def get_all_tests(session=None):
+    session = session or get_session()
+    query = db_utils.model_query(models.Test, session)
     return query.all()
 
 
-def get_all_runs():
-    query = db_utils.model_query(models.Run)
+def get_all_runs(session=None):
+    session = session or get_session()
+    query = db_utils.model_query(models.Run, session)
     return query.all()
 
 
-def get_all_test_runs():
-    query = db_utils.model_query(models.TestRun)
+def get_all_test_runs(session=None):
+    session = session or get_session()
+    query = db_utils.model_query(models.TestRun, session)
     return query.all()
 
 
