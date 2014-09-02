@@ -27,28 +27,28 @@ DB Setup
 --------
 
 The usage of subunit2ql is split into 2 stages. First you need to prepare a
-database with the proper schema; alembic should be used to do this. The
-alembic.ini file in-tree includes the necessary options for alembic, however
-the database uri must be specificed with the option::
+database with the proper schema; subunit2sql-db-manage should be used to do
+this. The utility requires db connection info which can be specified on the
+command or with a config file. Obviously the sql connector type, user,
+password, address, and database name should be specific to your environment.
+subunit2sql-db-manage will use alembic to setup the db schema. You can run the
+db migrations with the command::
 
-    sqlalchemy.url = smysql:///user:pass@127.0.0.1/subunit
+    subunit2sql-db-manage --database-connection mysql://subunit:pass@127.0.0.1/subunit upgrade head
 
-to be able to use alembic to setup the db schema. Obviously the sql connector
-type, user, password, address, and database name should be specific to your
-environment. After the alembic.ini file is updated you perform can run the db
-migrations with the command::
+or with a config file::
 
-    alembic upgrade head
+    subunit2sql-db-manage --config-file subunit2sql.conf upgrade head
 
-from the root path for subunit2sql. This will bring the DB schema up to the
-latest version for subunit2sql. Also, it is worh noting that the schema
-migrations used in subunit2sql do not currently support sqlite. While it is
-possible to fix this, sqlite only supports a subset of the necessary sql calls
-used by the migration scripts. As such, maintaining support for sqlite will be
-a continual extra effort, so if support is added in the future, it is no
-guarantee that it will remain. In addition, the performance of running, even in
-a testing capacity, subunit2sql with MySQL or Postgres make it worth the effort
-of setting up one of them to use subunit2sql.
+This will bring the DB schema up to the latest version for subunit2sql. Also,
+it is worth noting that the schema migrations used in subunit2sql do not 
+currently support sqlite. While it is possible to fix this, sqlite only
+supports a subset of the necessary sql calls used by the migration scripts. As
+such, maintaining support for sqlite will be a continual extra effort, so if
+support is added back in the future, it is no guarantee that it will remain. In 
+addition, the performance of running, even in a testing capacity, subunit2sql
+with MySQL or Postgres make it worth the effort of setting up one of them to
+use subunit2sql.
 
 Running subunit2sql
 -------------------

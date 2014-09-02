@@ -15,12 +15,14 @@
 
 from __future__ import with_statement
 from alembic import context
-from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig  # noqa
+from oslo.db.sqlalchemy import session
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+subunit2sql_config = config.subunit2sql_config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -50,8 +52,15 @@ def run_migrations_offline():
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
-    context.configure(url=url, target_metadata=target_metadata)
+    kwargs = dict()
+    if subunit2sql_config.database.connection:
+        kwargs['url'] = subunit2sql_config.database.connection
+    elif subunit2sql_config.database.engine:
+        kwargs['dialect_name'] = subunit2sql_config.database.engine
+    else:
+        kwargs['url'] = config.get_main_option("sqlalchemy.url")
+    kwargs['target_metadata'] = target_metadata
+    context.configure(**kwargs)
 
     with context.begin_transaction():
         context.run_migrations()
@@ -64,10 +73,7 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    engine = engine_from_config(config.get_section(config.config_ini_section),
-                                prefix='sqlalchemy.',
-                                poolclass=pool.NullPool)
-
+    engine = session.create_engine(subunit2sql_config.database.connection)
     connection = engine.connect()
     context.configure(connection=connection, target_metadata=target_metadata)
 
