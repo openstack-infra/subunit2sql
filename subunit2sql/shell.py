@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import sys
 
 from oslo.config import cfg
@@ -24,20 +25,28 @@ from subunit2sql import read_subunit as subunit
 
 CONF = cfg.CONF
 
+SHELL_OPTS = shell_opts = [
+    cfg.MultiStrOpt('subunit_files', positional=True,
+                    help='list of subunit files to put into the database'),
+    cfg.DictOpt('run_meta', short='r', default=None,
+                help='Dict of metadata about the run(s)'),
+    cfg.StrOpt('artifacts', short='a', default=None,
+               help='Location of run artifacts')
+]
+
 
 def cli_opts():
-    shell_opts = [
-        cfg.StrOpt('state_path', default='$pybasedir',
-                   help='Top level dir for maintaining subunit2sql state'),
-        cfg.MultiStrOpt('subunit_files', positional=True),
-        cfg.DictOpt('run_meta', short='r', default=None,
-                    help='Dict of metadata about the run(s)'),
-        cfg.StrOpt('artifacts', short='a', default=None,
-                   help='Location of run artifacts')
-    ]
-
-    for opt in shell_opts:
+    for opt in SHELL_OPTS:
         CONF.register_cli_opt(opt)
+
+
+def list_opts():
+    """Return a list of oslo.config options available.
+
+    The purpose of this is to allow tools like the Oslo sample config file
+    generator to discover the options exposed to users.
+    """
+    return [('DEFAULT', copy.deepcopy(SHELL_OPTS))]
 
 
 def parse_args(argv, default_config_files=None):

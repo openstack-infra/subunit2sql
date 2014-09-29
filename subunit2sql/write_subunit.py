@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import copy
 import functools
 import sys
 
@@ -33,16 +34,17 @@ STATUS_CODES = frozenset([
 
 CONF = cfg.CONF
 
+SHELL_OPTS = [
+    cfg.StrOpt('run_id', required=True, positional=True,
+               help='Run id to use for creating a subunit stream'),
+    cfg.StrOpt('out_path', short='o', default=None,
+               help='Path to write the subunit stream output, if none '
+                    'is specified STDOUT will be used')
+]
+
 
 def cli_opts():
-    shell_opts = [
-        cfg.StrOpt('run_id', required=True, positional=True,
-                   help='Run id to use for creating a subunit stream'),
-        cfg.StrOpt('out_path', short='o', default=None,
-                   help='Path to write the subunit stream output, if none '
-                        'is specified STDOUT will be used')
-    ]
-    for opt in shell_opts:
+    for opt in SHELL_OPTS:
         cfg.CONF.register_cli_opt(opt)
 
 
@@ -82,6 +84,11 @@ def sql2subunit(run_id, output=sys.stdout):
         write_test(output, test, test_i, metadatas)
     output.stopTestRun()
     session.close()
+
+
+def list_opts():
+    opt_list = copy.deepcopy(SHELL_OPTS)
+    return [('DEFAULT', opt_list)]
 
 
 def main():
