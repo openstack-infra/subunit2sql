@@ -1,0 +1,6 @@
+include subunit2sql/migrations/alembic.ini
+
+exclude .gitreview
+exclude .gitignore
+
+global-exclude *.pyc
