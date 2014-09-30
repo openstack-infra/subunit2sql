@@ -15,6 +15,7 @@
 # under the License.
 
 import ConfigParser
+import datetime
 import os
 import subprocess
 
@@ -369,3 +370,39 @@ class TestWalkMigrations(base.TestCase):
         # build a fully populated postgresql database with all the tables
         self._reset_databases()
         self._walk_versions(config, engine, False, False)
+
+    def _pre_upgrade_1f92cfe8a6d3(self, engine):
+        tests = get_table(engine, 'tests')
+        data = {'id': 'fake_test.id',
+                'test_id': 'fake_project.tests.FakeTestClass.fake_test',
+                'run_count': 1,
+                'success': 1,
+                'failure': 0}
+        tests.insert().values(data).execute()
+        return data
+
+    def _pre_upgrade_3db7b49816d5(self, engine):
+        runs = get_table(engine, 'runs')
+        data = {'id': 'fake_run.id',
+                'skips': 0,
+                'fails': 0,
+                'passes': 1,
+                'run_time': 1.0,
+                'artifacts': 'fake_url'}
+        runs.insert().values(data).execute()
+        return data
+
+    def _pre_upgrade_163fd5aa1380(self, engine):
+        now = datetime.datetime.now()
+        test_runs = get_table(engine, 'test_runs')
+        data = {'id': 'fake_test_run.id',
+                'test_id': 'fake_test.id',
+                'run_id': 'fake_run.id',
+                'status': 'pass',
+                'start_time': now,
+                'stop_time': now + datetime.timedelta(1, 0)}
+        test_runs.insert().values(data).execute()
+        return data
+
+    def _check_163fd5aa1380(self, engine, data):
+        self.assertColumnExists(engine, 'tests', 'run_time')
