@@ -443,3 +443,52 @@ class TestWalkMigrations(base.TestCase):
         for run in data:
             self.assertIn((run['id'], None), run_at)
         self.assertIn((time_data['id'], now), run_at)
+
+    def _pre_upgrade_5332fe255095(self, engine):
+        tests = get_table(engine, 'tests')
+        test_runs = get_table(engine, 'test_runs')
+        # Create 2 sample rows one for a passing test the other failing
+        fake_tests = {'pass': {'id': 'fake_null_test_id',
+                               'test_id': 'I_am_a_little_test_that_works',
+                               'success': 2,
+                               'failure': 0},
+                      'fail': {'id': 'fake_null_test_id_fails',
+                               'test_id': 'Im_a_little_test_that_doesnt_work',
+                               'success': 0,
+                               'failure': 1}}
+        now = datetime.datetime.now()
+        future_now = now + datetime.timedelta(0, 4)
+        # Create sample rows for the test_runs corresponding to the test rows
+        fake_test_runs = {'pass': [
+            {'id': 'fake_test_run_pass_1', 'test_id': 'fake_null_test_id',
+             'run_id': 'fake_run.id1', 'start_time': now, 'status': 'success',
+             'stop_time': future_now},
+            {'id': 'fake_test_run_pass_2', 'test_id': 'fake_null_test_id',
+             'run_id': 'fake_run.id2', 'start_time': now, 'status': 'success',
+             'stop_time': future_now}]}
+        fake_test_runs['fail'] = {'id': 'fake_test_run_fail',
+                                  'test_id': 'fake_null_test_id_fails',
+                                  'run_id': 'fake_run.id1',
+                                  'start_time': now,
+                                  'status': 'fail',
+                                  'stop_time': future_now}
+        for test in fake_tests:
+            tests.insert().values(fake_tests[test]).execute()
+        for test_run in fake_test_runs['pass']:
+            test_runs.insert().values(test_run).execute()
+        test_runs.insert().values(fake_test_runs['fail']).execute()
+        return {'tests': fake_tests, 'test_runs': fake_test_runs}
+
+    def _check_5332fe255095(self, engine, data):
+        tests = get_table(engine, 'tests')
+        # Get the test uuids from the same data set
+        test_ids = [data['tests'][x]['id'] for x in data['tests']]
+        # Query the DB for the tests from the sample dataset above
+        where = ' OR '.join(["tests.id='%s'" % x for x in test_ids])
+        result = tests.select(where).execute()
+        run_time_pairs = map(lambda x: (x['id'], x['run_time']), result)
+        # Ensure the test with one failure is None
+        self.assertIn(('fake_null_test_id_fails', None), run_time_pairs)
+        # Ensure the test with 2 success each taking 4 sec lists the proper
+        # run_time
+        self.assertIn(('fake_null_test_id', 4.0), run_time_pairs)
