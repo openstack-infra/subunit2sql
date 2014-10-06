@@ -15,4 +15,4 @@ build
 .coverage*
 !.coveragerc
 cover/
-
+etc/*.conf
