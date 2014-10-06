@@ -3,7 +3,7 @@ subunit2SQL README
 ==================
 
 subunit2SQL like it's name implies is a tool used for converting subunit
-streams to data in a SQL database. The motivation is that for multiple 
+streams to data in a SQL database. The motivation is that for multiple
 distributed test runs that are generating subunit output it is useful to
 store the results in a unified repository. This is the motivation for the
 testrepository project which does a good job for centralizing the results from
@@ -16,7 +16,7 @@ the test results need to be stored in a format that allows for easy querying.
 Using a SQL database makes a lot of sense for doing this.
 
 subunit2SQL uses alembic migrations to setup a DB schema that can then be used
-by the subunit2sql binary to parse subunit streams and populate the DB. 
+by the subunit2sql binary to parse subunit streams and populate the DB.
 Additionally, it provides a DB API that can be used to query information from
 the results stored to build other tooling.
 
@@ -41,11 +41,11 @@ or with a config file::
     subunit2sql-db-manage --config-file subunit2sql.conf upgrade head
 
 This will bring the DB schema up to the latest version for subunit2sql. Also,
-it is worth noting that the schema migrations used in subunit2sql do not 
+it is worth noting that the schema migrations used in subunit2sql do not
 currently support sqlite. While it is possible to fix this, sqlite only
 supports a subset of the necessary sql calls used by the migration scripts. As
 such, maintaining support for sqlite will be a continual extra effort, so if
-support is added back in the future, it is no guarantee that it will remain. In 
+support is added back in the future, it is no guarantee that it will remain. In
 addition, the performance of running, even in a testing capacity, subunit2sql
 with MySQL or Postgres make it worth the effort of setting up one of them to
 use subunit2sql.
