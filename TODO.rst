@@ -5,7 +5,6 @@ Short Term
 ----------
  * Add a migration that adds an ordering to the runs table
  * Add more unit tests
-   * Migration tests
    * DB API unit tests
    * Write subunit module
  * Flesh out query side of DB API to make it useful for building additional

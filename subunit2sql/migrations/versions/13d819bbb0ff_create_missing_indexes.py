@@ -36,7 +36,7 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_constraint('uq_test_runs')
-    op.drop_index('ix_test_id')
-    op.drop_index('ix_test_run_test_id')
-    op.drop_index('ix_test_run_run_id')
+    op.drop_constraint('uq_test_runs', 'test_runs')
+    op.drop_index('ix_test_id', 'tests')
+    op.drop_index('ix_test_run_test_id', 'test_runs')
+    op.drop_index('ix_test_run_run_id', 'test_runs')
