@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import datetime
 import uuid
 
 from oslo.db.sqlalchemy import models  # noqa
@@ -68,6 +69,8 @@ class Run(BASE, SubunitBase):
     passes = sa.Column(sa.Integer())
     run_time = sa.Column(sa.Float())
     artifacts = sa.Column(sa.Text())
+    run_at = sa.Column(sa.DateTime,
+                       default=datetime.datetime.utcnow)
 
 
 class TestRun(BASE, SubunitBase):

@@ -406,3 +406,40 @@ class TestWalkMigrations(base.TestCase):
 
     def _check_163fd5aa1380(self, engine, data):
         self.assertColumnExists(engine, 'tests', 'run_time')
+
+    def _pre_upgrade_28ac1ba9c3db(self, engine):
+        runs = get_table(engine, 'runs')
+        data = [{'id': 'fake_run.id1',
+                 'skips': 0,
+                 'fails': 0,
+                 'passes': 1,
+                 'run_time': 1.0,
+                 'artifacts': 'fake_url'},
+                {'id': 'fake_run.id2',
+                 'skips': 0,
+                 'fails': 0,
+                 'passes': 1,
+                 'run_time': 1.0,
+                 'artifacts': 'fake_url'}]
+        for run in data:
+            runs.insert().values(run).execute()
+        return data
+
+    def _check_28ac1ba9c3db(self, engine, data):
+        self.assertColumnExists(engine, 'runs', 'run_at')
+        runs = get_table(engine, 'runs')
+        now = datetime.datetime.now().replace(microsecond=0)
+        time_data = {'id': 'fake_run_with_time.id1',
+                     'skips': 0,
+                     'fails': 0,
+                     'passes': 1,
+                     'run_time': 1.0,
+                     'artifacts': 'fake_url',
+                     'run_at': now}
+        runs.insert().values(time_data).execute()
+        runs = get_table(engine, 'runs')
+        result = runs.select().execute()
+        run_at = map(lambda x: (x['id'], x['run_at']), result)
+        for run in data:
+            self.assertIn((run['id'], None), run_at)
+        self.assertIn((time_data['id'], now), run_at)
