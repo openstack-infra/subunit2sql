@@ -18,6 +18,7 @@ from oslo.db.sqlalchemy import utils as db_utils
 
 from subunit2sql.db import models
 from subunit2sql import exceptions
+from subunit2sql import read_subunit
 
 CONF = cfg.CONF
 
@@ -232,16 +233,7 @@ def get_test_runs_by_run_id(run_id, session=None):
     return test_runs
 
 
-def get_test_run_duration(test_run_id):
-    session = get_session()
-
+def get_test_run_duration(test_run_id, session=None):
+    session = session or get_session()
     test_run = get_test_run_by_id(test_run_id, session)
-    start = test_run.start_time
-    end = test_run.end_time
-    if not start or not end:
-        duration = ''
-    else:
-        delta = end - start
-        duration = '%d.%06ds' % (
-            delta.days * DAY_SECONDS + delta.seconds, delta.microseconds)
-    return duration
+    return read_subunit.get_duration(test_run.start_time, test_run.stop_time)
