@@ -175,6 +175,13 @@ def get_all_test_runs():
     return query.all()
 
 
+def get_latest_run(session=None):
+    session = session or get_session()
+    query = db_utils.model_query(models.Run, session).order_by(
+        models.Run.run_at.desc())
+    return query.first()
+
+
 def get_failing_from_run(run_id, session=None):
     session = session or get_session()
     query = db_utils.model_query(models.TestRun, session).filter_by(
