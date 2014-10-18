@@ -8,7 +8,7 @@ Contents:
    :maxdepth: 2
 
    README
-   db_api
+   api
 
 
 ==================
