@@ -25,7 +25,7 @@ from subunit2sql import read_subunit as subunit
 
 CONF = cfg.CONF
 
-SHELL_OPTS = shell_opts = [
+SHELL_OPTS = [
     cfg.MultiStrOpt('subunit_files', positional=True,
                     help='list of subunit files to put into the database'),
     cfg.DictOpt('run_meta', short='r', default=None,
