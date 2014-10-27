@@ -105,7 +105,7 @@ def update_test(values, test_id, session=None):
 
 
 def create_run(skips=0, fails=0, passes=0, run_time=0, artifacts=None,
-               session=None):
+               id=None, session=None):
     """Create a new run record in the database
 
     :param int skips: total number of skiped tests defaults to 0
@@ -114,6 +114,7 @@ def create_run(skips=0, fails=0, passes=0, run_time=0, artifacts=None,
     :param float run_time: total run timed defaults to 0
     :param str artifacts: A link to any artifacts from the test run defaults to
                           None
+    :param str id: the run id for the new run, needs to be a unique value
     :param session: optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
@@ -121,6 +122,8 @@ def create_run(skips=0, fails=0, passes=0, run_time=0, artifacts=None,
     :rtype: subunit2sql.models.Run
     """
     run = models.Run()
+    if id:
+        run.id = id
     run.skips = skips
     run.fails = fails
     run.passes = passes
