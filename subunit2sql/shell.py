@@ -18,6 +18,7 @@ import sys
 
 from oslo.config import cfg
 from oslo.db import options
+from pbr import version
 
 from subunit2sql.db import api
 from subunit2sql import exceptions
@@ -33,6 +34,8 @@ SHELL_OPTS = shell_opts = [
     cfg.StrOpt('artifacts', short='a', default=None,
                help='Location of run artifacts')
 ]
+
+_version_ = version.VersionInfo('subunit2sql').version_string()
 
 
 def cli_opts():
@@ -51,7 +54,7 @@ def list_opts():
 
 def parse_args(argv, default_config_files=None):
     cfg.CONF.register_cli_opts(options.database_opts, group='database')
-    cfg.CONF(argv[1:], project='subunit2sql',
+    cfg.CONF(argv[1:], project='subunit2sql', version=_version_,
              default_config_files=default_config_files)
 
 
