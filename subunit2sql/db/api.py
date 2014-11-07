@@ -80,7 +80,7 @@ def create_run(skips=0, fails=0, passes=0, run_time=0, artifacts=None,
                session=None):
     """Create a new run record in the database
 
-    :param skips: total number of skiped tests
+    :param skips: total number of skipped tests
     :param fails: total number of failed tests
     :param passes: total number of passed tests
     :param run_time: total run time

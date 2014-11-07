@@ -26,7 +26,7 @@ Usage
 DB Setup
 --------
 
-The usage of subunit2ql is split into 2 stages. First you need to prepare a
+The usage of subunit2sql is split into 2 stages. First you need to prepare a
 database with the proper schema; subunit2sql-db-manage should be used to do
 this. The utility requires db connection info which can be specified on the
 command or with a config file. Obviously the sql connector type, user,

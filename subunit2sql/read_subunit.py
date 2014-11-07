@@ -62,7 +62,7 @@ class ReadSubunit(object):
             metadata['attrs'] = attrs
         if test['tags']:
             metadata['tags'] = test['tags']
-        # Return code is a a fail don't process it
+        # Return code is a fail don't process it
         if name == 'process-returncode':
             return
         timestamps = test['timestamps']
@@ -90,7 +90,7 @@ class ReadSubunit(object):
 
         Make it possible to strip out the testscenarios information (not to
         be confused with tempest scenarios) however that's often needed to
-        indentify generated negative tests.
+        identify generated negative tests.
         """
         if strip_tags:
             tags_start = name.find('[')
