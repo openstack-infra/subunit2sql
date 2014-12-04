@@ -32,7 +32,10 @@ SHELL_OPTS = [
     cfg.DictOpt('run_meta', short='r', default=None,
                 help='Dict of metadata about the run(s)'),
     cfg.StrOpt('artifacts', short='a', default=None,
-               help='Location of run artifacts')
+               help='Location of run artifacts'),
+    cfg.StrOpt('run_id', short='i', default=None,
+               help='Run id to use for the specified subunit stream, can only'
+                    ' be used if a single stream is provided')
 ]
 
 _version_ = version.VersionInfo('subunit2sql').version_string()
@@ -106,7 +109,7 @@ def process_results(results):
     totals = get_run_totals(results)
     db_run = api.create_run(totals['skips'], totals['fails'],
                             totals['success'], run_time, CONF.artifacts,
-                            session=session)
+                            id=CONF.run_id, session=session)
     if CONF.run_meta:
         api.add_run_metadata(CONF.run_meta, db_run.id, session)
     for test in results:
@@ -146,6 +149,9 @@ def main():
     cli_opts()
     parse_args(sys.argv)
     if CONF.subunit_files:
+        if len(CONF.subunit_files) > 1 and CONF.run_id:
+            print("You can not specify a run id for adding more than 1 stream")
+            return 3
         streams = [subunit.ReadSubunit(open(s, 'r')) for s in
                    CONF.subunit_files]
     else:
