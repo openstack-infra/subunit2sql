@@ -454,3 +454,63 @@ def get_test_run_duration(test_run_id, session=None):
     session = session or get_session()
     test_run = get_test_run_by_id(test_run_id, session)
     return read_subunit.get_duration(test_run.start_time, test_run.stop_time)
+
+
+def get_tests_from_run_id(run_id, session=None):
+    """Return the all tests for a specific run.
+
+    This method returns a list of all the Test objects that were executed as
+    part of a specified run.
+
+    :param str run_id: The run's uuid (the id column in the run table) which to
+                       get all tests for
+    :param session: optional session object if one isn't provided a new session
+
+    :return list: The list of test objects for the specified test
+    :rtype: subunit2sql.models.Test
+    """
+    session = session or get_session()
+    query = db_utils.model_query(models.Test, session=session).join(
+        models.TestRun).filter_by(run_id=run_id)
+    return query.all()
+
+
+def get_tests_run_dicts_from_run_id(run_id, session=None):
+    """Returns all the stored data about test runs for a specific run.
+
+    This method returns a dictionary containing all the information stored in
+    the database regarding the test_runs. This includes the test_id from the
+    tests table, all the stored key value pair metadata from the
+    test_run_metadata table, and from the test_runs table the status,
+    start_time, and stop_time.
+
+    :param str run_id: The run's uuid (the id column in the run table) which to
+                       use to select it's run ids to collect information for.
+    :param session: optional session object if one isn't provided a new session
+
+    :return dict: A dictionary with the test_id from the tests for keys that
+                  contains all the stored information about the test_runs.
+    """
+    session = session or get_session()
+    query = db_utils.model_query(models.Test, session=session).join(
+        models.TestRun).filter_by(run_id=run_id).join(
+            models.TestRunMetadata).values(models.Test.test_id,
+                                           models.TestRun.status,
+                                           models.TestRun.start_time,
+                                           models.TestRun.stop_time,
+                                           models.TestRunMetadata.key,
+                                           models.TestRunMetadata.value)
+    test_runs = {}
+    for test_run in query:
+        if test_run[0] not in test_runs:
+            test_runs[test_run[0]] = {
+                'status': test_run[1],
+                'start_time': test_run[2],
+                'stop_time': test_run[3],
+            }
+            if test_run[4]:
+                test_runs[test_run[0]]['metadata'] = {test_run[4]: test_run[5]}
+        else:
+            if test_run[4]:
+                test_runs[test_run[0]]['metadata'][test_run[4]] = test_run[5]
+    return test_runs
