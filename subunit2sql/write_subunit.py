@@ -63,11 +63,12 @@ def write_test(output, start_time, stop_time, status, test_id, metadatas):
     write_status = functools.partial(write_status,
                                      timestamp=start_time)
     write_status = functools.partial(write_status, test_id=test_id)
+    write_status()
+    write_status = functools.partial(write_status, test_id=test_id)
     if status in STATUS_CODES:
         write_status = functools.partial(write_status,
-                                         test_status=status)
-    write_status = functools.partial(write_status,
-                                     timestamp=convert_datetime(stop_time))
+                                         test_status=status,
+                                         timestamp=convert_datetime(stop_time))
     write_status()
 
 
