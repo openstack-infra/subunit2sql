@@ -53,37 +53,35 @@ def convert_datetime(timestamp):
     return tz_timestamp
 
 
-def write_test(output, test_run, test, metadatas):
+def write_test(output, start_time, stop_time, status, test_id, metadatas):
     write_status = output.status
-    for meta in metadatas:
-        if meta.key == 'tags':
-            tags = meta.value
-            write_status = functools.partial(write_status,
-                                             test_tags=tags.split(','))
-    start_time = convert_datetime(test_run.start_time)
+    if 'tags' in metadatas:
+        tags = metadatas['tags']
+        write_status = functools.partial(write_status,
+                                         test_tags=tags.split(','))
+    start_time = convert_datetime(start_time)
     write_status = functools.partial(write_status,
                                      timestamp=start_time)
-    write_status = functools.partial(write_status, test_id=test.test_id)
-    if test_run.status in STATUS_CODES:
+    write_status = functools.partial(write_status, test_id=test_id)
+    if status in STATUS_CODES:
         write_status = functools.partial(write_status,
-                                         test_status=test_run.status)
+                                         test_status=status)
     write_status = functools.partial(write_status,
-                                     timestamp=convert_datetime(
-                                         test_run.stop_time))
+                                     timestamp=convert_datetime(stop_time))
     write_status()
 
 
 def sql2subunit(run_id, output=sys.stdout):
     session = api.get_session()
-    test_runs = api.get_test_runs_by_run_id(run_id, session)
+    test_runs = api.get_tests_run_dicts_from_run_id(run_id, session)
+    session.close()
     output = subunit.v2.StreamResultToBytes(output)
     output.startTestRun()
-    for test in test_runs:
-        metadatas = api.get_test_run_metadata(test.id, session)
-        test_i = api.get_test_by_id(test.test_id)
-        write_test(output, test, test_i, metadatas)
+    for test_id in test_runs:
+        test = test_runs[test_id]
+        write_test(output, test['start_time'], test['stop_time'],
+                   test['status'], test_id, test['metadata'])
     output.stopTestRun()
-    session.close()
 
 
 def list_opts():
