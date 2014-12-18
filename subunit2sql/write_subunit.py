@@ -13,6 +13,7 @@
 # under the License.
 
 import copy
+import datetime
 import functools
 import sys
 
@@ -35,11 +36,14 @@ STATUS_CODES = frozenset([
 CONF = cfg.CONF
 
 SHELL_OPTS = [
-    cfg.StrOpt('run_id', required=True, positional=True,
+    cfg.StrOpt('run_id', positional=True,
                help='Run id to use for creating a subunit stream'),
     cfg.StrOpt('out_path', short='o', default=None,
                help='Path to write the subunit stream output, if none '
-                    'is specified STDOUT will be used')
+                    'is specified STDOUT will be used'),
+    cfg.BoolOpt('average', short='a', default=False,
+                help='Generate a subunit stream for all the rows in the tests '
+                     'table using the average run_time for the duration.')
 ]
 
 
@@ -85,6 +89,21 @@ def sql2subunit(run_id, output=sys.stdout):
     output.stopTestRun()
 
 
+def avg_sql2subunit(output=sys.stdout):
+    session = api.get_session()
+    tests = api.get_all_tests(session=session)
+    session.close()
+    output = subunit.v2.StreamResultToBytes(output)
+    output.startTestRun()
+    for test in tests:
+        if not test.run_time:
+            continue
+        start_time = datetime.datetime.now()
+        stop_time = start_time + datetime.timedelta(0, test.run_time)
+        write_test(output, start_time, stop_time, 'success', test.test_id, [])
+    output.stopTestRun()
+
+
 def list_opts():
     opt_list = copy.deepcopy(SHELL_OPTS)
     return [('DEFAULT', opt_list)]
@@ -93,11 +112,22 @@ def list_opts():
 def main():
     cli_opts()
     shell.parse_args(sys.argv)
+    if not CONF.run_id and not CONF.average:
+        print('You must specify either a run_id or generate an average run'
+              ' stream')
+        return 1
+    if CONF.run_id and CONF.average:
+        print('You can either generate a stream for a run_id or an average run'
+              ' stream, but not both.')
+        return 1
     if CONF.out_path:
         fd = open(CONF.out_path, 'w')
     else:
         fd = sys.stdout
-    sql2subunit(CONF.run_id, fd)
+    if not CONF.average:
+        sql2subunit(CONF.run_id, fd)
+    else:
+        avg_sql2subunit(fd)
     if CONF.out_path:
         fd.close()
 
