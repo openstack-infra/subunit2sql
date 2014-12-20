@@ -25,27 +25,34 @@ revision = '5332fe255095'
 down_revision = '28ac1ba9c3db'
 
 
+import numpy as np
 from oslo.db.sqlalchemy import utils as db_utils
 
 from subunit2sql.db import api as db_api
 from subunit2sql.db import models
+from subunit2sql import read_subunit
 
 
 def upgrade():
-    query = db_utils.model_query(models.Test,
-                                 db_api.get_session()).filter(
-                                     models.Test.success > 0,
-                                     models.Test.run_time == None)
-    tests = query.all()
-    for test in tests:
-        test_runs = db_api.get_test_runs_by_test_id(test.id)
-        duration = 0.0
-        for test_run in test_runs:
-            if test_run.status == 'success':
-                test_run_duration = db_api.get_test_run_duration(test_run.id)
-                duration = duration + test_run_duration
-        avg = duration / test.success
-        db_api.update_test({'run_time': avg}, test.id)
+    query = db_utils.model_query(
+        models.Test, db_api.get_session()).filter(
+            models.Test.success > 0, models.Test.run_time == None).join(
+                models.TestRun).filter_by(
+                    status='success').values(models.Test.id,
+                                             models.TestRun.start_time,
+                                             models.TestRun.stop_time)
+
+    results = {}
+    for test_run in query:
+        delta = read_subunit.get_duration(test_run[1], test_run[2])
+        if test_run[0] in results:
+            results[test_run[0]].append(delta)
+        else:
+            results[test_run[0]] = [delta]
+
+    for test in results:
+        avg = np.mean(results[test])
+        db_api.update_test({'run_time': avg}, test)
 
 
 def downgrade():
