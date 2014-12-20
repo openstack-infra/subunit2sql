@@ -159,6 +159,30 @@ def update_run(values, run_id, session=None):
     return run
 
 
+def update_test_run(values, test_run_id, session=None):
+    """Update an individual test_run with new data.
+
+    This method will take a dictionary of fields to update for a specific
+    test_run. If a field is omitted it will not be changed in the DB.
+
+    :param dict values: dict of values to update the test with. The key is the
+                        column name and the value is the new value to be stored
+                        in the DB
+    :param str test_run_id: the uuid of the test_run to update. (value of the
+                        id column for the row to be updated)
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return: The updated test_run object stored in the DB
+    :rtype: subunit2sql.models.TestRun
+    """
+    session = session or get_session()
+    with session.begin():
+        test_run = get_test_run_by_id(test_run_id, session)
+        test_run.update(values)
+    return test_run
+
+
 def add_run_metadata(meta_dict, run_id, session=None):
     """Add a metadata key value pairs for a specific run.
 
