@@ -514,3 +514,24 @@ def get_tests_run_dicts_from_run_id(run_id, session=None):
             if test_run[4]:
                 test_runs[test_run[0]]['metadata'][test_run[4]] = test_run[5]
     return test_runs
+
+
+def get_test_run_time_series(test_id, session=None):
+    """Returns a time series dict of run_times for successes of a single test
+
+    :param str test_id: The test's uuid (the id column in the test table) which
+                        will be used to get all the test run times for.
+    :param session: optional session object if one isn't provided a new session
+
+    :return dict: A dictionary with the start times as the keys and the values
+                  being the duration of the test that started at that time in
+                  sec.
+    """
+    session = session or get_session()
+    query = db_utils.model_query(models.TestRun, session=session).filter_by(
+        test_id=test_id).filter_by(status='success').values(
+            models.TestRun.start_time, models.TestRun.stop_time)
+    time_series = {}
+    for test_run in query:
+        time_series[test_run[0]] = (test_run[1] - test_run[0]).total_seconds()
+    return time_series
