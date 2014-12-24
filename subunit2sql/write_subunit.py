@@ -63,6 +63,8 @@ def write_test(output, start_time, stop_time, status, test_id, metadatas):
         tags = metadatas['tags']
         write_status = functools.partial(write_status,
                                          test_tags=tags.split(','))
+    if 'attrs' in metadatas:
+        test_id = test_id + '[' + metadatas['attrs'] + ']'
     start_time = convert_datetime(start_time)
     write_status = functools.partial(write_status,
                                      timestamp=start_time)
