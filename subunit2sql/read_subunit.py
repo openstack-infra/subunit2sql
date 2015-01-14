@@ -61,7 +61,7 @@ class ReadSubunit(object):
         if attrs:
             metadata['attrs'] = attrs
         if test['tags']:
-            metadata['tags'] = test['tags']
+            metadata['tags'] = ",".join(test['tags'])
         # Return code is a fail don't process it
         if name == 'process-returncode':
             return

@@ -84,3 +84,41 @@ class TestReadSubunit(base.TestCase):
         fake_subunit.results = fake_results
         runtime = fake_subunit.run_time()
         self.assertEqual(runtime, 5000.0)
+
+    def test_parse_outcome(self):
+        fake_subunit = subunit.ReadSubunit(mock.MagicMock())
+
+        fake_id = 'fake_dir.fake_module.fakeClass.test_fake[attr1,attr2]'
+        fake_timestamps = [datetime.datetime(1914, 8, 26, 20, 00, 00),
+                           datetime.datetime(2014, 8, 26, 20, 00, 00)]
+        fake_status = 'skip'
+        tags = set(['worker-0'])
+
+        fake_results = {
+            'status': fake_status,
+            'details': {
+                'reason': 'fake reason'
+            },
+            'id': fake_id,
+            'timestamps': fake_timestamps,
+            'tags': tags
+        }
+        fake_subunit.parse_outcome(fake_results)
+
+        parsed_results = fake_subunit.results
+        # assert that the dict root key is the test name - the fake_id stripped
+        # of the tags
+        fake_test_name = fake_id[:fake_id.find('[')]
+        self.assertEqual(parsed_results.keys(), [fake_test_name])
+
+        self.assertEqual(parsed_results[fake_test_name]['status'],
+                         fake_status)
+        self.assertEqual(parsed_results[fake_test_name]['start_time'],
+                         fake_timestamps[0])
+        self.assertEqual(parsed_results[fake_test_name]['end_time'],
+                         fake_timestamps[1])
+        fake_attrs = fake_id[fake_id.find('[') + 1:fake_id.find(']')]
+        self.assertEqual(parsed_results[fake_test_name]['metadata']['attrs'],
+                         fake_attrs)
+        self.assertEqual(parsed_results[fake_test_name]['metadata']['tags'],
+                         ','.join(tags))
