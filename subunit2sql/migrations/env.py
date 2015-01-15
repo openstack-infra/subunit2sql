@@ -16,7 +16,8 @@
 from __future__ import with_statement
 from alembic import context
 from logging.config import fileConfig  # noqa
-from oslo.db.sqlalchemy import session
+
+from subunit2sql.db import api as db_api
 
 
 # this is the Alembic Config object, which provides
@@ -73,8 +74,12 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    engine = session.create_engine(subunit2sql_config.database.connection)
+
+    facade = db_api._create_facade_lazily()
+    engine = facade.get_engine()
     connection = engine.connect()
+    facade._session_maker.configure(bind=connection)
+
     context.configure(connection=connection, target_metadata=target_metadata)
 
     try:
@@ -82,6 +87,7 @@ def run_migrations_online():
             context.run_migrations()
     finally:
         connection.close()
+        facade._session_maker.configure(bind=engine)
 
 if context.is_offline_mode():
     run_migrations_offline()
