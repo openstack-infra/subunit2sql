@@ -6,4 +6,3 @@ python-subunit>=0.0.18
 six>=1.5.2
 SQLAlchemy>=0.7.8
 pandas
-numpy

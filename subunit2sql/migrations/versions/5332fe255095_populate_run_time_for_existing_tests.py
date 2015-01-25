@@ -25,7 +25,6 @@ revision = '5332fe255095'
 down_revision = '28ac1ba9c3db'
 
 
-import numpy as np
 from oslo.db.sqlalchemy import utils as db_utils
 
 from subunit2sql.db import api as db_api
@@ -51,7 +50,7 @@ def upgrade():
             results[test_run[0]] = [delta]
 
     for test in results:
-        avg = np.mean(results[test])
+        avg = float(sum(results[test])) / float(len(results[test]))
         db_api.update_test({'run_time': avg}, test)
 
 
