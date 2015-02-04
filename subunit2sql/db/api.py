@@ -559,3 +559,34 @@ def get_test_run_time_series(test_id, session=None):
     for test_run in query:
         time_series[test_run[0]] = (test_run[1] - test_run[0]).total_seconds()
     return time_series
+
+
+def get_recent_successful_runs(num_runs=10, session=None):
+    """Return a list of run uuid strings for the most recent successful runs
+
+    :param int num_runs: The number of runs to return in the list
+    :param session: optional session object if one isn't provided a new session
+
+    :return list: A list of run uuid strings (the id column in the runs table)
+                  for the most recent runs.
+    """
+    session = session or get_session()
+    results = db_utils.model_query(models.Run, session).order_by(
+        models.Run.run_at.desc()).filter_by(fails=0).limit(num_runs).all()
+    return map(lambda x: x.id, results)
+
+
+def get_recent_failed_runs(num_runs=10, session=None):
+    """Return a list of run uuid strings for the most recent failed runs
+
+    :param int num_runs: The number of runs to return in the list
+    :param session: optional session object if one isn't provided a new session
+
+    :return list: A list of run uuid strings (the id column in the runs table)
+                  for the most recent runs.
+    """
+    session = session or get_session()
+    results = db_utils.model_query(models.Run, session).order_by(
+        models.Run.run_at.desc()).filter(
+        models.Run.fails > 0).limit(num_runs).all()
+    return map(lambda x: x.id, results)
