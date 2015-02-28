@@ -87,7 +87,9 @@ class TestRun(BASE, SubunitBase):
     run_id = sa.Column(sa.String(36), sa.ForeignKey('runs.id'), nullable=False)
     status = sa.Column(sa.String(256))
     start_time = sa.Column(sa.DateTime())
+    start_time_microsecond = sa.Column(sa.Integer(), default=0)
     stop_time = sa.Column(sa.DateTime())
+    stop_time_microsecond = sa.Column(sa.Integer(), default=0)
 
 
 class RunMetadata(BASE, SubunitBase):

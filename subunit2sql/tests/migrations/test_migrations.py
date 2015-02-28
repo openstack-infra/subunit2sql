@@ -492,3 +492,36 @@ class TestWalkMigrations(base.TestCase):
         # Ensure the test with 2 success each taking 4 sec lists the proper
         # run_time
         self.assertIn(('fake_null_test_id', 4.0), run_time_pairs)
+
+    def _pre_upgrade_1679b5bc102c(self, engine):
+        test_runs = get_table(engine, 'test_runs')
+        now = datetime.datetime.now()
+        future_now = now + datetime.timedelta(0, 4)
+        fake_test_runs = {'id': 'abc123',
+                          'test_id': 'fake_null_test_id',
+                          'run_id': 'fake_run.id',
+                          'status': 'success',
+                          'start_time': now,
+                          'stop_time': future_now}
+        test_runs.insert().values(fake_test_runs).execute()
+        return fake_test_runs
+
+    def _check_1679b5bc102c(self, engine, data):
+        test_runs = get_table(engine, 'test_runs')
+        start_micro = data['start_time'].microsecond
+        stop_micro = data['stop_time'].microsecond
+        result = test_runs.select().execute()
+        row = None
+        for i in result:
+            if i.id == data['id']:
+                row = i
+                break
+        else:
+            self.fail("Row not present")
+        if row.start_time_microsecond == 0 and row.stop_time_microsecond == 0:
+            # Backing db doesn't store subseconds so the migration will just
+            # populate zeros and the data is lost to the ether.
+            pass
+        else:
+            self.assertEqual(start_micro, row.start_time_microsecond)
+            self.assertEqual(row.stop_time_microsecond, stop_micro)

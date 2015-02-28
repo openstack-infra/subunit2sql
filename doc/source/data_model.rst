@@ -60,4 +60,8 @@ Properties:
   the `testtools documentation <http://testtools.readthedocs.org/en/latest/api.html#testtools.StreamResult.status>`_
   for the details on each status.
 * **start_time**: The timestamp when test execution started
+* **start_time_microsecond**: The microsecond component of the timestamp when
+                              test execution started
 * **stop_time**: The timestamp when the test finished executing
+* **stop_time_microsecond**: The microsecond component of the timestamp when
+                             test execution finished

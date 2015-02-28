@@ -31,9 +31,19 @@ def state_path_def(*args):
     """Return an uninterpolated path relative to $state_path."""
     return os.path.join('$state_path', *args)
 
+MIGRATION_OPTS = [
+    cfg.BoolOpt('disable-microsecond-data-migration', short='d', default=False,
+                help="If set to true this option will skip the data migration"
+                     " part of the microsecond migration. The schema changes "
+                     "will still be run. If the database has already stripped "
+                     "out the microseconds from the timestamps this will skip "
+                     "converting the microsecond field from the timestamps "
+                     "into a separate column")
+]
 
 CONF = cfg.CONF
 CONF.register_cli_opts(options.database_opts, group='database')
+CONF.register_cli_opts(MIGRATION_OPTS)
 
 
 def do_alembic_command(config, cmd, *args, **kwargs):

@@ -235,8 +235,14 @@ def create_test_run(test_id, run_id, status, start_time=None,
     test_run.test_id = test_id
     test_run.run_id = run_id
     test_run.status = status
-    test_run.stop_time = end_time.replace(tzinfo=None)
-    test_run.start_time = start_time.replace(tzinfo=None)
+    start_time = start_time.replace(tzinfo=None)
+    start_time_microsecond = start_time.microsecond
+    stop_time = end_time.replace(tzinfo=None)
+    stop_time_microsecond = stop_time.microsecond
+    test_run.stop_time = stop_time
+    test_run.stop_time_microsecond = stop_time_microsecond
+    test_run.start_time = start_time
+    test_run.start_time_microsecond = start_time_microsecond
     session = session or get_session()
     with session.begin():
         session.add(test_run)
@@ -477,6 +483,11 @@ def get_test_run_duration(test_run_id, session=None):
     """
     session = session or get_session()
     test_run = get_test_run_by_id(test_run_id, session)
+    start_time = test_run.start_time
+    start_time = start_time.replace(
+        microsecond=test_run.start_time_microsecond)
+    stop_time = test_run.stop_time
+    stop_time = stop_time.replace(microsecond=test_run.stop_time_microsecond)
     return read_subunit.get_duration(test_run.start_time, test_run.stop_time)
 
 
@@ -518,25 +529,32 @@ def get_tests_run_dicts_from_run_id(run_id, session=None):
     session = session or get_session()
     query = db_utils.model_query(models.Test, session=session).join(
         models.TestRun).filter_by(run_id=run_id).join(
-            models.TestRunMetadata).values(models.Test.test_id,
-                                           models.TestRun.status,
-                                           models.TestRun.start_time,
-                                           models.TestRun.stop_time,
-                                           models.TestRunMetadata.key,
-                                           models.TestRunMetadata.value)
+            models.TestRunMetadata).values(
+                models.Test.test_id,
+                models.TestRun.status,
+                models.TestRun.start_time,
+                models.TestRun.start_time_microsecond,
+                models.TestRun.stop_time,
+                models.TestRun.stop_time_microsecond,
+                models.TestRunMetadata.key,
+                models.TestRunMetadata.value)
     test_runs = {}
     for test_run in query:
         if test_run[0] not in test_runs:
+            start_time = test_run[2]
+            start_time = start_time.replace(microsecond=test_run[3])
+            stop_time = test_run[4]
+            stop_time = stop_time.replace(microsecond=test_run[5])
             test_runs[test_run[0]] = {
                 'status': test_run[1],
-                'start_time': test_run[2],
-                'stop_time': test_run[3],
+                'start_time': start_time,
+                'stop_time': stop_time,
             }
-            if test_run[4]:
-                test_runs[test_run[0]]['metadata'] = {test_run[4]: test_run[5]}
+            if test_run[6]:
+                test_runs[test_run[0]]['metadata'] = {test_run[6]: test_run[7]}
         else:
-            if test_run[4]:
-                test_runs[test_run[0]]['metadata'][test_run[4]] = test_run[5]
+            if test_run[6]:
+                test_runs[test_run[0]]['metadata'][test_run[6]] = test_run[7]
     return test_runs
 
 
@@ -554,10 +572,15 @@ def get_test_run_time_series(test_id, session=None):
     session = session or get_session()
     query = db_utils.model_query(models.TestRun, session=session).filter_by(
         test_id=test_id).filter_by(status='success').values(
-            models.TestRun.start_time, models.TestRun.stop_time)
+            models.TestRun.start_time, models.TestRun.start_time_microsecond,
+            models.TestRun.stop_time, models.TestRun.stop_time_microsecond)
     time_series = {}
     for test_run in query:
-        time_series[test_run[0]] = (test_run[1] - test_run[0]).total_seconds()
+        start_time = test_run[0]
+        start_time = start_time.replace(microsecond=test_run[1])
+        stop_time = test_run[2]
+        stop_time = stop_time.replace(microsecond=test_run[3])
+        time_series[test_run[0]] = (stop_time - start_time).total_seconds()
     return time_series
 
 
