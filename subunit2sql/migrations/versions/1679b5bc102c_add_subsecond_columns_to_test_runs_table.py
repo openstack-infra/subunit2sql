@@ -40,7 +40,10 @@ CONF = cfg.CONF
 
 
 def upgrade():
-    sql_path = os.path.realpath(__file__).split('.')[0] + '.mysql_upgrade.sql'
+    migration_file = ('1679b5bc102c_add_subsecond_columns_to_test_runs_table.'
+                      'mysql_upgrade.sql')
+    migration_dir = os.path.dirname(os.path.realpath(__file__))
+    sql_path = os.path.join(migration_dir, migration_file)
     migration_context = context.get_context()
     if migration_context.dialect.name == 'mysql':
         with open(sql_path, 'r') as sql_file:
