@@ -89,3 +89,58 @@ along with any options that you would normally use to either specify a config
 file or the DB connection info. Running this command will print to stdout the
 subunit v2 stream for the run specified by $RUN_ID, unless the --out_path
 argument is specified to write it to a file instead.
+
+Release Notes
+=============
+
+0.4.2
+-----
+ * Fixes an issue with the path finding in 1679b5bc102 which cause failures
+   when running the migration from an installed version of subunit2sql
+
+0.4.1
+-----
+ * Fixes an issue with running the 1679b5bc102 DB migration on large mysql
+   databases running on trove by hand coding the SQL for running on MySQL
+
+0.4.0
+-----
+ * Add a new tool, subunit2sql-graph, for graphing a test's run_time over time
+ * Fix to ensure attrs are set in the output from sql2subunit
+ * Add a new DB migration to separate microseconds for start and stop time in
+   the test_runs table into separate columns
+ * Add db api methods to get a time series of run_times for a specific test,
+   to update an existing test_run row, and methods to get a list of recent run
+   uuids
+ * Several miscellaneous bug fixes
+
+0.3.0
+-----
+ * Add new db api methods to extract more test information from a given run
+ * Add a --average flah to sql2subunit for using the aggregate test data in
+   the tests table to write a subunit stream
+ * Bug and performance fixes around the sql2subunit command
+ * Documentation updates
+
+0.2.1
+-----
+ * Documentation Improvements
+ * Fixed the output from the --version flag
+ * Added an option to set the run_id when adding a new run to the db
+ * Several code cleanups
+
+0.2.0
+-----
+ * Adds 2 new commands sql2subunit, and subunit2sql-db-manage
+ * Migration Testing improvements
+ * Drops the state_path config option which was unused
+ * Added sample config files and a method for generating up to date copies
+ * Adds a migration to add a run_at column to the runs table
+ * Adds a migration to populate the run_time column in the tests table for
+   rows that do not have a value there
+ * Several bug fixes and code cleanups
+
+
+0.1
+---
+ * First release
