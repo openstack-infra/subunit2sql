@@ -23,6 +23,7 @@ from alembic import util as alembic_util
 from oslo.config import cfg
 from oslo.db import options
 
+from subunit2sql.db import api as db_api
 
 HEAD_FILENAME = 'HEAD'
 
@@ -100,6 +101,14 @@ def validate_head_file(config):
         alembic_util.err('HEAD file does not match migration timeline head')
 
 
+def expire_old(config, cmd):
+    expire_age = int(CONF.command.expire_age)
+    if not CONF.command.no_runs:
+        db_api.delete_old_runs(expire_age)
+    if not CONF.command.no_test_runs:
+        db_api.delete_old_test_runs(expire_age)
+
+
 def update_head_file(config):
     script = alembic_script.ScriptDirectory.from_config(config)
     if len(script.get_heads()) > 1:
@@ -140,6 +149,17 @@ def add_command_parsers(subparsers):
     parser.add_argument('--sql', action='store_true')
     parser.set_defaults(func=do_revision)
 
+    parser = subparsers.add_parser('expire',
+                                   help="delete old rows from runs and "
+                                        "test_runs tables")
+    parser.add_argument('--no-runs', action='store_true',
+                        help="Don't delete any rows in the runs table")
+    parser.add_argument('--no-test-runs', action='store_true',
+                        help="Don't delete any rows in the test_runs table")
+    parser.add_argument('--expire-age', '-e', default=186,
+                        help="Number of days into the past to use as the "
+                             "expiration point")
+    parser.set_defaults(func=expire_old)
 
 command_opt = cfg.SubCommandOpt('command',
                                 title='Command',
