@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import datetime
+
 from oslo.config import cfg
 from oslo.db.sqlalchemy import session as db_session
 from oslo.db.sqlalchemy import utils as db_utils
@@ -613,3 +615,36 @@ def get_recent_failed_runs(num_runs=10, session=None):
         models.Run.run_at.desc()).filter(
         models.Run.fails > 0).limit(num_runs).all()
     return map(lambda x: x.id, results)
+
+
+def delete_old_runs(expire_age=186, session=None):
+    """Delete all runs and associated metadata older than the provided age
+
+    :param int expire_age: The number of days into the past to use as the
+                           expiration date for deleting the runs
+    :param session: optional session object if one isn't provided a new session
+    """
+    session = session or get_session()
+    expire_date = datetime.date.today() - datetime.timedelta(days=expire_age)
+    db_utils.model_query(models.Run, session).filter(
+        models.Run.run_at < expire_date).join(
+            models.RunMetadata).delete(synchronize_session='evaluate')
+    db_utils.model_query(models.Run, session).filter(
+        models.Run.run_at < expire_date).delete(synchronize_session='evaluate')
+
+
+def delete_old_test_runs(expire_age=186, session=None):
+    """Delete all test runs and associated metadata older than the provided age
+
+    :param int expire_age: The number of days into the past to use as the
+                           expiration date for deleting the test runs
+    :param session: optional session object if one isn't provided a new session
+    """
+    session = session or get_session()
+    expire_date = datetime.date.today() - datetime.timedelta(days=expire_age)
+    db_utils.model_query(models.TestRun, session).filter(
+        models.TestRun.start_time < expire_date).join(
+            models.TestRunMetadata).delete(synchronize_session='evaluate')
+    db_utils.model_query(models.TestRun, session).filter(
+        models.TestRun.start_time < expire_date).delete(
+            synchronize_session='evaluate')
