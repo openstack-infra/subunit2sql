@@ -586,6 +586,30 @@ def get_test_run_time_series(test_id, session=None):
     return time_series
 
 
+def get_test_status_time_series(test_id, session=None):
+    """Returns a time series dict of test_run statuses of a single test
+
+    :param str test_id: The test's uuid (the id column in the test table) which
+                        will be used to get all the test run times for.
+    :param session: optional session object if one isn't provided a new session
+
+    :return dict: A dictionary with the start times as the keys and the values
+                  being the status of that test run.
+    """
+    session = session or get_session()
+    query = db_utils.model_query(models.TestRun, session=session).filter_by(
+        test_id=test_id).values(
+            models.TestRun.start_time, models.TestRun.start_time_microsecond,
+            models.TestRun.status)
+    status_series = {}
+    for test_run in query:
+        start_time = test_run[0]
+        start_time = start_time.replace(microsecond=test_run[1])
+        status = test_run[2]
+        status_series[start_time] = status
+    return status_series
+
+
 def get_recent_successful_runs(num_runs=10, session=None):
     """Return a list of run uuid strings for the most recent successful runs
 
