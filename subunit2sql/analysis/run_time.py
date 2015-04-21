@@ -19,6 +19,7 @@ import sys
 from oslo.config import cfg
 import pandas as pd
 
+from subunit2sql.analysis import utils
 from subunit2sql.db import api
 from subunit2sql import shell
 
@@ -32,7 +33,13 @@ SHELL_OPTS = [
                                         'full test_id will be used'),
     cfg.StrOpt('output', short='o', required=True,
                help='Output path to write image file to. The file extension '
-                    'will determine the file format.')
+                    'will determine the file format.'),
+    cfg.StrOpt('start-date', short='d',
+               help='Start date for the graph only data from after this date '
+                    'will be used. Uses ISO8601 format: 1914-06-28'),
+    cfg.StrOpt('stop-date', short='s',
+               help='Stop date for the graph only data from before this date '
+                    'will be used. Uses ISO8601 format: 1914-06-28'),
 ]
 
 
@@ -53,6 +60,7 @@ def generate_series(test_id):
         test = api.get_test_by_id(test_id, session)
     session.close()
     ts = pd.Series(run_times)
+    ts = utils.filter_dates(ts)
     if not CONF.title:
         plot = ts.plot().set_title(test.test_id)
     else:
