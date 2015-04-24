@@ -14,7 +14,6 @@
 
 import copy
 import datetime
-import functools
 import sys
 
 from oslo.config import cfg
@@ -59,23 +58,20 @@ def convert_datetime(timestamp):
 
 def write_test(output, start_time, stop_time, status, test_id, metadatas):
     write_status = output.status
+    kwargs = {}
     if 'tags' in metadatas:
         tags = metadatas['tags']
-        write_status = functools.partial(write_status,
-                                         test_tags=tags.split(','))
+        kwargs['test_tags'] = tags.split(',')
     if 'attrs' in metadatas:
         test_id = test_id + '[' + metadatas['attrs'] + ']'
     start_time = convert_datetime(start_time)
-    write_status = functools.partial(write_status,
-                                     timestamp=start_time)
-    write_status = functools.partial(write_status, test_id=test_id)
-    write_status()
-    write_status = functools.partial(write_status, test_id=test_id)
+    kwargs['timestamp'] = start_time
+    kwargs['test_id'] = test_id
+    write_status(**kwargs)
     if status in STATUS_CODES:
-        write_status = functools.partial(write_status,
-                                         test_status=status,
-                                         timestamp=convert_datetime(stop_time))
-    write_status()
+        kwargs['test_status'] = status
+        kwargs['timestamp'] = convert_datetime(stop_time)
+    write_status(**kwargs)
 
 
 def sql2subunit(run_id, output=sys.stdout):
