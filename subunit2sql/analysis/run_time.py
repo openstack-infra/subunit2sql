@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import matplotlib
+import matplotlib.pyplot as plt
 from oslo.config import cfg
 import pandas as pd
 
@@ -19,6 +21,8 @@ from subunit2sql.analysis import utils
 from subunit2sql.db import api
 
 CONF = cfg.CONF
+
+matplotlib.style.use('ggplot')
 
 
 def set_cli_opts(parser):
@@ -35,12 +39,19 @@ def generate_series():
     session.close()
     ts = pd.Series(run_times)
     ts = utils.filter_dates(ts)
+    mean = pd.rolling_mean(ts, 20)
+    rolling_std = pd.rolling_std(ts, 20)
+    plt.figure()
     if not CONF.title:
-        plot = ts.plot().set_title(test.test_id)
+        plt.title(test.test_id)
     else:
-        plot = ts.plot().set_title(CONF.title)
-    plot = pd.rolling_mean(ts, 50).plot()
-    fig = plot.get_figure()
-    plot.set_ylabel('Time (sec.)')
-    fig.savefig(CONF.output)
+        plt.title(CONF.title)
+    plt.ylabel('Time (sec.)')
+    plt.plot(ts.index, ts, 'k', label='Run Time')
+    plt.plot(mean.index, mean, 'b', label='Avg. Run Time')
+    plt.fill_between(rolling_std.index, mean - 2 * rolling_std,
+                     mean + 2 * rolling_std, color='b', alpha=0.2,
+                     label='std dev')
+    plt.legend()
+    plt.savefig(CONF.output, dpi=900)
     return ts
