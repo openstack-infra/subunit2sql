@@ -698,3 +698,51 @@ def get_ids_for_all_tests(session=None):
     """
     session = session or get_session()
     return db_utils.model_query(models.Test, session).value(models.Test.id)
+
+
+def get_test_counts_in_date_range(test_id, start_date=None, stop_date=None,
+                                  session=None):
+    """Return the number of successes, failures, and skips for a single test.
+
+    Optionally you can provide a date to filter the results to be within a
+    certain date range
+
+    :param str start_date: The date to use as the start for counting
+    :param str stop_date: The date to use as the cutoff for counting
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+    :return: a dict containing the number of successes, failures, and skips
+    :rtype: dict
+    """
+    start_date = datetime.datetime.strptime(start_date, '%b %d %Y')
+    if isinstance(stop_date, str):
+        stop_date = datetime.datetime.strptime(stop_date, '%b %d %Y')
+    session = session or get_session()
+    count_dict = {}
+    success_query = db_utils.model_query(models.TestRun, session).filter_by(
+        test_id=test_id).filter(models.TestRun.status == 'success')
+    fail_query = db_utils.model_query(models.TestRun, session).filter_by(
+        test_id=test_id).filter(models.TestRun.status == 'fail')
+    skip_query = db_utils.model_query(models.TestRun, session).filter_by(
+        test_id=test_id).filter(models.TestRun.status == 'skip')
+
+    if start_date:
+        success_query = success_query.filter(
+            models.TestRun.start_time > start_date)
+        fail_query = fail_query.filter(
+            models.TestRun.start_time > start_date)
+        skip_query = skip_query.filter(
+            models.TestRun.start_time > start_date)
+
+    if stop_date:
+        success_query = success_query.filter(
+            models.TestRun.stop_time < stop_date)
+        fail_query = fail_query.filter(
+            models.TestRun.stop_time < stop_date)
+        skip_query = skip_query.filter(
+            models.TestRun.stop_time < stop_date)
+
+    count_dict['success'] = success_query.count()
+    count_dict['failure'] = fail_query.count()
+    count_dict['skips'] = skip_query.count()
+    return count_dict
