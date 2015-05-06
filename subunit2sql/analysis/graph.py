@@ -18,6 +18,7 @@ import sys
 
 from oslo_config import cfg
 
+import subunit2sql.analysis.agg_count
 import subunit2sql.analysis.failures
 import subunit2sql.analysis.run_time
 from subunit2sql import shell
@@ -41,7 +42,7 @@ SHELL_OPTS = [
 
 
 def add_command_parsers(subparsers):
-    for name in ['failures', 'run_time']:
+    for name in ['failures', 'run_time', 'agg_count']:
         parser = subparsers.add_parser(name)
         getattr(subunit2sql.analysis, name).set_cli_opts(parser)
         parser.set_defaults(
