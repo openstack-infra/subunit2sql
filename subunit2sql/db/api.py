@@ -672,3 +672,29 @@ def delete_old_test_runs(expire_age=186, session=None):
     db_utils.model_query(models.TestRun, session).filter(
         models.TestRun.start_time < expire_date).delete(
             synchronize_session='evaluate')
+
+
+def get_id_from_test_id(test_id, session=None):
+    """Return the id (uuid primary key) for a test given it's test_id value
+
+    :param str test_id:
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+    :return: The id for the specified test
+    :rtype: str
+    """
+    session = session or get_session()
+    return db_utils.model_query(models.Test, session).filter_by(
+        test_id=test_id).value('id')
+
+
+def get_ids_for_all_tests(session=None):
+    """Return a list of ids (uuid primary key) for all tests in the database
+
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+    :return: The list of all ids for tests in the tests table
+    :rtype: list
+    """
+    session = session or get_session()
+    return db_utils.model_query(models.Test, session).value(models.Test.id)
