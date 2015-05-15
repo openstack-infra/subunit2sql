@@ -90,6 +90,16 @@ file or the DB connection info. Running this command will print to stdout the
 subunit v2 stream for the run specified by $RUN_ID, unless the --out_path
 argument is specified to write it to a file instead.
 
+Installation Notes
+==================
+
+To use the subunit2sql-graph command you need to install matplotlib, the graph
+generation will not work without it installed. However it's not included in the
+requirements file as a temporary measure to avoid some additional C dependencies
+in CI. This will be corrected in a future bug fix release, but for the time
+being this is a constraint.
+
+
 Release Notes
 =============
 
