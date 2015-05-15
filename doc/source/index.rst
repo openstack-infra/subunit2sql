@@ -10,6 +10,7 @@ Contents:
    README
    data_model
    api
+   graph
 
 
 ==================
