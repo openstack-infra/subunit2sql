@@ -94,6 +94,25 @@ argument is specified to write it to a file instead.
 Release Notes
 =============
 
+0.5.1
+-----
+* Remove matplotlib from requirements file to avoid requiring additional C
+  dependencies in CI systems. (the next release will switch to using extras
+  to articulate the additional dependencies for the graphing tool)
+
+0.5.0
+-----
+ * Several new db api methods to:
+   * Delete old runs and test_runs
+   * Get a test status time series dict
+   * Get a test uuid from a test_id
+   * Get date bounded per status counts for a test
+ * Adds a new subunit2sql-db-manage subcommand to expire runs and
+   test_runs
+ * Reworked subunit2sql-graph command to be modular extendable
+ * Added 2 new graph types to subunit2sql-graph, agg_count and failures
+ * Improved the formatting for the previously existing run_time graph
+
 0.4.2
 -----
  * Fixes an issue with the path finding in 1679b5bc102 which cause failures
