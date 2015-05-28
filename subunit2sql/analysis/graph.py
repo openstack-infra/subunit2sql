@@ -17,6 +17,7 @@ import copy
 import sys
 
 from oslo_config import cfg
+import stevedore
 
 import subunit2sql.analysis.agg_count
 import subunit2sql.analysis.dailycount
@@ -42,12 +43,30 @@ SHELL_OPTS = [
 ]
 
 
+def get_plugin_list():
+    plugin_list = stevedore.ExtensionManager(
+        'subunit2sql.graph.plugin',
+        invoke_on_load=True,
+        propagate_map_exceptions=True)
+    return plugin_list
+
+
 def add_command_parsers(subparsers):
-    for name in ['failures', 'run_time', 'agg_count', 'dailycount']:
+    graph_commands = {}
+    # Put commands from in-tree commands on init list
+    for command in ['failures', 'run_time', 'agg_count', 'dailycount']:
+        graph_commands[command] = getattr(subunit2sql.analysis, command)
+
+    # Load any installed out of tree commands on the init list
+    for plugin in get_plugin_list():
+        graph_commands[plugin.name] = plugin.plugin
+
+    # Init all commands from graph_commands
+    for name in graph_commands:
         parser = subparsers.add_parser(name)
-        getattr(subunit2sql.analysis, name).set_cli_opts(parser)
+        graph_commands[name].set_cli_opts(parser)
         parser.set_defaults(
-            func=getattr(subunit2sql.analysis, name).generate_series)
+            func=graph_commands[name].generate_series)
 
 command_opt = cfg.SubCommandOpt('command', title='graph',
                                 help='Available graphs',
