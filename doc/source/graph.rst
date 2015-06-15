@@ -59,6 +59,7 @@ For example running something like::
 will generate a graph like:
 
 .. image:: graph-run_time.png
+   :width: 115%
 
 you can refer to the help on the graph command for run_time to see the full
 option list with something like::
