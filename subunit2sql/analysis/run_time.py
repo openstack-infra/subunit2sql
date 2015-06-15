@@ -49,8 +49,12 @@ def generate_series():
     plt.ylabel('Time (sec.)')
     plt.plot(ts.index, ts, 'k', label='Run Time')
     plt.plot(mean.index, mean, 'b', label='Avg. Run Time')
-    plt.fill_between(rolling_std.index, mean - 2 * rolling_std,
-                     mean + 2 * rolling_std, color='b', alpha=0.2,
+    upper_std_dev = mean + 2 * rolling_std
+    lower_std_dev = mean - 2 * rolling_std
+    # Set negative numbers to 0
+    lower_std_dev[lower_std_dev < 0] = 0
+    plt.fill_between(rolling_std.index, upper_std_dev,
+                     lower_std_dev, color='b', alpha=0.2,
                      label='std dev')
     plt.legend()
     plt.savefig(CONF.output, dpi=900)
