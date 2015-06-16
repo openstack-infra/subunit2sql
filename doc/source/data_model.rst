@@ -65,3 +65,15 @@ Properties:
 * **stop_time**: The timestamp when the test finished executing
 * **stop_time_microsecond**: The microsecond component of the timestamp when
                              test execution finished
+
+Attachments
+-----------
+Attachemnts represent the file attachemnts in the subunit stream for a
+particular test_run.
+
+Properties:
+
+* **test_run_id**: The uuid representing the test_run the attachment is
+                   associated with.
+* **label**: The label for the attachment
+* **attachment**: The actual attachment
