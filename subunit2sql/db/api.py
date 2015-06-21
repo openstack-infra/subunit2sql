@@ -586,6 +586,45 @@ def get_test_run_time_series(test_id, session=None):
     return time_series
 
 
+def get_test_run_series(start_date=None, stop_date=None, session=None):
+    """Returns a time series dict of total daily run counts
+
+    :param str start_date: Optional start date to filter results on
+    :param str stop_date: Optional stop date to filter results on
+    :param session: optional session object if one isn't provided a new session
+
+    :return dict: A dictionary with the dates as the keys and the values
+                  being the total run count for that day. (The sum of success
+                  and failures from all runs that started that day)
+    """
+    session = session or get_session()
+    full_query = db_utils.model_query(models.Run, session=session).join(
+        models.RunMetadata).filter_by(key='build_queue', value='gate')
+
+    # Process date bounds
+    if isinstance(start_date, str):
+        start_date = datetime.datetime.strptime(start_date, '%b %d %Y')
+    if isinstance(stop_date, str):
+        stop_date = datetime.datetime.strptime(stop_date, '%b %d %Y')
+    if start_date:
+        full_query.filter(models.Run.run_at < start_date)
+    if stop_date:
+        full_query.filter(models.Run.run_at > stop_date)
+
+    query = full_query.values(models.Run.run_at, models.Run.passes,
+                              models.Run.fails)
+    time_series = {}
+    for test_run in query:
+        start_time = test_run[0]
+        # Sum of starts and failures is the count for the run
+        local_run_count = test_run[1] + test_run[2]
+        if start_time in time_series:
+            time_series[start_time] = time_series[start_time] + local_run_count
+        else:
+            time_series[start_time] = local_run_count
+    return time_series
+
+
 def get_test_status_time_series(test_id, session=None):
     """Returns a time series dict of test_run statuses of a single test
 
