@@ -86,7 +86,7 @@ def update_test(values, test_id, session=None):
     """Update an individual test with new data.
 
     This method will take a dictionary of fields to update for a specific test.
-    If a field is ommited it will not be changed in the DB.
+    If a field is omitted it will not be changed in the DB.
 
     :param dict values: dict of values to update the test with. The key is the
                         column name and the value is the new value to be stored
@@ -110,7 +110,7 @@ def create_run(skips=0, fails=0, passes=0, run_time=0, artifacts=None,
                id=None, session=None):
     """Create a new run record in the database
 
-    :param int skips: total number of skiped tests defaults to 0
+    :param int skips: total number of skipped tests defaults to 0
     :param int fails: total number of failed tests defaults to 0
     :param int passes: total number of passed tests defaults to 0
     :param float run_time: total run timed defaults to 0
@@ -473,7 +473,7 @@ def get_test_runs_by_run_id(run_id, session=None):
 
 
 def get_test_run_duration(test_run_id, session=None):
-    """Get the run duration for a specifc test_run.
+    """Get the run duration for a specific test_run.
 
     :param str test_run_id: The test_run's uuid (the id column in the test_run
                             table) to get the duration of
