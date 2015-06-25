@@ -33,6 +33,8 @@ SHELL_OPTS = [
                 help='Dict of metadata about the run(s)'),
     cfg.StrOpt('artifacts', short='a', default=None,
                help='Location of run artifacts'),
+    cfg.BoolOpt('store_attachments', short='s', default=False,
+                help='Store attachments from subunit streams in the DB'),
     cfg.StrOpt('run_id', short='i', default=None,
                help='Run id to use for the specified subunit stream, can only'
                     ' be used if a single stream is provided')
@@ -142,6 +144,9 @@ def process_results(results):
         if results[test]['metadata']:
             api.add_test_run_metadata(results[test]['metadata'], test_run.id,
                                       session)
+        if results[test]['attachments']:
+            api.add_test_run_attachments(results[test]['attachment'],
+                                         test_run.id, session)
     session.close()
 
 
@@ -152,10 +157,12 @@ def main():
         if len(CONF.subunit_files) > 1 and CONF.run_id:
             print("You can not specify a run id for adding more than 1 stream")
             return 3
-        streams = [subunit.ReadSubunit(open(s, 'r')) for s in
-                   CONF.subunit_files]
+        streams = [subunit.ReadSubunit(open(s, 'r'),
+                                       attachments=CONF.store_attachments)
+                   for s in CONF.subunit_files]
     else:
-        streams = [subunit.ReadSubunit(sys.stdin)]
+        streams = [subunit.ReadSubunit(sys.stdin,
+                                       attachments=CONF.store_attachments)]
     for stream in streams:
         process_results(stream.get_results())
 

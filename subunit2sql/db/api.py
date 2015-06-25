@@ -785,3 +785,34 @@ def get_test_counts_in_date_range(test_id, start_date=None, stop_date=None,
     count_dict['failure'] = fail_query.count()
     count_dict['skips'] = skip_query.count()
     return count_dict
+
+
+def add_test_run_attachments(attach_dict, test_run_id, session=None):
+    """Add attachments a specific test run.
+
+    This method will take a dictionary and store key blob pair attachments in
+    the DB associated with the specified test_run.
+
+    :param dict attachments_dict: a dictionary which will generate a separate
+                                  key blob pair row associated with the
+                                  test_run_id
+    :param str test_run_id: the uuid of the test_run to update. (value of the
+                            id column for the row to be updated)
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return list: The list of created attachment objects
+    :rtype: subunit2sql.models.Attachments
+    """
+
+    session = session or get_session()
+    attachments = []
+    for label, attach in attach_dict.items():
+        attachment = models.Attachments()
+        attachment.label = label
+        attachment.attachment = attach
+        attachment.test_run_id = test_run_id
+        with session.begin():
+            session.add(attachment)
+        attachments.append(attachment)
+    return attachments

@@ -32,7 +32,7 @@ def get_duration(start, end):
 
 class ReadSubunit(object):
 
-    def __init__(self, stream_file):
+    def __init__(self, stream_file, attachments=False):
         self.stream_file = stream_file
         self.stream = subunit.ByteStreamToStreamResult(stream_file)
         starts = testtools.StreamResult()
@@ -41,6 +41,7 @@ class ReadSubunit(object):
             self.parse_outcome))
         self.result = testtools.CopyStreamResult([starts, outcomes, summary])
         self.results = {}
+        self.attachments = attachments
 
     def get_results(self):
         self.result.startTestRun()
@@ -50,6 +51,13 @@ class ReadSubunit(object):
             self.result.stopTestRun()
         self.results['run_time'] = self.run_time()
         return self.results
+
+    def get_attachments(self, test):
+        attach_dict = {}
+        for name, detail in test['details'].items():
+            name = name.split(':')[0]
+            attach_dict[name] = detail
+        return attach_dict
 
     def parse_outcome(self, test):
         metadata = {}
@@ -66,11 +74,15 @@ class ReadSubunit(object):
         if name == 'process-returncode':
             return
         timestamps = test['timestamps']
+        attachment_dict = {}
+        if self.attachments:
+            attachment_dict = self.get_attachments(test)
         self.results[name] = {
             'status': status,
             'start_time': timestamps[0],
             'end_time': timestamps[1],
-            'metadata': metadata
+            'metadata': metadata,
+            'attachments': attachment_dict
         }
         self.stream_file.flush()
 
