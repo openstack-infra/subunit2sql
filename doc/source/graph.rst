@@ -117,3 +117,101 @@ you can refer to the help on the graph command for run_time to see the full
 option list with something like::
 
   subunit2sql-graph failures --help
+
+subunit2sql-graph plugin interface
+==================================
+
+subunit2sql-graph exposes a plugin interface which enables others to add
+additional graph types to the command without having to add the additional
+modules to the subunit2sql repository. This could be because the additional
+graph commands are too application specific to be in the general purpose
+command, or really any reason.
+
+A graph plugin is simply a python module that has of a few pieces: a
+set_cli_opts function, a generate_series function, and a a python entrypoint.
+This is the same as the internal interface for the in-tree commands, meaning
+that migrating a command from landing in the upstream repo and as an external
+plugin is quite straightforward.
+
+Entry Point
+-----------
+This is how you tell the subunit2sql-graph command about the existance of the
+external plugin. It leverages setuptools and stevedore to register the module
+in a known namespace which will be loaded by the subunit2sql-graph command.
+
+To add a plugin you just need to add an entry-point for your new graph command
+to the 'subunit2sql.graph.plugin' namespace. For example, if you were adding a
+plugin for the new command graph_pretty_results you would use the following in
+your setup.cfg (assuming you're using PBR)::
+
+    [entry_points]
+    subunit2sql.graph.plugin =
+        graph_pretty_results = path.to.plugin.module
+
+Then after you install the python program the plugin is in the
+subunit2sql-graph will be able to use the plugin.
+
+
+The plugin module
+-----------------
+There are a couple of requirements for each plugin module. First you'll need
+to import oslo.config and setup a CONF object. This can be done very simply
+with::
+
+    from oslo_config import cfg
+
+    CONF = cfg.CONF
+
+This is needed so you'll be able to parse some required CLI opts from the
+base command like the output directory.
+
+Additionally, there are some required functions in the plugin which are
+described in the sections below.
+
+For examples, of how to write a plugin module you can look at any of the in-tree
+graph commands they are constructed in the same exact way as an out-of-tree
+plugin.
+
+set_cli_opts function
+---------------------
+This function is used to set any command specific options. It takes in a single
+parameter a ConfigParser object which is used to register options on. The
+function is required even if no additional command specific options are needed.
+Simply add it and make it a no-op, for example::
+
+    def set_cli_opts(parser):
+        pass
+
+The normal way this is used is to add args is to just call add_argunment on the
+parser passed in. For example, to add a single option, test_id, you would do
+the following::
+
+    def set_cli_opts(parser):
+        parser.add_argument('test_id', nargs='?',
+                            help='Test id to extract time series for')
+
+generate_series function
+------------------------
+This is where all the actual work for generating the graph in the plugin happens
+this function is where the graph is generated and the output is saved to a file.
+Basically when you run subunit2sql-graph with your plugin as the graph type this
+is the function which gets called to do the work.
+
+There are a couple of constraints in how it functions. First, the use of the
+oslo_config config object is how to get at CLI arg values. Base command values
+are in the default namespace, for example CONF.output. You can see the list of
+available options from the SHELL_OPTS list in subunit2sql/analysis/graph.py
+Command specific options are available in the command namespace. For example,
+if you add set an arg "test_id" in set_cli_opts() then you can get to the value
+of it from CONF.command.test_id.
+
+The other constraint on this function is that the way it gets called by
+subunit2sql-graph assumes that it will be writing an image file. The
+last thing subunit2sql-graph does is print "Graph saved at: file_path" The
+file_path is whatever CONF.output is set to so you should use that for the
+output path. The other aspect is the file extension of this value is used to
+specify the file format of the image file. The file output commands from
+matplotlib, which is what is used for all the in-tree commands, will take
+care of this automatically. However using matplotlib is not a requirement,
+just make sure however you generate a graph respects the file extension of
+the output path.
