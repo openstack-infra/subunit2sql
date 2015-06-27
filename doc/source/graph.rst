@@ -1,6 +1,6 @@
 Subunit2SQL Graphs
 ==================
-subunit2sql includes a utilty to generate various graphs from the data in a
+subunit2sql includes a utility to generate various graphs from the data in a
 database. This is used to provide a more visual analysis of the data contained
 in the DB.
 
@@ -128,14 +128,14 @@ graph commands are too application specific to be in the general purpose
 command, or really any reason.
 
 A graph plugin is simply a python module that has of a few pieces: a
-set_cli_opts function, a generate_series function, and a a python entrypoint.
+set_cli_opts function, a generate_series function, and a python entrypoint.
 This is the same as the internal interface for the in-tree commands, meaning
 that migrating a command from landing in the upstream repo and as an external
 plugin is quite straightforward.
 
 Entry Point
 -----------
-This is how you tell the subunit2sql-graph command about the existance of the
+This is how you tell the subunit2sql-graph command about the existence of the
 external plugin. It leverages setuptools and stevedore to register the module
 in a known namespace which will be loaded by the subunit2sql-graph command.
 
@@ -182,7 +182,7 @@ Simply add it and make it a no-op, for example::
     def set_cli_opts(parser):
         pass
 
-The normal way this is used is to add args is to just call add_argunment on the
+The normal way this is used is to add args is to just call add_argument on the
 parser passed in. For example, to add a single option, test_id, you would do
 the following::
 
