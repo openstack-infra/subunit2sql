@@ -16,8 +16,8 @@
 import copy
 import sys
 
-from oslo.config import cfg
-from oslo.db import options
+from oslo_config import cfg
+from oslo_db import options
 from pbr import version
 
 from subunit2sql.db import api

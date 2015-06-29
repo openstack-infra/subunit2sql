@@ -22,8 +22,8 @@ import subprocess
 
 from alembic import config
 from alembic import script
-from oslo.config import cfg
-from oslo.db import options
+from oslo_config import cfg
+from oslo_db import options
 import six
 from six.moves.urllib import parse
 import sqlalchemy

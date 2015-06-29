@@ -14,9 +14,9 @@
 
 import datetime
 
-from oslo.config import cfg
-from oslo.db.sqlalchemy import session as db_session
-from oslo.db.sqlalchemy import utils as db_utils
+from oslo_config import cfg
+from oslo_db.sqlalchemy import session as db_session
+from oslo_db.sqlalchemy import utils as db_utils
 
 from subunit2sql.db import models
 from subunit2sql import exceptions

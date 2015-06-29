@@ -15,7 +15,7 @@
 import datetime
 import uuid
 
-from oslo.db.sqlalchemy import models  # noqa
+from oslo_db.sqlalchemy import models  # noqa
 import sqlalchemy as sa
 from sqlalchemy.ext import declarative
 

@@ -20,8 +20,8 @@ from alembic import command as alembic_command
 from alembic import config as alembic_config
 from alembic import script as alembic_script
 from alembic import util as alembic_util
-from oslo.config import cfg
-from oslo.db import options
+from oslo_config import cfg
+from oslo_db import options
 
 from subunit2sql.db import api as db_api
 

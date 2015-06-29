@@ -14,7 +14,7 @@
 
 import matplotlib
 import matplotlib.pyplot as plt
-from oslo.config import cfg
+from oslo_config import cfg
 import pandas as pd
 
 from subunit2sql.analysis import utils

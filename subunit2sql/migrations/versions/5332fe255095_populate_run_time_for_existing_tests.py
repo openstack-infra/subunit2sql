@@ -25,7 +25,7 @@ revision = '5332fe255095'
 down_revision = '28ac1ba9c3db'
 
 
-from oslo.db.sqlalchemy import utils as db_utils
+from oslo_db.sqlalchemy import utils as db_utils
 
 from subunit2sql.db import api as db_api
 from subunit2sql.db import models

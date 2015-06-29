@@ -28,8 +28,8 @@ import os
 
 from alembic import context
 from alembic import op
-from oslo.config import cfg
-from oslo.db.sqlalchemy import utils as db_utils
+from oslo_config import cfg
+from oslo_db.sqlalchemy import utils as db_utils
 import sqlalchemy as sa
 
 from subunit2sql.db import api as db_api
