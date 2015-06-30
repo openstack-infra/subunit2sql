@@ -68,7 +68,7 @@ Properties:
 
 Attachments
 -----------
-Attachemnts represent the file attachemnts in the subunit stream for a
+Attachments represent the file attachments in the subunit stream for a
 particular test_run.
 
 Properties:

@@ -10,7 +10,7 @@ DB API Guide
 Example usage patterns
 ----------------------
 
-Initiallizing subunit2sql
+Initializing subunit2sql
 `````````````````````````
 
 The first step to using subunit2sql inside your program is to initialize the db
