@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 from oslo_config import cfg
 import pandas as pd
 
+from subunit2sql.analysis import utils
 from subunit2sql.db import api
 
 CONF = cfg.CONF
@@ -30,14 +31,14 @@ def set_cli_opts(parser):
 
 def generate_series():
     session = api.get_session()
-    test_starts = api.get_test_run_series(CONF.start_date, CONF.stop_date,
-                                          session)
+    test_starts = api.get_test_run_series(session)
     session.close()
-    daily_count = pd.Series(test_starts)
-    mean = pd.rolling_mean(daily_count, 20)
-    rolling_std = pd.rolling_std(daily_count, 20)
+    ts = pd.Series(test_starts).resample('D', how='sum')
+    daily_count = utils.filter_dates(ts)
+    mean = pd.rolling_mean(daily_count, 10)
+    rolling_std = pd.rolling_std(daily_count, 10)
     plt.figure()
-    title = CONF.title or 'Number of Tempest tests run in the Gate'
+    title = CONF.title or 'Number of tests run'
     plt.title(title)
     plt.ylabel('Number of tests')
     plt.plot(daily_count.index, daily_count, 'k', label='Daily Test Count')
