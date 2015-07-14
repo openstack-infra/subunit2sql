@@ -199,8 +199,10 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'subunit2sql', u'subunit2SQL Documentation',
-     [u'Matthew Treinish'], 1)
+    ('README', 'subunit2sql', u'Tooling for storing and interacting with test'
+     ' results databases', [u'Matthew Treinish'], 1),
+    ('graph', 'subunit2sql-graph', 'A tool for generating graphs from a '
+     'subunit2sql database', ['Matthew Treinish'], 1)
 ]
 
 # If true, show URL addresses after external links.

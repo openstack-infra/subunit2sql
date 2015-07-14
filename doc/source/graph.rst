@@ -1,4 +1,6 @@
-Subunit2SQL Graphs
+.. _subunit2sql-graph:
+
+subunit2sql-graph
 ==================
 subunit2sql includes a utility to generate various graphs from the data in a
 database. This is used to provide a more visual analysis of the data contained
@@ -117,6 +119,18 @@ you can refer to the help on the graph command for run_time to see the full
 option list with something like::
 
   subunit2sql-graph failures --help
+
+Daily Test Counts
+-----------------
+This graph is used to show the the daily # of tests run as a time series line graph.
+
+For example, running something like::
+
+    subunit2sql-graph --database-connection mysql://test:test@localhost/subunit2sql --output test.png --title 'Daily Test Count' dailycount
+
+will generate a graph like:
+
+.. image:: graph-dailycount.png
 
 subunit2sql-graph plugin interface
 ==================================

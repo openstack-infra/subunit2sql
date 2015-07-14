@@ -2,23 +2,43 @@
 subunit2SQL README
 ==================
 
-subunit2SQL like it's name implies is a tool used for converting subunit
-streams to data in a SQL database. The motivation is that for multiple
-distributed test runs that are generating subunit output it is useful to
-store the results in a unified repository. This is the motivation for the
-testrepository project which does a good job for centralizing the results from
-multiple test runs.
+subunit2SQL is a tool for storing test results data in a SQL database. Like
+it's name implies it was originally designed around converting `subunit`_
+streams to data in a SQL database and the packaged utilities assume a subunit
+stream as the input format. However, the data model used for the DB does not
+preclude using any test result format. Additionally the analysis tooling built
+on top of a database is data format agnostic. However if you choose to use a
+different result format as an input for the database additional tooling using
+the DB api would need to be created to parse a different test result output
+format. It's also worth pointing out that subunit has several language library
+bindings available. So as a user you could create a small filter to convert a
+different format to subunit. Creating a filter should be fairly easy and then
+you don't have to worry about writing a tool like :ref:_`subunit2sql` to use a
+different format.
+
+.. _subunit: https://github.com/testing-cabal/subunit/blob/master/README.rst
+
+For multiple distributed test runs that are generating subunit output it is
+useful to store the results in a unified repository. This is the motivation for
+the _`testrepository` project which does a good job for centralizing the
+results from multiple test runs.
+
+.. _testrepository: http://testrepository.readthedocs.org/en/latest/
 
 However, imagine something like the OpenStack CI system where the same basic
 test suite is normally run several hundreds of times a day. To provide useful
 introspection on the data from those runs and to build trends over time
 the test results need to be stored in a format that allows for easy querying.
-Using a SQL database makes a lot of sense for doing this.
+Using a SQL database makes a lot of sense for doing this, which was the
+original motivation for the project.
 
-subunit2SQL uses alembic migrations to setup a DB schema that can then be used
-by the subunit2sql binary to parse subunit streams and populate the DB.
-Additionally, it provides a DB API that can be used to query information from
-the results stored to build other tooling.
+At a high level subunit2SQL uses alembic migrations to setup a DB schema that
+can then be used by the :ref:`subunit2sql` tool to parse subunit streams and
+populate the DB. Then there are tools for interacting with the stored data in
+the :ref:`subunit2sql-graph` command as well as the :ref:`sql2subunit`
+command to create a subunit stream from data in the database. Additionally,
+subunit2sql provides a Python DB API that can be used to query information from
+the stored data to build other tooling.
 
 Usage
 =====
@@ -50,8 +70,10 @@ addition, the performance of running, even in a testing capacity, subunit2sql
 with MySQL or Postgres make it worth the effort of setting up one of them to
 use subunit2sql.
 
-Running subunit2sql
--------------------
+.. _subunit2sql:
+
+subunit2sql
+-----------
 
 Once you have a database setup with the proper database schema you can then use
 the subunit2sql command to populate the database with data from your test runs.
@@ -76,8 +98,10 @@ path that points to any logs or other external test artifacts related to the
 run being added. The run_meta option takes in a dictionary which will be added
 to the database as key value pairs associated with the run being added.
 
-Creating a v2 Subunit Stream from the DB
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. _sql2subunit:
+
+sql2subunit
+-----------
 
 The sql2subunit utility is used for taking a run_id and creating a subunit
 v2 stream from the data in the DB about that run. To create a new subunit
@@ -90,9 +114,28 @@ file or the DB connection info. Running this command will print to stdout the
 subunit v2 stream for the run specified by $RUN_ID, unless the --out_path
 argument is specified to write it to a file instead.
 
-
 Release Notes
 =============
+
+0.7.0
+-----
+ * Initial external plugin support for the subunit2sql-graph command
+ * Internal code cleanup around the use of the oslo namespace package
+ * A temporary version cap on oslo.db limiting it to < 2.0.0 because of a
+   subunit2sql dependency on an internal oslo.db interface (this will be removed
+   in a future release)
+
+0.6.0
+-----
+ * subunit2sql-graph improvements:
+  * Use setuptools extras to list graph requirements
+  * Adds documentation
+  * New graph type to show daily test count over time
+  * Graph cleanups
+ * Start of attachments support
+  * Adds a new table to store arbitrary attachments from a subunit stream
+  * Support to the subunit2sql utility to store attachments in the attachments
+    table
 
 0.5.1
 -----

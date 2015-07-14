@@ -3,6 +3,9 @@ Work Items for Subunit2SQL
 
 Short Term
 ----------
+ * Add attachments support to the sql2subunit utility
+ * Enable sqlite support for the data migrations to enable using sqlite as
+   a database backend
  * Add more unit tests
    * DB API unit tests
    * write_subunit module
@@ -16,6 +19,5 @@ Short Term
 
 Longer Term
 -----------
- * Add tooling to pull the data and visualize it in fun ways
  * Add some statistics functions on top of the DB api to perform analysis
  * Add a subunit2sql repository type to the testrepository project
