@@ -24,13 +24,32 @@ Create Date: 2014-06-20 21:27:01.629724
 revision = '13d819bbb0ff'
 down_revision = '4ca26dac400e'
 
+from alembic import context
 from alembic import op
+from sqlalchemy.engine import reflection
 
 
 def upgrade():
-    op.create_index('ix_test_id', 'tests', ['test_id'])
-    op.create_index('ix_test_run_test_id', 'test_runs', ['test_id'])
-    op.create_index('ix_test_run_run_id', 'test_runs', ['run_id'])
+    migration_context = context.get_context()
+    insp = reflection.Inspector(migration_context.bind)
+    test_indx = insp.get_indexes('tests')
+    test_indx_names = [x['name'] for x in test_indx]
+    test_indx_columns = [x['column_names'][0] for x in test_indx
+                         if len(x) == 1]
+    test_run_indx = insp.get_indexes('test_runs')
+    test_run_indx_names = [x['name'] for x in test_run_indx]
+    test_run_indx_columns = [x['column_names'][0] for x in test_run_indx
+                             if len(x) == 1]
+    if ('ix_test_id' not in test_indx_names and
+        'test_id' not in test_indx_columns):
+        op.create_index('ix_test_id', 'tests', ['test_id'])
+    if ('ix_test_run_test_id' not in test_run_indx_names and
+        'test_id' not in test_run_indx_columns):
+        op.create_index('ix_test_run_test_id', 'test_runs', ['test_id'])
+    if ('ix_test_run_run_id' not in test_run_indx_names and
+        'run_id' not in test_run_indx_columns):
+        op.create_index('ix_test_run_run_id', 'test_runs', ['run_id'])
+
     op.create_unique_constraint('uq_test_runs', 'test_runs',
                                 ['test_id', 'run_id'])
 
