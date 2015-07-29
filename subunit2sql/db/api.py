@@ -214,6 +214,22 @@ def add_run_metadata(meta_dict, run_id, session=None):
     return metadata
 
 
+def get_run_metadata(run_id, session=None):
+    """Return all run metadata objects associated with a given run.
+
+    :param str run_id: The uuid of the run to get all the metadata
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return list: The list of metadata objects
+    :rtype: subunit2sql.models.RunMetadata
+    """
+    session = session or get_session()
+    query = db_utils.model_query(models.RunMetadata, session).filter_by(
+        run_id=run_id)
+    return query.all()
+
+
 def create_test_run(test_id, run_id, status, start_time=None,
                     end_time=None, session=None):
     """Create a new test run record in the database
