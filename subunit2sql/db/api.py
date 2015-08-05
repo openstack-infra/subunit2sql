@@ -230,6 +230,23 @@ def get_run_metadata(run_id, session=None):
     return query.all()
 
 
+def get_runs_by_key_value(key, value, session=None):
+    """Return all run objects associated with a certain key/value metadata pair
+
+    :param key: The key to be matched
+    :param value: The value to be matched
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+    :return list: The list of runs
+    :rtype: subunit2sql.models.Run
+    """
+    session = session or get_session()
+    query = db_utils.model_query(models.Run, session=session).join(
+        models.RunMetadata).filter_by(key=key, value=value)
+
+    return query.all()
+
+
 def create_test_run(test_id, run_id, status, start_time=None,
                     end_time=None, session=None):
     """Create a new test run record in the database
