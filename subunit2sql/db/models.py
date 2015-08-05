@@ -43,7 +43,7 @@ class SubunitBase(models.ModelBase):
     def to_dict(self):
         d = self.__dict__.copy()
         d.pop("_sa_instance_state")
-        return self.__dict__.copy()
+        return d
 
 
 class Test(BASE, SubunitBase):
