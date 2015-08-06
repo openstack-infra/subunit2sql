@@ -43,6 +43,23 @@ specify these options and just pass that config file into subunit2sql::
 The tradeoff here is that you have to have a file available to configure
 subunit2sql.
 
+
+Another alternative is to initialize a sqlalchemy engine to create a session
+with the appropriate db url. This session can then be passed to all API calls
+without having to deal with oslo.config::
+
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    # Create engine with db url for session generation
+    engine=create_engine('mysql://subunit:subunit@localhost/subunit')
+    Session = sessionmaker(bind=engine)
+
+    # Create a new session to pass to API calls
+    # EX: api.get_run_metadata(session=session)
+    session = Session()
+
+
 Parsing subunit stream and storing it in a DB
 `````````````````````````````````````````````
 
