@@ -995,6 +995,39 @@ def get_ids_for_all_tests(session=None):
     return db_utils.model_query(models.Test, session).value(models.Test.id)
 
 
+def get_run_times_grouped_by_run_metadata_key(key, start_date=None,
+                                              stop_date=None, session=None):
+    """Return the aggregate run times for all runs grouped by a metadata key
+
+    :param key: The run_metadata key to use for grouping runs
+    :param session: Optional session object if one isn't provided a new session
+                        will be acquired for the duration of this operation
+
+    :return: A dictionary where keys are the value of the provided metadata key
+             and the values are a list of run_times for successful runs with
+             that metadata value
+    :rtype: dict
+    """
+    session = session or get_session()
+    run_times_query = db_utils.model_query(models.Run, session).filter(
+        models.Run.fails == 0, models.Run.passes > 0).join(
+            models.RunMetadata,
+            models.Run.id == models.RunMetadata.run_id).filter(
+                models.RunMetadata.key == key)
+
+    run_times_query = _filter_runs_by_date(run_times_query, start_date,
+                                           stop_date)
+    run_times = run_times_query.values(models.Run.run_at, models.Run.run_time,
+                                       models.RunMetadata.value)
+    result = {}
+    for run in run_times:
+        if result.get(run[2]):
+            result[run[2]].append(run[1])
+        else:
+            result[run[2]] = [run[1]]
+    return result
+
+
 def get_test_counts_in_date_range(test_id, start_date=None, stop_date=None,
                                   session=None):
     """Return the number of successes, failures, and skips for a single test.
