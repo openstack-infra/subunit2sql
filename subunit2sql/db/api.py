@@ -17,6 +17,7 @@ import datetime
 from oslo_config import cfg
 from oslo_db.sqlalchemy import session as db_session
 from oslo_db.sqlalchemy import utils as db_utils
+import sqlalchemy
 
 from subunit2sql.db import models
 from subunit2sql import exceptions
@@ -818,6 +819,35 @@ def get_test_counts_in_date_range(test_id, start_date=None, stop_date=None,
     count_dict['failure'] = fail_query.count()
     count_dict['skips'] = skip_query.count()
     return count_dict
+
+
+def get_failing_test_ids_from_runs_by_key_value(key, value, session=None):
+    """Get a list of failing test_ids from runs with run_metadata.
+
+    This method gets a distinct list of test_ids (the test_id column not the id
+    column) from all runs that match a run metadata key value pair.
+
+    :param str key: The key to use to match runs from in run_metadata
+    :param str value: The value of the key in run_metadata to match runs
+                      against
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return: A list of test_ids that failed from runs that match the provided
+             key value run_metadata pair
+    :rtype: list
+    """
+
+    session = session or get_session()
+    test_ids = db_utils.model_query(models.TestRun, session).join(
+        models.Test, models.TestRun.test_id == models.Test.id).join(
+            models.RunMetadata,
+            models.TestRun.run_id == models.RunMetadata.run_id).filter(
+                models.RunMetadata.key == key,
+                models.RunMetadata.value == value,
+                models.TestRun.status == 'fail').values(
+                    sqlalchemy.distinct(models.Test.test_id))
+    return [test_id[0] for test_id in test_ids]
 
 
 def add_test_run_attachments(attach_dict, test_run_id, session=None):
