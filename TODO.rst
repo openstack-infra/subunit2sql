@@ -1,8 +1,6 @@
 Work Items for Subunit2SQL
 ==========================
 
-Short Term
-----------
  * Add attachments support to the sql2subunit utility
  * Enable sqlite support for the data migrations to enable using sqlite as
    a database backend
@@ -13,11 +11,4 @@ Short Term
    tooling.
  * Investigate dropping oslo.db from requirements to enable using other
    config/cli tooling
- * Maybe use raw SQL queries instead of the ORM where it makes sense
- * Improve documentation
-   * More usage examples
-
-Longer Term
------------
- * Add some statistics functions on top of the DB api to perform analysis
  * Add a subunit2sql repository type to the testrepository project
