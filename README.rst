@@ -117,6 +117,22 @@ argument is specified to write it to a file instead.
 Release Notes
 =============
 
+0.8.1
+-----
+ * Fix an issue with migration 1ff737bef438 which was failing on creating an
+   index on mysql environments using multi-byte utf8.
+
+0.8.0
+-----
+ * DB API improvements:
+  * New methods to get runs by key value pair in run_metadata and get
+    the run_metadata for a run
+ * Documentation updates
+ * A new migration is added to add additional indexes on common search
+   patterns
+ * Several bugfixes and code cleanups
+
+
 0.7.0
 -----
  * Initial external plugin support for the subunit2sql-graph command
