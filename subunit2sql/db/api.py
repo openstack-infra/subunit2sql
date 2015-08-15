@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import collections
 import datetime
 
 from oslo_config import cfg
@@ -680,16 +681,18 @@ def get_tests_run_dicts_from_run_id(run_id, session=None):
     session = session or get_session()
     query = db_utils.model_query(models.Test, session=session).join(
         models.TestRun).filter(models.TestRun.run_id == run_id).outerjoin(
-            models.TestRunMetadata).values(
-                models.Test.test_id,
-                models.TestRun.status,
+            models.TestRunMetadata).order_by(
                 models.TestRun.start_time,
-                models.TestRun.start_time_microsecond,
-                models.TestRun.stop_time,
-                models.TestRun.stop_time_microsecond,
-                models.TestRunMetadata.key,
-                models.TestRunMetadata.value)
-    test_runs = {}
+                models.TestRun.start_time_microsecond).values(
+                    models.Test.test_id,
+                    models.TestRun.status,
+                    models.TestRun.start_time,
+                    models.TestRun.start_time_microsecond,
+                    models.TestRun.stop_time,
+                    models.TestRun.stop_time_microsecond,
+                    models.TestRunMetadata.key,
+                    models.TestRunMetadata.value)
+    test_runs = collections.OrderedDict()
     for test_run in query:
         if test_run[0] not in test_runs:
             # If there is no start_time set to None

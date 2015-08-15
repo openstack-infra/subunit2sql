@@ -145,3 +145,25 @@ class TestDatabaseAPI(base.TestCase):
         all_test_runs = api.get_all_test_runs()
         self.assertEqual(len(all_test_runs), 1)
         self.assertEqual(test_run.id, all_test_runs[0].id)
+
+    def test_get_test_runs_dicts_from_run_id_are_in_chrono_order(self):
+        run = api.create_run()
+        test_a = api.create_test('fake_test')
+        test_b = api.create_test('fake_test_2')
+        test_c = api.create_test('fake_test_3')
+        api.create_test_run(test_a.id, run.id, 'success',
+                            datetime.datetime.utcnow())
+        api.create_test_run(test_b.id, run.id, 'success',
+                            datetime.datetime(1914, 6, 28, 10, 45, 0))
+        api.create_test_run(test_c.id, run.id, 'success',
+                            datetime.datetime(2014, 8, 26, 20, 00, 00))
+        test_run_dicts = api.get_tests_run_dicts_from_run_id(run.id)
+        self.assertEqual(len(test_run_dicts), 3)
+        prev = None
+        for test_run in test_run_dicts:
+            if prev == None:
+                prev = test_run
+                continue
+            self.assertTrue(test_run_dicts[test_run]['start_time'] >
+                            test_run_dicts[prev]['start_time'])
+            prev = test_run
