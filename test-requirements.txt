@@ -10,3 +10,4 @@ testtools>=0.9.34
 oslosphinx
 MySQL-python
 psycopg2
+os-testr
