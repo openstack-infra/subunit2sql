@@ -42,7 +42,7 @@ def upgrade():
                              if len(x) == 1]
     if ('ix_test_id' not in test_indx_names and
         'test_id' not in test_indx_columns):
-        op.create_index('ix_test_id', 'tests', ['test_id'])
+        op.create_index('ix_test_id', 'tests', ['test_id'], mysql_length=30)
     if ('ix_test_run_test_id' not in test_run_indx_names and
         'test_id' not in test_run_indx_columns):
         op.create_index('ix_test_run_test_id', 'test_runs', ['test_id'])
