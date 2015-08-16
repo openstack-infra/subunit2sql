@@ -271,10 +271,17 @@ def create_test_run(test_id, run_id, status, start_time=None,
     test_run.test_id = test_id
     test_run.run_id = run_id
     test_run.status = status
-    start_time = start_time.replace(tzinfo=None)
-    start_time_microsecond = start_time.microsecond
-    stop_time = end_time.replace(tzinfo=None)
-    stop_time_microsecond = stop_time.microsecond
+    if start_time:
+        start_time = start_time.replace(tzinfo=None)
+        start_time_microsecond = start_time.microsecond
+    else:
+        start_time_microsecond = None
+    if end_time:
+        stop_time = end_time.replace(tzinfo=None)
+        stop_time_microsecond = stop_time.microsecond
+    else:
+        stop_time = None
+        stop_time_microsecond = None
     test_run.stop_time = stop_time
     test_run.stop_time_microsecond = stop_time_microsecond
     test_run.start_time = start_time
