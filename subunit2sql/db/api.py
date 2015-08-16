@@ -68,6 +68,18 @@ def _filter_runs_by_date(query, start_date=None, stop_date=None):
     return query
 
 
+def get_engine(use_slave=False):
+    """Get a new sqlalchemy engine instance
+
+    :param bool use_slave if possible, use 'slave' database for this engine
+
+    :return: The engine object for the database connection
+    :rtype: sqlalchemy.engine.Engine
+    """
+    facade = _create_facade_lazily()
+    return facade.get_engine(use_slave=use_slave)
+
+
 def create_test(test_id, run_count=0, success=0, failure=0, run_time=0.0,
                 session=None):
     """Create a new test record in the database.
