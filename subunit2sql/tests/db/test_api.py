@@ -167,3 +167,42 @@ class TestDatabaseAPI(base.TestCase):
             self.assertTrue(test_run_dicts[test_run]['start_time'] >
                             test_run_dicts[prev]['start_time'])
             prev = test_run
+
+    def test_get_test_run_duration(self):
+        start_time = datetime.datetime.utcnow()
+        stop_time = start_time + datetime.timedelta(minutes=3)
+        run = api.create_run()
+        test_a = api.create_test('fake_test')
+        test_run = api.create_test_run(test_a.id, run.id, 'success',
+                                       start_time, stop_time)
+        dur = api.get_test_run_duration(test_run.id)
+        self.assertEqual(180.0, dur)
+
+    def test_get_id_from_test_id(self):
+        test_a = api.create_test('fake_test')
+        id_value = api.get_id_from_test_id('fake_test')
+        self.assertEqual(test_a.id, id_value)
+
+    def test_get_test_runs_by_run_id(self):
+        run_b = api.create_run()
+        run_a = api.create_run()
+        run_c = api.create_run()
+        test_a = api.create_test('fake_test')
+        testrun_a = api.create_test_run(test_a.id, run_a.id, 'success',
+                                        datetime.datetime.utcnow())
+        testrun_b = api.create_test_run(test_a.id, run_b.id, 'success',
+                                        datetime.datetime.utcnow())
+        testrun_c = api.create_test_run(test_a.id, run_c.id, 'success',
+                                        datetime.datetime.utcnow())
+        test_runs_a = api.get_test_runs_by_run_id(run_a.id)
+        test_runs_b = api.get_test_runs_by_run_id(run_b.id)
+        test_runs_c = api.get_test_runs_by_run_id(run_c.id)
+        self.assertEqual(len(test_runs_a), 1)
+        self.assertEqual(testrun_a.id, test_runs_a[0].id)
+        self.assertEqual(testrun_a.status, test_runs_a[0].status)
+        self.assertEqual(len(test_runs_b), 1)
+        self.assertEqual(testrun_b.id, test_runs_b[0].id)
+        self.assertEqual(testrun_b.status, test_runs_b[0].status)
+        self.assertEqual(len(test_runs_c), 1)
+        self.assertEqual(testrun_c.id, test_runs_c[0].id)
+        self.assertEqual(testrun_c.status, test_runs_c[0].status)
