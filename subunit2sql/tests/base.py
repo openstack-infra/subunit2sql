@@ -31,3 +31,7 @@ class TestCase(testtools.TestCase):
         if os.environ.get('OS_STDERR_CAPTURE') in self.true:
             stderr = self.useFixture(fixtures.StringStream('stderr')).stream
             self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
+        if (os.environ.get('OS_LOG_CAPTURE') != 'False' and
+            os.environ.get('OS_LOG_CAPTURE') != '0'):
+            self.useFixture(fixtures.LoggerFixture(nuke_handlers=False,
+                                                   level=None))
