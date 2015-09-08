@@ -13,6 +13,7 @@
 # under the License.
 
 import functools
+import re
 
 import subunit
 import testtools
@@ -32,7 +33,7 @@ def get_duration(start, end):
 
 class ReadSubunit(object):
 
-    def __init__(self, stream_file, attachments=False):
+    def __init__(self, stream_file, attachments=False, attr_regex=None):
         self.stream_file = stream_file
         self.stream = subunit.ByteStreamToStreamResult(stream_file)
         starts = testtools.StreamResult()
@@ -42,6 +43,12 @@ class ReadSubunit(object):
         self.result = testtools.CopyStreamResult([starts, outcomes, summary])
         self.results = {}
         self.attachments = attachments
+        if attr_regex:
+            self.attr_regex = re.compile(attr_regex)
+        # NOTE(mtreinish): Default to the previous implicit regex if None is
+        # specified for backwards compat
+        else:
+            self.attr_regex = re.compile('\[(.*)\]')
 
     def get_results(self):
         self.result.startTestRun()
@@ -87,11 +94,11 @@ class ReadSubunit(object):
         self.stream_file.flush()
 
     def get_attrs(self, name):
-        tags_start = name.find('[')
-        tags_end = name.find(']')
-        attrs = None
-        if tags_start > 0 and tags_end > tags_start:
-            attrs = name[(tags_start + 1):tags_end]
+        matches = self.attr_regex.search(name)
+        if matches:
+            attrs = matches.group(1)
+        else:
+            attrs = None
         return attrs
 
     def cleanup_test_name(self, name, strip_tags=True, strip_scenarios=False):
@@ -105,12 +112,14 @@ class ReadSubunit(object):
         identify generated negative tests.
         """
         if strip_tags:
-            tags_start = name.find('[')
-            tags_end = name.find(']')
-            if tags_start > 0 and tags_end > tags_start:
-                newname = name[:tags_start]
-                newname += name[tags_end + 1:]
-                name = newname
+            matches = self.attr_regex.search(name)
+            if matches:
+                tags_start = matches.start(0)
+                tags_end = matches.end(0)
+                if tags_start > 0 and tags_end > tags_start:
+                    newname = name[:tags_start]
+                    newname += name[tags_end:]
+                    name = newname
 
         if strip_scenarios:
             tags_start = name.find('(')

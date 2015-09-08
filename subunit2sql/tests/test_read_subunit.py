@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import datetime
+import io
 
 import mock
 
@@ -122,3 +123,50 @@ class TestReadSubunit(base.TestCase):
                          fake_attrs)
         self.assertEqual(parsed_results[fake_test_name]['metadata']['tags'],
                          ','.join(tags))
+
+    def test_attrs_default_regex(self):
+        fake_id = 'test_fake.TestThing.testA[good_test,fun_test,legit]'
+        read = subunit.ReadSubunit(io.BytesIO())
+        attrs = read.get_attrs(fake_id)
+        attrs_list = attrs.split(',')
+        self.assertIn('legit', attrs_list)
+        self.assertIn('fun_test', attrs_list)
+        self.assertIn('good_test', attrs_list)
+
+    def test_attrs_non_default_regex(self):
+        fake_id = 'test_fake.TestThing.testB`good_test,fun_test,legit`'
+        regex = '\`(.*)\`'
+        read = subunit.ReadSubunit(io.BytesIO(), attr_regex=regex)
+        attrs = read.get_attrs(fake_id)
+        attrs_list = attrs.split(',')
+        self.assertIn('legit', attrs_list)
+        self.assertIn('fun_test', attrs_list)
+        self.assertIn('good_test', attrs_list)
+
+    def test_attrs_no_matches(self):
+        fake_id = 'test_fake.TestThing.testB`good_test,fun_test,legit`'
+        read = subunit.ReadSubunit(io.BytesIO())
+        attrs = read.get_attrs(fake_id)
+        self.assertIsNone(attrs)
+
+    def test_cleanup_test_name_default_attr_regex(self):
+        fake_id = 'test_fake.TestThing.testA[good_test,fun_test,legit]'
+        read = subunit.ReadSubunit(io.BytesIO())
+        test_name = read.cleanup_test_name(fake_id, strip_tags=True,
+                                           strip_scenarios=False)
+        self.assertEqual('test_fake.TestThing.testA', test_name)
+
+    def test_cleanup_test_name_non_default_attr_regex(self):
+        fake_id = 'test_fake.TestThing.testB`good_test,fun_test,legit`'
+        regex = '\`(.*)\`'
+        read = subunit.ReadSubunit(io.BytesIO(), attr_regex=regex)
+        test_name = read.cleanup_test_name(fake_id, strip_tags=True,
+                                           strip_scenarios=False)
+        self.assertEqual('test_fake.TestThing.testB', test_name)
+
+    def test_cleanup_test_name_no_attr_matches(self):
+        fake_id = 'test_fake.TestThing.testB`good_test,fun_test,legit`'
+        read = subunit.ReadSubunit(io.BytesIO())
+        test_name = read.cleanup_test_name(fake_id, strip_tags=True,
+                                           strip_scenarios=False)
+        self.assertEqual(fake_id, test_name)

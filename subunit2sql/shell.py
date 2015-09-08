@@ -37,7 +37,10 @@ SHELL_OPTS = [
                 help='Store attachments from subunit streams in the DB'),
     cfg.StrOpt('run_id', short='i', default=None,
                help='Run id to use for the specified subunit stream, can only'
-                    ' be used if a single stream is provided')
+                    ' be used if a single stream is provided'),
+    cfg.StrOpt('attr_regex', short='r', default='\[(.*)\]',
+               help='The regex to use to extract the comma seperated list of '
+                    'test attributes from the test_id'),
 ]
 
 _version_ = version.VersionInfo('subunit2sql').version_string()
@@ -158,11 +161,13 @@ def main():
             print("You can not specify a run id for adding more than 1 stream")
             return 3
         streams = [subunit.ReadSubunit(open(s, 'r'),
-                                       attachments=CONF.store_attachments)
+                                       attachments=CONF.store_attachments,
+                                       attr_regex=CONF.attr_regex)
                    for s in CONF.subunit_files]
     else:
         streams = [subunit.ReadSubunit(sys.stdin,
-                                       attachments=CONF.store_attachments)]
+                                       attachments=CONF.store_attachments,
+                                       attr_regex=CONF.attr_regex)]
     for stream in streams:
         process_results(stream.get_results())
 
