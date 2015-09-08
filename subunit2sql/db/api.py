@@ -337,6 +337,51 @@ def get_test_run_metadata(test_run_id, session=None):
     return query.all()
 
 
+def add_test_metadata(meta_dict, test_id, session=None):
+    """Add a metadata key value pairs for a specific test.
+
+    This method will take a dictionary and store key value pair metadata in the
+    DB associated with the specified run.
+
+    :param dict meta_dict: a dictionary which will generate a separate key
+                           value pair row associated with the test_run_id
+    :param str test_id: the uuid of the test to update. (value of the
+                        id column for the row to be updated)
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return list: The list of created metadata objects
+    :rtype: subunit2sql.models.TestMeta
+    """
+    metadata = []
+    for key, value in meta_dict.items():
+        meta = models.TestMetadata()
+        meta.key = key
+        meta.value = value
+        meta.test_id = test_id
+        session = session or get_session()
+        with session.begin():
+            session.add(meta)
+        metadata.append(meta)
+    return metadata
+
+
+def get_test_metadata(test_id, session=None):
+    """Return all test metadata objects for associated with a given test.
+
+    :param str test_id: The uuid of the test to get all the metadata
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return list: The list of created metadata objects
+    :rtype: subunit2sql.models.TestMetadata
+    """
+    session = session or get_session()
+    query = db_utils.model_query(models.TestMetadata, session).filter_by(
+        id=test_id)
+    return query.all()
+
+
 def get_all_tests(session=None):
     """Return all tests from the DB.
 
