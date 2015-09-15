@@ -40,6 +40,9 @@ def generate_series():
     ts = pd.Series(test_statuses)
     ts = utils.filter_dates(ts)
     run_count = len(ts)
+    if run_count == 0:
+        print("Query returned no data.")
+        exit(-1)
     failures = ts[ts.isin(['fail', 'unxsuccess'])]
     successes = ts[ts.isin(['success', 'xfail'])]
     skips = ts[ts.isin(['skip'])]
