@@ -38,7 +38,7 @@ SHELL_OPTS = [
     cfg.StrOpt('run_id', short='i', default=None,
                help='Run id to use for the specified subunit stream, can only'
                     ' be used if a single stream is provided'),
-    cfg.StrOpt('attr_regex', short='r', default='\[(.*)\]',
+    cfg.StrOpt('attr_regex', default='\[(.*)\]',
                help='The regex to use to extract the comma seperated list of '
                     'test attributes from the test_id'),
 ]
