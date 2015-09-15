@@ -1021,6 +1021,80 @@ def get_all_runs_time_series_by_key(key, start_date=None,
     return runs
 
 
+def get_time_series_runs_by_key_value(key, value, start_date=None,
+                                      stop_date=None, session=None):
+    """Get a time series of runs with meta for all runs with a key value pai
+
+    :param str key: the metadata key to use for matching the runs
+    :param str value: the metadata value to use for matching the runs
+    :param start_date: Optional start date to filter results on
+    :param str stop_date: Optional stop date to filter results on
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+
+    :return runs: a time series dictionary (where the top level key is a
+                  timestamp) that contains all the runs which
+    :rtype: dict
+    """
+    session = session or get_session()
+    sub_query = session.query(models.RunMetadata.run_id).filter(
+        models.RunMetadata.key == key,
+        models.RunMetadata.value == value).subquery()
+    run_query = db_utils.model_query(models.Run, session).join(
+        models.RunMetadata).filter(models.Run.id.in_(sub_query))
+    run_query = _filter_runs_by_date(run_query, start_date, stop_date)
+    run_query = run_query.values(models.Run.id,
+                                 models.Run.passes,
+                                 models.Run.fails,
+                                 models.Run.skips,
+                                 models.Run.run_time,
+                                 models.Run.run_at,
+                                 models.RunMetadata.key,
+                                 models.RunMetadata.value)
+    runs = {}
+    for run in run_query:
+        run_at = run[5]
+        run_id = run[0]
+        if run_at not in runs:
+            # We have hit a new time stamp so we need to add a top level key
+            # for the timestamp and populate the run list with a new dict for
+            # the run
+            runs[run_at] = []
+            run_dict = {
+                'id': run_id,
+                'pass': run[1],
+                'fail': run[2],
+                'skip': run[3],
+                'run_time': run[4],
+                'metadata': {run[6]: run[7]}
+            }
+            runs[run_at].append(run_dict)
+        else:
+            if run_id not in [loc_run["id"] for loc_run in runs[run_at]]:
+                # We have hit a new run for an existing timestamp, we need to
+                # append a new run dict to the list of runs for that timestamp
+                run_dict = {
+                    'id': run_id,
+                    'pass': run[1],
+                    'fail': run[2],
+                    'skip': run[3],
+                    'run_time': run[4],
+                    'metadata': {run[6]: run[7]}
+                }
+                runs[run_at].append(run_dict)
+            else:
+                # The run dictionary has already been added for this timestamp
+                # this means we've hit a new metadata entry, so we need to
+                # update the metadata dictionary with the additional info
+                update_index = None
+                for index, run_dict in list(enumerate(runs[run_at])):
+                    if run_dict['id'] == run_id:
+                        update_index = index
+                runs[run_at][update_index]['metadata'][run[6]] = run[7]
+    return runs
+
+
 def add_test_run_attachments(attach_dict, test_run_id, session=None):
     """Add attachments a specific test run.
 
