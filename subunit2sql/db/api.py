@@ -50,6 +50,19 @@ def get_session(autocommit=True, expire_on_commit=False):
                               expire_on_commit=expire_on_commit)
 
 
+def _filter_runs_by_date(query, start_date=None, stop_date=None):
+    # Helper to apply a data range filter to a query on Run table
+    if isinstance(start_date, str):
+        start_date = datetime.datetime.strptime(start_date, '%b %d %Y')
+    if isinstance(stop_date, str):
+        stop_date = datetime.datetime.strptime(stop_date, '%b %d %Y')
+    if start_date:
+        query = query.filter(models.Run.run_at <= start_date)
+    if stop_date:
+        query = query.filter(models.Run.run_at >= stop_date)
+    return query
+
+
 def create_test(test_id, run_count=0, success=0, failure=0, run_time=0.0,
                 session=None):
     """Create a new test record in the database.
@@ -396,6 +409,29 @@ def get_all_tests(session=None):
     return query.all()
 
 
+def get_all_runs_by_date(start_date=None, stop_date=None, session=None):
+    """Return all runs from the DB.
+
+    :param str: optional start_date, if provided only runs started at or after
+                the start_date will be included in the response
+    :param str: optional end_date, if provided only runs started at or before
+                the end_date will be included in the response
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return list: The list of run objects
+    :rtype: subunit2sql.models.Run
+    """
+
+    session = session or get_session()
+    query = db_utils.model_query(models.Run, session=session)
+
+    # Process date bounds
+    query = _filter_runs_by_date(query, start_date, stop_date)
+
+    return query.all()
+
+
 def get_all_runs(session=None):
     """Return all runs from the DB.
 
@@ -405,9 +441,8 @@ def get_all_runs(session=None):
     :return list: The list of run objects
     :rtype: subunit2sql.models.Run
     """
-    session = session or get_session()
-    query = db_utils.model_query(models.Run, session)
-    return query.all()
+
+    return get_all_runs_by_date(session=session)
 
 
 def get_all_test_runs(session=None):
@@ -688,14 +723,7 @@ def get_test_run_series(start_date=None, stop_date=None, session=None):
         models.RunMetadata).filter_by(key='build_queue', value='gate')
 
     # Process date bounds
-    if isinstance(start_date, str):
-        start_date = datetime.datetime.strptime(start_date, '%b %d %Y')
-    if isinstance(stop_date, str):
-        stop_date = datetime.datetime.strptime(stop_date, '%b %d %Y')
-    if start_date:
-        full_query.filter(models.Run.run_at < start_date)
-    if stop_date:
-        full_query.filter(models.Run.run_at > stop_date)
+    full_query = _filter_runs_by_date(full_query, start_date, stop_date)
 
     query = full_query.values(models.Run.run_at, models.Run.passes,
                               models.Run.fails)
@@ -943,13 +971,10 @@ def get_runs_by_status_grouped_by_run_metadata(key, start_date=None,
         models.Run.fails > 0).join(models.RunMetadata).filter(
             models.RunMetadata.key == key)
 
-    if start_date:
-        run_pass_query = run_pass_query.filter(models.Run.run_at >= start_date)
-        run_fail_query = run_fail_query.filter(models.Run.run_at >= start_date)
-
-    if stop_date:
-        run_pass_query = run_pass_query.filter(models.Run.run_at <= stop_date)
-        run_fail_query = run_fail_query.filter(models.Run.run_at <= stop_date)
+    run_pass_query = _filter_runs_by_date(run_pass_query, start_date,
+                                          stop_date)
+    run_fail_query = _filter_runs_by_date(run_fail_query, start_date,
+                                          stop_date)
 
     run_passes = run_pass_query.values(models.RunMetadata.value)
     run_fails = run_fail_query.values(models.RunMetadata.value)
