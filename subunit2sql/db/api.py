@@ -53,13 +53,13 @@ def get_session(autocommit=True, expire_on_commit=False):
 def _filter_runs_by_date(query, start_date=None, stop_date=None):
     # Helper to apply a data range filter to a query on Run table
     if isinstance(start_date, str):
-        start_date = datetime.datetime.strptime(start_date, '%b %d %Y')
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
     if isinstance(stop_date, str):
-        stop_date = datetime.datetime.strptime(stop_date, '%b %d %Y')
+        stop_date = datetime.datetime.strptime(stop_date, '%Y-%m-%d')
     if start_date:
-        query = query.filter(models.Run.run_at <= start_date)
+        query = query.filter(models.Run.run_at >= start_date)
     if stop_date:
-        query = query.filter(models.Run.run_at >= stop_date)
+        query = query.filter(models.Run.run_at <= stop_date)
     return query
 
 
