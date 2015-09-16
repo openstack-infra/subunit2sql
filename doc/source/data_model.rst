@@ -35,6 +35,7 @@ stored in the db.
 
 Properties:
 
+* **id**: Database uuid of the row
 * **test_id**: This would be normally be considered the test name, it is the id
   used in the subunit stream for an individual test
 * **success**: The total number of times this test has been run successfully
@@ -53,7 +54,8 @@ used for recording all the information about a single test's run.
 
 Properties:
 
-* **test_id**: The uuid representing the test which was run
+* **test_id**: The uuid representing the test which was run. This correlates
+               to the id column of the Tests table (And not the test_id column).
 * **run_id**: The uuid representing the run this was part of
 * **status**: The outcome of the test. The valid values here are:
   exists, xfail, unxsuccess, success, fail, skip. You can refer to
