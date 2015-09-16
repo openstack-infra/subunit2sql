@@ -930,6 +930,55 @@ def get_failing_test_ids_from_runs_by_key_value(key, value, session=None):
     return [test_id[0] for test_id in test_ids]
 
 
+def get_all_runs_time_series_by_key(key, start_date=None,
+                                    stop_date=None, session=None):
+    """Get a time series of run summaries grouped by a key
+
+    This method will get a time series dictionary of run summary views which
+    are grouped by the values of the specified key
+
+    :param str key: the key to use for grouping the run summaries
+    :param str start_date: Optional start date to filter results on
+    :param str stop_date: Optional stop date to filter results on
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+    :return runs: a time series dictionary of runs grouped by values of the
+                  specified key
+    :rtype: dict
+    """
+    session = session or get_session()
+    runs_query = db_utils.model_query(models.Run, session).join(
+        models.RunMetadata).filter(models.RunMetadata.key == key)
+    runs_query = _filter_runs_by_date(runs_query, start_date, stop_date)
+    runs_query = runs_query.values(models.Run.run_at,
+                                   models.Run.passes,
+                                   models.Run.fails,
+                                   models.Run.skips,
+                                   models.RunMetadata.value)
+    runs = {}
+    for run in runs_query:
+        if run[0] not in runs:
+            runs[run[0]] = {run[4]: [{
+                'pass': run[1],
+                'fail': run[2],
+                'skip': run[3],
+            }]}
+        else:
+            if run[4] not in runs[run[0]].keys():
+                runs[run[0]][run[4]] = [{
+                    'pass': run[1],
+                    'fail': run[2],
+                    'skip': run[3],
+                }]
+            else:
+                runs[run[0]][run[4]].append({
+                    'pass': run[1],
+                    'fail': run[2],
+                    'skip': run[3],
+                })
+    return runs
+
+
 def add_test_run_attachments(attach_dict, test_run_id, session=None):
     """Add attachments a specific test run.
 
