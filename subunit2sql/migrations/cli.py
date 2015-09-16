@@ -32,6 +32,7 @@ def state_path_def(*args):
     """Return an uninterpolated path relative to $state_path."""
     return os.path.join('$state_path', *args)
 
+
 MIGRATION_OPTS = [
     cfg.BoolOpt('disable-microsecond-data-migration', short='d', default=False,
                 help="If set to true this option will skip the data migration"
@@ -39,7 +40,9 @@ MIGRATION_OPTS = [
                      "will still be run. If the database has already stripped "
                      "out the microseconds from the timestamps this will skip "
                      "converting the microsecond field from the timestamps "
-                     "into a separate column")
+                     "into a separate column"),
+    cfg.BoolOpt('verbose', short='v',
+                help='Verbose output including logging of SQL statements'),
 ]
 
 CONF = cfg.CONF
