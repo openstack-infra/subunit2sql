@@ -13,6 +13,7 @@
 # under the License.
 
 import os
+import tempfile
 
 from alembic import command
 from alembic import config as alembic_config
@@ -22,6 +23,7 @@ import sqlalchemy
 from subunit2sql.db import api as session
 
 CONF = cfg.CONF
+SQLITE_TEST_DATABASE_PATH = tempfile.mkstemp('subunit2sql.db')[1]
 
 script_location = os.path.join(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))), 'migrations')
@@ -40,6 +42,9 @@ def get_connect_string(backend,
         backend = "mysql+mysqldb"
     elif backend == "postgres":
         backend = "postgresql+psycopg2"
+
+    if backend == "sqlite":
+        return "sqlite:///" + SQLITE_TEST_DATABASE_PATH
 
     return ("%(backend)s://%(user)s:%(passwd)s@localhost/%(database)s"
             % {'backend': backend, 'user': user, 'passwd': passwd,

@@ -194,6 +194,17 @@ class TestWalkMigrations(base.TestCase):
         # build a fully populated postgresql database with all the tables
         self._walk_versions(engine)
 
+    def test_sqlite_opportunistically(self):
+        self.useFixture(fixtures.LockFixture('sqlite'))
+        self.useFixture(fixtures.SqliteConfFixture())
+
+        connect_string = db_test_utils.get_connect_string("sqlite")
+        engine = sqlalchemy.create_engine(connect_string)
+        self.engines["sqlitecitest"] = engine
+        self.test_databases["sqlitecitest"] = connect_string
+
+        self._walk_versions(engine)
+
     def _pre_upgrade_1f92cfe8a6d3(self, engine):
         tests = get_table(engine, 'tests')
         data = {'id': 'fake_test.id',

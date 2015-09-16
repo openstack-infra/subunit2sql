@@ -140,6 +140,27 @@ class PostgresConfFixture(config_fixture.Config):
         self._drop_db()
 
 
+class SqliteConfFixture(config_fixture.Config):
+    """Fixture to manage global conf settings."""
+    def _drop_db(self):
+        if os.path.exists(db_test_utils.SQLITE_TEST_DATABASE_PATH):
+            os.remove(db_test_utils.SQLITE_TEST_DATABASE_PATH)
+
+    def setUp(self):
+        super(SqliteConfFixture, self).setUp()
+        self.register_opts(options.database_opts, group='database')
+        self.register_opts(cli.MIGRATION_OPTS)
+        self.url = db_test_utils.get_connect_string("sqlite")
+        self.set_default('connection', self.url, group='database')
+        self.set_default('disable_microsecond_data_migration', False)
+        lockutils.set_defaults(lock_path='/tmp')
+        self._drop_db()
+        self.addCleanup(self.cleanup)
+
+    def cleanup(self):
+        self._drop_db()
+
+
 class LockFixture(lock_fixture.LockFixture):
     def __init__(self, name):
         lockutils.set_defaults(lock_path='/tmp')

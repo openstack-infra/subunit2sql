@@ -61,6 +61,7 @@ def run_migrations_offline():
     else:
         kwargs['url'] = config.get_main_option("sqlalchemy.url")
     kwargs['target_metadata'] = target_metadata
+    kwargs['render_as_batch'] = True
     context.configure(**kwargs)
 
     with context.begin_transaction():
@@ -80,7 +81,9 @@ def run_migrations_online():
     connection = engine.connect()
     facade._session_maker.configure(bind=connection)
 
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(connection=connection,
+                      target_metadata=target_metadata,
+                      render_as_batch=True)
 
     try:
         with context.begin_transaction():

@@ -43,15 +43,25 @@ def upgrade():
     if ('ix_test_id' not in test_indx_names and
         'test_id' not in test_indx_columns):
         op.create_index('ix_test_id', 'tests', ['test_id'], mysql_length=30)
+
+    # remove auto created indexes (sqlite only)
+    # note the name is with test_runs not test_run
+    if migration_context.dialect.name == 'sqlite':
+        if 'ix_test_runs_test_id' in test_run_indx_names:
+            op.drop_index('ix_test_runs_test_id', 'test_runs')
+        if 'ix_test_runs_run_id' in test_run_indx_names:
+            op.drop_index('ix_test_runs_run_id', 'test_runs')
+
+    with op.batch_alter_table('test_runs') as batch_op:
+        batch_op.create_unique_constraint('uq_test_runs',
+                                          ['test_id', 'run_id'])
+
     if ('ix_test_run_test_id' not in test_run_indx_names and
         'test_id' not in test_run_indx_columns):
         op.create_index('ix_test_run_test_id', 'test_runs', ['test_id'])
     if ('ix_test_run_run_id' not in test_run_indx_names and
         'run_id' not in test_run_indx_columns):
         op.create_index('ix_test_run_run_id', 'test_runs', ['run_id'])
-
-    op.create_unique_constraint('uq_test_runs', 'test_runs',
-                                ['test_id', 'run_id'])
 
 
 def downgrade():
