@@ -18,6 +18,7 @@ from oslo_config import cfg
 from oslo_db.sqlalchemy import session as db_session
 from oslo_db.sqlalchemy import utils as db_utils
 import sqlalchemy
+from sqlalchemy.engine.url import make_url
 
 from subunit2sql.db import models
 from subunit2sql import exceptions
@@ -27,16 +28,20 @@ CONF = cfg.CONF
 
 DAY_SECONDS = 60 * 60 * 24
 
-_FACADE = None
+_facades = {}
 
 
 def _create_facade_lazily():
-    global _FACADE
-    if _FACADE is None:
-        _FACADE = db_session.EngineFacade(
+    global _facades
+    db_url = make_url(CONF.database.connection)
+    db_backend = db_url.get_backend_name()
+    facade = _facades.get(db_backend)
+    if facade is None:
+        facade = db_session.EngineFacade(
             CONF.database.connection,
             **dict(CONF.database.iteritems()))
-    return _FACADE
+        _facades[db_backend] = facade
+    return facade
 
 
 def get_session(autocommit=True, expire_on_commit=False):
