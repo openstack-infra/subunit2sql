@@ -1055,35 +1055,30 @@ def add_test_run_attachments(attach_dict, test_run_id, session=None):
 def get_runs_by_status_grouped_by_run_metadata(key, start_date=None,
                                                stop_date=None, session=None):
     session = session or get_session()
-    run_pass_query = db_utils.model_query(models.Run, session).filter(
-        models.Run.fails == 0, models.Run.passes > 0).join(
-            models.RunMetadata).filter(models.RunMetadata.key == key)
-    run_fail_query = db_utils.model_query(models.Run, session).filter(
-        models.Run.fails > 0).join(models.RunMetadata).filter(
-            models.RunMetadata.key == key)
+    val = models.RunMetadata.value
+    run_pass_query = session.query(
+        sqlalchemy.func.count(models.Run.id), val).filter(
+            models.Run.fails == 0, models.Run.passes > 0).join(
+                models.RunMetadata).group_by(val).filter(
+                    models.RunMetadata.key == key)
+    run_fail_query = session.query(
+        sqlalchemy.func.count(models.Run.id), val).filter(
+            models.Run.fails > 0, models.Run.passes > 0).join(
+                models.RunMetadata).group_by(val).filter(
+                    models.RunMetadata.key == key)
 
     run_pass_query = _filter_runs_by_date(run_pass_query, start_date,
                                           stop_date)
     run_fail_query = _filter_runs_by_date(run_fail_query, start_date,
                                           stop_date)
-
-    run_passes = run_pass_query.values(models.RunMetadata.value)
-    run_fails = run_fail_query.values(models.RunMetadata.value)
-
+    rows = run_pass_query.all()
     result = {}
-    for run in run_passes:
-        if result.get(run[0]):
-            result[run[0]]['pass'] += 1
+    for row in rows:
+        result[row[1]] = {'pass': row[0]}
+    rows = run_fail_query.all()
+    for row in rows:
+        if row[1] in result:
+            result[row[1]]['fail'] = row[0]
         else:
-            result[run[0]] = {'pass': 1}
-
-    for run in run_fails:
-        if result.get(run[0]):
-            if result[run[0]].get('fail'):
-                result[run[0]]['fail'] += 1
-            else:
-                result[run[0]]['fail'] = 1
-        else:
-            result[run[0]] = {'fail': 1}
-
+            result[row[1]] = {'fail': row[0]}
     return result
