@@ -52,7 +52,7 @@ class TestShell(base.TestCase):
         }
         fake_values = {}
         result = shell.running_avg(fake_test, fake_values, fake_result)
-        # Let's do some arithmatic
+        # Let's do some arithmetic
         expected_avg = ((150 * 30.452) + 50) / 151
         # Both values should be 30.581456953642384
         self.assertEqual(expected_avg, result['run_time'])
@@ -81,7 +81,7 @@ class TestShell(base.TestCase):
             'end_time': datetime.datetime(1914, 6, 28, 10, 45, 50),
         }
         values = shell.increment_counts(fake_test, fake_result)
-        # Check to ensure counts incrememented properly
+        # Check to ensure counts incremented properly
         self.assertEqual(values['run_count'], 16)
         self.assertEqual(values['success'], 6)
         # Ensure run_time is updated on success
@@ -100,7 +100,7 @@ class TestShell(base.TestCase):
             'end_time': datetime.datetime(1914, 6, 28, 10, 45, 50),
         }
         values = shell.increment_counts(fake_test, fake_result)
-        # Check to ensure counts incrememented properly
+        # Check to ensure counts incremented properly
         self.assertEqual(values['run_count'], 16)
         self.assertEqual(values['failure'], 11)
         # Avg runtime should only be updated on success
@@ -118,7 +118,7 @@ class TestShell(base.TestCase):
             'end_time': datetime.datetime(1914, 6, 28, 10, 45, 2),
         }
         values = shell.increment_counts(fake_test, fake_result)
-        # No test counts incrememented with a skip
+        # No test counts incremented with a skip
         self.assertEqual(values, {})
 
     def test_increment_counts_unknown_status(self):
