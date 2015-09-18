@@ -41,6 +41,8 @@ SHELL_OPTS = [
     cfg.StrOpt('attr_regex', default='\[(.*)\]',
                help='The regex to use to extract the comma seperated list of '
                     'test attributes from the test_id'),
+    cfg.BoolOpt('verbose', short='v',
+                help='Verbose output including logging of SQL statements'),
 ]
 
 _version_ = version.VersionInfo('subunit2sql').version_string()

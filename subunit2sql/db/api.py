@@ -20,6 +20,8 @@ from oslo_db.sqlalchemy import utils as db_utils
 import sqlalchemy
 from sqlalchemy.engine.url import make_url
 
+import logging
+
 from subunit2sql.db import models
 from subunit2sql import exceptions
 from subunit2sql import read_subunit
@@ -51,8 +53,17 @@ def get_session(autocommit=True, expire_on_commit=False):
     :param bool expire_on_commit: Expire the session on commit defaults False.
     """
     facade = _create_facade_lazily()
-    return facade.get_session(autocommit=autocommit,
-                              expire_on_commit=expire_on_commit)
+    session = facade.get_session(autocommit=autocommit,
+                                 expire_on_commit=expire_on_commit)
+
+    # if --verbose was specified, turn on SQL logging
+    # note that this is done after the session has been initialized so that
+    # we can override the default sqlalchemy logging
+    if CONF.verbose:
+        logging.basicConfig()
+        logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
+    return session
 
 
 def _filter_runs_by_date(query, start_date=None, stop_date=None):
