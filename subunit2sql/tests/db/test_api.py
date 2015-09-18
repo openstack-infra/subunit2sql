@@ -206,3 +206,43 @@ class TestDatabaseAPI(base.TestCase):
         self.assertEqual(len(test_runs_c), 1)
         self.assertEqual(testrun_c.id, test_runs_c[0].id)
         self.assertEqual(testrun_c.status, test_runs_c[0].status)
+
+    def test_get_runs_by_status_grouped_by_run_metadata(self):
+        # Generating 20 runs:
+        # 10 with no failures
+        # 10 with 10 failures
+        # 7 in 2010/2011 each, 6 in 2012
+        # 10 in projecta/projectb each
+        for i in range(20):
+            if i % 2 == 1:
+                fails = 10
+            else:
+                fails = 0
+            year = 2010 + (i % 3)
+            run_at = '%d-01-%02d 12:00:00' % (year, i + 1)
+            run = api.create_run(fails=fails, passes=10, run_at=run_at)
+            self.assertIsNotNone(run)
+            if i < 10:
+                project = 'projecta'
+            else:
+                project = 'projectb'
+            meta_dict = {'project': project}
+            api.add_run_metadata(meta_dict, run.id)
+        result = api.get_runs_by_status_grouped_by_run_metadata(
+            'project', start_date='2012-01-01', stop_date='2012-12-31')
+        # There should be two projects
+        self.assertEqual(2, len(result.keys()))
+        self.assertTrue('projecta' in result)
+        self.assertTrue('projectb' in result)
+        # There should be passes and failures
+        self.assertEqual(2, len(result['projecta'].keys()))
+        self.assertTrue('pass' in result['projecta'])
+        self.assertTrue('fail' in result['projecta'])
+        self.assertEqual(2, len(result['projectb'].keys()))
+        self.assertTrue('pass' in result['projectb'])
+        self.assertTrue('fail' in result['projectb'])
+
+        self.assertEqual(2, result['projecta']['pass'])
+        self.assertEqual(1, result['projecta']['fail'])
+        self.assertEqual(1, result['projectb']['pass'])
+        self.assertEqual(2, result['projectb']['fail'])

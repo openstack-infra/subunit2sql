@@ -150,7 +150,7 @@ def update_test(values, test_id, session=None):
 
 
 def create_run(skips=0, fails=0, passes=0, run_time=0, artifacts=None,
-               id=None, session=None):
+               id=None, session=None, run_at=None):
     """Create a new run record in the database
 
     :param int skips: total number of skipped tests defaults to 0
@@ -169,6 +169,8 @@ def create_run(skips=0, fails=0, passes=0, run_time=0, artifacts=None,
     run = models.Run()
     if id:
         run.id = id
+    if run_at:
+        run.run_at = run_at
     run.skips = skips
     run.fails = fails
     run.passes = passes
@@ -245,6 +247,7 @@ def add_run_metadata(meta_dict, run_id, session=None):
     :rtype: subunit2sql.models.RunMeta
     """
 
+    session = session or get_session()
     metadata = []
     for key, value in meta_dict.items():
         meta = models.RunMetadata()
