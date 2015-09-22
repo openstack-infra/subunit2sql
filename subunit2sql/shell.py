@@ -25,6 +25,7 @@ from subunit2sql import exceptions
 from subunit2sql import read_subunit as subunit
 
 CONF = cfg.CONF
+CONF.import_opt('verbose', 'subunit2sql.db.api')
 
 SHELL_OPTS = [
     cfg.MultiStrOpt('subunit_files', positional=True,
@@ -41,8 +42,6 @@ SHELL_OPTS = [
     cfg.StrOpt('attr_regex', default='\[(.*)\]',
                help='The regex to use to extract the comma separated list of '
                     'test attributes from the test_id'),
-    cfg.BoolOpt('verbose', short='v',
-                help='Verbose output including logging of SQL statements'),
 ]
 
 _version_ = version.VersionInfo('subunit2sql').version_string()

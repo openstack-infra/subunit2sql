@@ -27,6 +27,9 @@ from subunit2sql import exceptions
 from subunit2sql import read_subunit
 
 CONF = cfg.CONF
+CONF.register_cli_opt(cfg.BoolOpt('verbose', short='v', default=False,
+                                  help='Verbose output including logging of '
+                                       'SQL statements'))
 
 DAY_SECONDS = 60 * 60 * 24
 
@@ -59,7 +62,7 @@ def get_session(autocommit=True, expire_on_commit=False):
     # if --verbose was specified, turn on SQL logging
     # note that this is done after the session has been initialized so that
     # we can override the default sqlalchemy logging
-    if CONF.verbose:
+    if CONF.get('verbose', False):
         logging.basicConfig()
         logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 

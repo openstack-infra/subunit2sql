@@ -41,13 +41,12 @@ MIGRATION_OPTS = [
                      "out the microseconds from the timestamps this will skip "
                      "converting the microsecond field from the timestamps "
                      "into a separate column"),
-    cfg.BoolOpt('verbose', short='v',
-                help='Verbose output including logging of SQL statements'),
 ]
 
 CONF = cfg.CONF
 CONF.register_cli_opts(options.database_opts, group='database')
 CONF.register_cli_opts(MIGRATION_OPTS)
+CONF.import_opt('verbose', 'subunit2sql.db.api')
 
 
 def do_alembic_command(config, cmd, *args, **kwargs):
