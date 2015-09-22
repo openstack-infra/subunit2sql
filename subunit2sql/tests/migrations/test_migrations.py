@@ -359,3 +359,25 @@ class TestWalkMigrations(base.TestCase):
         else:
             self.assertEqual(start_micro, row.start_time_microsecond)
             self.assertEqual(row.stop_time_microsecond, stop_micro)
+
+    def _pre_upgrade_2fb76f1a1393(self, engine):
+        test_metadata = get_table(engine, 'test_metadata')
+        tests = get_table(engine, 'tests')
+        test = {'id': 'fake_test_with_metadata.id',
+                'test_id': 'fake_project.tests.FakeTestClass.fake_test_meta',
+                'run_count': 1,
+                'success': 1,
+                'failure': 0}
+        tests.insert().values(test).execute()
+        data = {'id': 'AUUID',
+                'key': 'AKey',
+                'value': 42,
+                'test_run_id': 'fake_test_with_metadata.id'}
+        test_metadata.insert().values(data).execute()
+        return data
+
+    def _check_2fb76f1a1393(self, engine, data):
+        test_metadata = get_table(engine, 'test_metadata')
+        res = list(test_metadata.select().execute())[0]
+        self.assertEqual(res.id, data['id'])
+        self.assertEqual(res.test_id, data['test_run_id'])
