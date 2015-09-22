@@ -290,3 +290,50 @@ class TestDatabaseAPI(base.TestCase):
                 }
             }
             self.assertNotIn(missing_run_dict, runs_time_series[timestamp])
+
+    def test_get_all_run_metadata_keys(self):
+        run = api.create_run()
+        meta_dict = {
+            'test_a': 'a',
+            'test_a': 'b',
+            'test_b': 'a',
+            'test_c': 'a',
+            'test_d': 'a',
+            'test_c': 'b',
+        }
+        api.add_run_metadata(meta_dict, run.id)
+        keys = api.get_all_run_metadata_keys()
+        self.assertEqual(sorted(['test_a', 'test_b', 'test_c', 'test_d']),
+                         sorted(keys))
+
+    def test_get_all_test_metadata_keys(self):
+        test = api.create_test('fake_test')
+        meta_dict = {
+            'test_a': 'a',
+            'test_a': 'b',
+            'test_b': 'a',
+            'test_c': 'a',
+            'test_d': 'a',
+            'test_c': 'b',
+        }
+        api.add_test_metadata(meta_dict, test.id)
+        keys = api.get_all_test_metadata_keys()
+        self.assertEqual(sorted(['test_a', 'test_b', 'test_c', 'test_d']),
+                         sorted(keys))
+
+    def test_get_all_test_run_metadata_keys(self):
+        run = api.create_run()
+        test = api.create_test('fake_test')
+        test_run = api.create_test_run(test.id, run.id, 'skip')
+        meta_dict = {
+            'test_a': 'a',
+            'test_a': 'b',
+            'test_b': 'a',
+            'test_c': 'a',
+            'test_d': 'a',
+            'test_c': 'b',
+        }
+        api.add_test_run_metadata(meta_dict, test_run.id)
+        keys = api.get_all_test_run_metadata_keys()
+        self.assertEqual(sorted(['test_a', 'test_b', 'test_c', 'test_d']),
+                         sorted(keys))

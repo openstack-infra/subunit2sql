@@ -1161,3 +1161,45 @@ def get_runs_by_status_grouped_by_run_metadata(key, start_date=None,
             result[run[0]] = {'fail': 1}
 
     return result
+
+
+def get_all_run_metadata_keys(session=None):
+    """Get a list of all the keys used in the run_metadata table
+
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return keys: a list of all keys used in the run_metadata table
+    :rtype: list
+    """
+    session = session or get_session()
+    keys = session.query(models.RunMetadata.key).distinct().all()
+    return [key[0] for key in keys]
+
+
+def get_all_test_metadata_keys(session=None):
+    """Get a list of all the keys used in the test_metadata table
+
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return keys: a list of all keys used in the test_metadata table
+    :rtype: list
+    """
+    session = session or get_session()
+    keys = session.query(models.TestMetadata.key).distinct().all()
+    return [key[0] for key in keys]
+
+
+def get_all_test_run_metadata_keys(session=None):
+    """Get a list of all the keys used in the test_run_metadata table
+
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return keys: a list of all keys used in the test_run_metadata table
+    :rtype: list
+    """
+    session = session or get_session()
+    keys = session.query(models.TestRunMetadata.key).distinct().all()
+    return [key[0] for key in keys]
