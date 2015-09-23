@@ -337,3 +337,25 @@ class TestDatabaseAPI(base.TestCase):
         keys = api.get_all_test_run_metadata_keys()
         self.assertEqual(sorted(['test_a', 'test_b', 'test_c', 'test_d']),
                          sorted(keys))
+
+    def test_get_test_run_dict_by_run_meta_key_value(self):
+        timestamp_a = datetime.datetime.utcnow()
+        timestamp_b = timestamp_a + datetime.timedelta(minutes=2)
+        run_a = api.create_run()
+        run_b = api.create_run()
+        api.add_run_metadata({'key': 'true'}, run_a.id)
+        api.add_run_metadata({'key': 'not so true'}, run_b.id)
+        test_a = api.create_test('fake_test')
+        api.create_test_run(test_a.id, run_a.id, 'success', timestamp_a,
+                            timestamp_b)
+        api.create_test_run(test_a.id, run_b.id, 'fail', timestamp_a,
+                            datetime.datetime.utcnow())
+        test_run_dicts = api.get_test_run_dict_by_run_meta_key_value('key',
+                                                                     'true')
+        self.assertEqual(1, len(test_run_dicts))
+        self.assertEqual([{
+            'test_id': 'fake_test',
+            'status': 'success',
+            'start_time': timestamp_a,
+            'stop_time': timestamp_b,
+        }], test_run_dicts)

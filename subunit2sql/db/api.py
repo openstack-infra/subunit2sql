@@ -972,6 +972,59 @@ def get_failing_test_ids_from_runs_by_key_value(key, value, session=None):
     return [test_id[0] for test_id in test_ids]
 
 
+def get_test_run_dict_by_run_meta_key_value(key, value, start_date=None,
+                                            stop_date=None, session=None):
+    """Get a list of test run dicts from runs with a run metadata key value pair
+
+    :param str key: The key to use to match runs from in run_metadata
+    :param str value: The value of the key in run_metadata to match runs
+                      against
+    :param start_date: Optional start date to filter results on
+    :param stop_date: Optional stop date to filter results on
+    :param session: Optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return test_runs: The dictionary of all the tests run on any run that had
+                       metadata matching the provided key value pair.
+    :rtype: dict
+    """
+    session = session or get_session()
+    query = db_utils.model_query(models.RunMetadata, session).filter(
+        models.RunMetadata.key == key,
+        models.RunMetadata.value == value).join(
+            models.TestRun,
+            models.RunMetadata.run_id == models.TestRun.run_id).join(
+                models.Test)
+    query = _filter_runs_by_date(query, start_date=start_date,
+                                 stop_date=stop_date)
+    query = query.values(models.Test.test_id,
+                         models.TestRun.status,
+                         models.TestRun.start_time,
+                         models.TestRun.start_time_microsecond,
+                         models.TestRun.stop_time,
+                         models.TestRun.stop_time_microsecond)
+    tests = []
+    for test in query:
+        if test[2]:
+            start_time = test[2]
+            start_time = start_time.replace(microsecond=test[3])
+        else:
+            start_time = None
+        if test[4]:
+            stop_time = test[4]
+            stop_time = stop_time.replace(microsecond=test[5])
+        else:
+            stop_time = None
+        test_run_dict = {
+            'test_id': test[0],
+            'status': test[1],
+            'start_time': start_time,
+            'stop_time': stop_time,
+        }
+        tests.append(test_run_dict)
+    return tests
+
+
 def get_all_runs_time_series_by_key(key, start_date=None,
                                     stop_date=None, session=None):
     """Get a time series of run summaries grouped by a key
