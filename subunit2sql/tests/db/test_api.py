@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import datetime
+
 import testscenarios
 
 from subunit2sql.db import api
@@ -58,6 +60,82 @@ class TestDatabaseAPI(base.TestCase):
         all_runs = api.get_all_runs()
         self.assertEqual(len(all_runs), 1)
         self.assertEqual(res.id, all_runs[0].id)
+
+    def test_get_test_runs_dicts_with_no_meta(self):
+        run = api.create_run()
+        test_a = api.create_test('fake_test')
+        start_time = datetime.datetime.utcnow()
+        stop_time = datetime.datetime.utcnow()
+        api.create_test_run(test_a.id, run.id, 'success',
+                            start_time, stop_time)
+        test_run_dict = api.get_tests_run_dicts_from_run_id(run.id)
+        self.assertEqual(1, len(test_run_dict))
+        self.assertIn('fake_test', test_run_dict)
+        self.assertEqual(test_run_dict['fake_test']['status'], 'success')
+        self.assertEqual(test_run_dict['fake_test']['start_time'], start_time)
+        self.assertEqual(test_run_dict['fake_test']['stop_time'], stop_time)
+        self.assertNotIn('metadata', test_run_dict['fake_test'])
+
+    def test_get_test_runs_dicts_with_no_stop_time(self):
+        run = api.create_run()
+        test_a = api.create_test('fake_test')
+        start_time = datetime.datetime.utcnow()
+        stop_time = None
+        api.create_test_run(test_a.id, run.id, 'success',
+                            start_time, stop_time)
+        test_run_dict = api.get_tests_run_dicts_from_run_id(run.id)
+        self.assertEqual(1, len(test_run_dict))
+        self.assertIn('fake_test', test_run_dict)
+        self.assertEqual(test_run_dict['fake_test']['status'], 'success')
+        self.assertEqual(test_run_dict['fake_test']['start_time'], start_time)
+        self.assertEqual(test_run_dict['fake_test']['stop_time'], stop_time)
+
+    def test_get_test_runs_dicts_with_no_start_time(self):
+        run = api.create_run()
+        test_a = api.create_test('fake_test')
+        stop_time = datetime.datetime.utcnow()
+        start_time = None
+        api.create_test_run(test_a.id, run.id, 'success',
+                            start_time, stop_time)
+        test_run_dict = api.get_tests_run_dicts_from_run_id(run.id)
+        self.assertEqual(1, len(test_run_dict))
+        self.assertIn('fake_test', test_run_dict)
+        self.assertEqual(test_run_dict['fake_test']['status'], 'success')
+        self.assertEqual(test_run_dict['fake_test']['start_time'], start_time)
+        self.assertEqual(test_run_dict['fake_test']['stop_time'], stop_time)
+
+    def test_get_test_runs_dicts_with_no_start_or_stop_time(self):
+        run = api.create_run()
+        test_a = api.create_test('fake_test')
+        stop_time = None
+        start_time = None
+        api.create_test_run(test_a.id, run.id, 'success',
+                            start_time, stop_time)
+        test_run_dict = api.get_tests_run_dicts_from_run_id(run.id)
+        self.assertEqual(1, len(test_run_dict))
+        self.assertIn('fake_test', test_run_dict)
+        self.assertEqual(test_run_dict['fake_test']['status'], 'success')
+        self.assertEqual(test_run_dict['fake_test']['start_time'], start_time)
+        self.assertEqual(test_run_dict['fake_test']['stop_time'], stop_time)
+
+    def test_get_test_runs_dicts_with_meta(self):
+        run = api.create_run()
+        test_a = api.create_test('fake_test')
+        test_run = api.create_test_run(test_a.id, run.id, 'success',
+                                       datetime.datetime.utcnow(),
+                                       datetime.datetime.utcnow())
+        run_meta = {
+            'key_a': 'value_b',
+            'key_b': 'value_a',
+            'attrs': 'test,smoke,notatest',
+        }
+        api.add_test_run_metadata(run_meta, test_run.id)
+        test_run_dict = api.get_tests_run_dicts_from_run_id(run.id)
+        self.assertEqual(3, len(test_run_dict['fake_test']['metadata']))
+        for meta in run_meta:
+            self.assertIn(meta, test_run_dict['fake_test']['metadata'])
+            self.assertEqual(run_meta[meta],
+                             test_run_dict['fake_test']['metadata'][meta])
 
     def test_create_test_run_and_list(self):
         run = api.create_run()

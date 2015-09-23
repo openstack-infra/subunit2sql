@@ -679,7 +679,7 @@ def get_tests_run_dicts_from_run_id(run_id, session=None):
     """
     session = session or get_session()
     query = db_utils.model_query(models.Test, session=session).join(
-        models.TestRun).filter_by(run_id=run_id).join(
+        models.TestRun).filter(models.TestRun.run_id == run_id).outerjoin(
             models.TestRunMetadata).values(
                 models.Test.test_id,
                 models.TestRun.status,
@@ -692,10 +692,18 @@ def get_tests_run_dicts_from_run_id(run_id, session=None):
     test_runs = {}
     for test_run in query:
         if test_run[0] not in test_runs:
-            start_time = test_run[2]
-            start_time = start_time.replace(microsecond=test_run[3])
-            stop_time = test_run[4]
-            stop_time = stop_time.replace(microsecond=test_run[5])
+            # If there is no start_time set to None
+            if test_run[2]:
+                start_time = test_run[2]
+                start_time = start_time.replace(microsecond=test_run[3])
+            else:
+                start_time = None
+            # If there is no stop_time set to None
+            if test_run[4]:
+                stop_time = test_run[4]
+                stop_time = stop_time.replace(microsecond=test_run[5])
+            else:
+                stop_time = None
             test_runs[test_run[0]] = {
                 'status': test_run[1],
                 'start_time': start_time,
