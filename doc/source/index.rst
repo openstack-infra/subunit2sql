@@ -11,6 +11,7 @@ Contents:
    data_model
    api
    graph
+   history
 
 
 ==================
