@@ -27,6 +27,7 @@ import subunit2sql.analysis.run_time
 from subunit2sql import shell
 
 CONF = cfg.CONF
+CONF.import_opt('verbose', 'subunit2sql.db.api')
 
 SHELL_OPTS = [
     cfg.StrOpt('title', short='t', help='Optional title to use for the graph '
@@ -41,8 +42,6 @@ SHELL_OPTS = [
     cfg.StrOpt('stop-date', short='s',
                help='Stop date for the graph only data from before this date '
                     'will be used. Uses ISO 8601 format: 1914-06-28'),
-    cfg.BoolOpt('verbose', short='v',
-                help='Verbose output including logging of SQL statements'),
 ]
 
 
