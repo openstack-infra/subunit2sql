@@ -1220,6 +1220,60 @@ def get_ids_for_all_tests(session=None):
     return db_utils.model_query(models.Test, session).values(models.Test.id)
 
 
+def get_run_times_all_test_runs(tests=None, start_date=None, stop_date=None,
+                                session=None):
+    """Return the all the individual duration times for each test_run
+
+    This function will return a dictionary where each key is a test_id and
+    the value is a list of all the durations for each run of that test
+
+    :param list tests: the list of test_ids to get results for, if none is
+                       specified all tests
+    :param str start_date: The date to use as the start date for results
+    :param str stop_date: The date to use as the cutoff date for results
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return run_times: all the durations for test_runs grouped by test_id
+    :rtype: dict
+    """
+    session = session or get_session()
+    run_times_query = db_utils.model_query(models.TestRun, session).filter(
+        models.TestRun.status == 'success').join(
+            models.Test, models.TestRun.test_id == models.Test.id)
+    if tests:
+        run_times_query = run_times_query.filter(
+            models.Test.test_id.in_(tests))
+    if start_date:
+        run_times_query = run_times_query.filter(
+            models.TestRun.start_time >= start_date)
+    if stop_date:
+        run_times_query = run_times_query.filter(
+            models.TestRun.start_time <= stop_date)
+    run_times = run_times_query.values(models.Test.test_id,
+                                       models.TestRun.start_time,
+                                       models.TestRun.start_time_microsecond,
+                                       models.TestRun.stop_time,
+                                       models.TestRun.stop_time_microsecond)
+    run_times_dict = {}
+    for run_time in run_times:
+        test_id = run_time[0]
+        if run_time[1]:
+            start_time = run_time[1]
+            start_time = start_time.replace(microsecond=run_time[2])
+        else:
+            continue
+        if run_time[3]:
+            stop_time = run_time[3]
+            stop_time = stop_time.replace(microsecond=run_time[4])
+        duration = read_subunit.get_duration(start_time, stop_time)
+        if test_id in run_times_dict:
+            run_times_dict[test_id].append(duration)
+        else:
+            run_times_dict[test_id] = [duration]
+    return run_times_dict
+
+
 def get_run_times_grouped_by_run_metadata_key(key, start_date=None,
                                               stop_date=None, session=None,
                                               match_key=None,

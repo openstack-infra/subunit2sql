@@ -248,6 +248,45 @@ class TestDatabaseAPI(base.TestCase):
         id_value = api.get_id_from_test_id('fake_test')
         self.assertEqual(test_a.id, id_value)
 
+    def test_get_run_times_all_test_runs(self):
+        timestamp_a = datetime.datetime.utcnow()
+        timestamp_b = timestamp_a + datetime.timedelta(seconds=3)
+        run_a = api.create_run()
+        run_b = api.create_run()
+        test_a = api.create_test('test_a')
+        test_b = api.create_test('test_b')
+        api.create_test_run(test_a.id, run_a.id, 'success', timestamp_a,
+                            timestamp_b)
+        api.create_test_run(test_a.id, run_b.id, 'success', timestamp_a,
+                            timestamp_b)
+        api.create_test_run(test_b.id, run_b.id, 'success', timestamp_a,
+                            timestamp_b)
+        res = api.get_run_times_all_test_runs()
+        expected_dict = {
+            'test_a': [3, 3],
+            'test_b': [3]
+        }
+        self.assertEqual(expected_dict, res)
+
+    def test_get_run_times_all_test_runs_with_tests_filter(self):
+        timestamp_a = datetime.datetime.utcnow()
+        timestamp_b = timestamp_a + datetime.timedelta(seconds=3)
+        run_a = api.create_run()
+        run_b = api.create_run()
+        test_a = api.create_test('test_a')
+        test_b = api.create_test('test_b')
+        api.create_test_run(test_a.id, run_a.id, 'success', timestamp_a,
+                            timestamp_b)
+        api.create_test_run(test_a.id, run_b.id, 'success', timestamp_a,
+                            timestamp_b)
+        api.create_test_run(test_b.id, run_b.id, 'success', timestamp_a,
+                            timestamp_b)
+        res = api.get_run_times_all_test_runs(tests=['test_a'])
+        expected_dict = {
+            'test_a': [3, 3],
+        }
+        self.assertEqual(expected_dict, res)
+
     def test_get_test_runs_by_run_id(self):
         run_b = api.create_run()
         run_a = api.create_run()

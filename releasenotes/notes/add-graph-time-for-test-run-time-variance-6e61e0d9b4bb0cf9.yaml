@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    A new subunit2sql-graph type, `test_run_time`, is added. This will graph the
+    run time variance for the specified tests as box and wiskers plots.
+  - |
+    A new DB API function, get_run_times_all_test_runs(), was added. This will
+    return a all the individual durations for sucessful executions for tests.
