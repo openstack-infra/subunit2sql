@@ -110,7 +110,7 @@ class TestReadSubunit(base.TestCase):
         # assert that the dict root key is the test name - the fake_id stripped
         # of the tags
         fake_test_name = fake_id[:fake_id.find('[')]
-        self.assertEqual(parsed_results.keys(), [fake_test_name])
+        self.assertEqual(list(parsed_results.keys()), [fake_test_name])
 
         self.assertEqual(parsed_results[fake_test_name]['status'],
                          fake_status)

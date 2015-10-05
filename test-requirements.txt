@@ -8,6 +8,6 @@ testscenarios>=0.4
 testrepository>=0.0.18
 testtools>=0.9.34
 oslosphinx
-MySQL-python
+PyMySql
 psycopg2
 os-testr

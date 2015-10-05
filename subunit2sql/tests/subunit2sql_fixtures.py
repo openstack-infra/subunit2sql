@@ -15,13 +15,13 @@
 import os
 import shutil
 import subprocess
-import urlparse
 
 import fixtures as fix
 from oslo_concurrency.fixture import lockutils as lock_fixture
 from oslo_concurrency import lockutils
 from oslo_config import fixture as config_fixture
 from oslo_db import options
+from six.moves.urllib import parse as urlparse
 
 from subunit2sql.db import api as session
 from subunit2sql.migrations import cli

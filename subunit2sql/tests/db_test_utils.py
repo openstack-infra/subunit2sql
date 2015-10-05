@@ -39,7 +39,7 @@ def get_connect_string(backend,
     these then we'll run the tests, otherwise they are skipped
     """
     if backend == "mysql":
-        backend = "mysql+mysqldb"
+        backend = "mysql+pymysql"
     elif backend == "postgres":
         backend = "postgresql+psycopg2"
 
