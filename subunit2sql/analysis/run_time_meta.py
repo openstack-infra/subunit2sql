@@ -28,10 +28,16 @@ matplotlib.style.use('ggplot')
 def set_cli_opts(parser):
     parser.add_argument('metadata_key',
                         help="The run_metadata key to group the runs by")
+    parser.add_argument('--filter_list', '-f',
+                        help='A comma seperated list of values to use')
 
 
 def generate_series():
     session = api.get_session()
+    if CONF.command.filter_list:
+        filter_list = CONF.command.filter_list.split(',')
+    else:
+        filter_list = None
     if CONF.start_date:
         start_date = datetime.datetime.strptime(CONF.start_date, '%Y-%m-%d')
     else:
@@ -43,8 +49,13 @@ def generate_series():
     run_times = api.get_run_times_grouped_by_run_metadata_key(
         CONF.command.metadata_key, start_date=start_date,
         stop_date=stop_date, session=session)
-    df = pd.DataFrame(dict(
-        [(k, pd.Series(v)) for k, v in run_times.iteritems()]))
+    if not filter_list:
+        df = pd.DataFrame(dict(
+            [(k, pd.Series(v)) for k, v in run_times.iteritems()]))
+    else:
+        df = pd.DataFrame(dict(
+            [(k, pd.Series(v)) for k, v in run_times.iteritems()
+             if k in filter_list]))
     if not CONF.title:
         title = "Run aggregate run time grouped by metadata"
     else:
