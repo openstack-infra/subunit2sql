@@ -610,6 +610,38 @@ def get_test_runs_by_test_id(test_id, session=None):
     return test_runs
 
 
+def get_test_runs_by_test_test_id(test_id, start_date=None, stop_date=None,
+                                  session=None):
+    """Get all test runs for a specific test by the test'stest_id column
+
+    :param str test_id: The test's test_id (the test_id column in the test
+                        table) which to get all test runs for
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+    :param datetime.datetime start_date: The date to use as the start date for
+                                         results
+    :param datetime.datetime stop_date: The date to use as the cutoff date for
+                                        results
+
+    :return list: The list of test run objects for the specified test
+    :rtype: subunit2sql.models.TestRun
+    """
+    session = session or get_session()
+
+    test_runs_query = db_utils.model_query(models.TestRun,
+                                           session=session).join(
+        models.Test).filter(
+            models.Test.test_id == test_id)
+    if start_date:
+        test_runs_query = test_runs_query.filter(
+            models.TestRun.start_time >= start_date)
+    if stop_date:
+        test_runs_query = test_runs_query.filter(
+            models.TestRun.start_time <= stop_date)
+    test_runs = test_runs_query.all()
+    return test_runs
+
+
 def get_test_runs_by_run_id(run_id, session=None):
     """Get all test runs for a specific run.
 

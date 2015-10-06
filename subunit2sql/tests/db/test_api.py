@@ -291,6 +291,17 @@ class TestDatabaseAPI(base.TestCase):
             }
             self.assertNotIn(missing_run_dict, runs_time_series[timestamp])
 
+    def test_get_test_runs_test_test_id(self):
+        run = api.create_run()
+        test_a = api.create_test('fake_test')
+        test_b = api.create_test('less_fake_test')
+        api.create_test_run(test_a.id, run.id, 'success')
+        api.create_test_run(test_b.id, run.id, 'success')
+        res = api.get_test_runs_by_test_test_id('less_fake_test')
+        self.assertEqual(1, len(res))
+        self.assertEqual(test_b.id, res[0].test_id)
+        self.assertEqual(run.id, res[0].run_id)
+
     def test_get_all_run_metadata_keys(self):
         run = api.create_run()
         meta_dict = {
