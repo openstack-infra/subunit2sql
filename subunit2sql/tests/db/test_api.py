@@ -17,6 +17,7 @@ import datetime
 import testscenarios
 
 from subunit2sql.db import api
+from subunit2sql.db import models
 from subunit2sql.tests import base
 from subunit2sql.tests import subunit2sql_fixtures as fixtures
 
@@ -359,3 +360,37 @@ class TestDatabaseAPI(base.TestCase):
             'start_time': timestamp_a,
             'stop_time': timestamp_b,
         }], test_run_dicts)
+
+    def test_delete_old_runs(self):
+        run_a = api.create_run(run_at=datetime.datetime(
+            1914, 6, 28, 10, 45, 0))
+        run_b = api.create_run()
+        api.add_run_metadata({'key': 'value'}, run_b.id)
+        api.add_run_metadata({'key': 'not_so_much_a_value'}, run_a.id)
+        api.delete_old_runs()
+        runs = api.get_all_runs()
+        self.assertEqual(1, len(runs))
+        self.assertEqual(1, api.get_session().query(
+            models.RunMetadata.id).count())
+        self.assertEqual(run_b.id, runs[0].id)
+        self.assertEqual(1, len(api.get_run_metadata(run_b.id)))
+        self.assertEqual(0, len(api.get_run_metadata(run_a.id)))
+
+    def test_delete_old_test_runs(self):
+        run_a = api.create_run()
+        run_b = api.create_run()
+        test = api.create_test('fake_test')
+        test_run_a = api.create_test_run(test.id, run_a.id, 'fail',
+                                         start_time=datetime.datetime(
+                                             1914, 6, 28, 10, 45, 0))
+        test_run_b = api.create_test_run(test.id, run_b.id, 'fail',
+                                         start_time=datetime.datetime.utcnow())
+        api.add_test_run_metadata({'key': 'value'}, test_run_b.id)
+        api.add_test_run_metadata({'key': 'not_so_much_a_value'},
+                                  test_run_a.id)
+        api.delete_old_test_runs()
+        test_runs = api.get_all_test_runs()
+        self.assertEqual(1, len(test_runs))
+        self.assertEqual(test_run_b.id, test_runs[0].id)
+        self.assertEqual(1, len(api.get_test_run_metadata(test_run_b.id)))
+        self.assertEqual(0, len(api.get_test_run_metadata(test_run_a.id)))

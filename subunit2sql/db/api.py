@@ -848,9 +848,14 @@ def delete_old_runs(expire_age=186, session=None):
     """
     session = session or get_session()
     expire_date = datetime.date.today() - datetime.timedelta(days=expire_age)
-    db_utils.model_query(models.Run, session).filter(
-        models.Run.run_at < expire_date).join(
-            models.RunMetadata).delete(synchronize_session='evaluate')
+
+    # Delete the run_metadata
+    sub_query = session.query(models.Run.id).filter(
+        models.Run.run_at < expire_date).subquery()
+    db_utils.model_query(models.RunMetadata, session).filter(
+        models.RunMetadata.run_id.in_(sub_query)).delete(
+            synchronize_session='fetch')
+    # Delete the runs
     db_utils.model_query(models.Run, session).filter(
         models.Run.run_at < expire_date).delete(synchronize_session='evaluate')
 
@@ -864,9 +869,14 @@ def delete_old_test_runs(expire_age=186, session=None):
     """
     session = session or get_session()
     expire_date = datetime.date.today() - datetime.timedelta(days=expire_age)
-    db_utils.model_query(models.TestRun, session).filter(
-        models.TestRun.start_time < expire_date).join(
-            models.TestRunMetadata).delete(synchronize_session='evaluate')
+
+    # Delete the test run metadata
+    sub_query = session.query(models.TestRun.id).filter(
+        models.TestRun.start_time < expire_date).subquery()
+    db_utils.model_query(models.TestRunMetadata, session).filter(
+        models.TestRunMetadata.test_run_id.in_(sub_query)).delete(
+            synchronize_session='fetch')
+    # Delete the test runs
     db_utils.model_query(models.TestRun, session).filter(
         models.TestRun.start_time < expire_date).delete(
             synchronize_session='evaluate')
