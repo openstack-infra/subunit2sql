@@ -22,6 +22,7 @@ import os
 from alembic import config
 from alembic import script
 import sqlalchemy
+from sqlalchemy.engine import reflection
 
 from subunit2sql import exceptions as exc
 from subunit2sql.tests import base
@@ -381,3 +382,19 @@ class TestWalkMigrations(base.TestCase):
         res = list(test_metadata.select().execute())[0]
         self.assertEqual(res.id, data['id'])
         self.assertEqual(res.test_id, data['test_run_id'])
+
+    def _pre_upgrade_b96122f780(self, engine):
+        # NOTE(mtreinish) Return fake data to ensure we run check, this
+        # is needed because the framework normall assumes you're preseeded
+        # data is in the correct state post migration. But this time all we
+        # want to do is ensure a single index exists so that isn't needed
+        return 'data'
+
+    def _check_b96122f780(self, engine, data):
+        insp = reflection.Inspector(engine)
+        indxs = insp.get_indexes('test_runs')
+        # Check that we don't duplicate indexes anymore
+        tests = [indx for indx in indxs if ['test_id'] == indx['column_names']]
+        runs = [indx for indx in indxs if indx['column_names'] == ['run_id']]
+        self.assertEqual(1, len(tests))
+        self.assertEqual(1, len(runs))
