@@ -14,7 +14,6 @@
 
 import datetime
 
-import six
 from six import moves
 import testscenarios
 
@@ -272,7 +271,7 @@ class TestDatabaseAPI(base.TestCase):
                 'skip': run_num,
                 'fail': run_num + 1,
                 'pass': run_num + 2,
-                'id': six.text_type(runs[run_num].id),
+                'id': runs[run_num].id,
                 'run_time': 3.0,
                 'metadata': {
                     u'test_key': u'fun',
@@ -285,7 +284,7 @@ class TestDatabaseAPI(base.TestCase):
                 'skip': run_num,
                 'fail': run_num + 1,
                 'pass': run_num + 2,
-                'id': six.text_type(runs[run_num].id),
+                'id': runs[run_num].id,
                 'run_time': 3.0,
                 'metadata': {
                     u'test_key': u'fun',
