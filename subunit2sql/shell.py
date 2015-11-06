@@ -19,6 +19,7 @@ import sys
 from oslo_config import cfg
 from oslo_db import options
 from pbr import version
+from stevedore import enabled
 
 from subunit2sql.db import api
 from subunit2sql import exceptions
@@ -182,19 +183,30 @@ def process_results(results):
 
 def main():
     cli_opts()
+
+    def check_enabled(ext):
+        return ext.plugin.enabled()
+    extensions = enabled.EnabledExtensionManager('subunit2sql.target',
+                                                 check_func=check_enabled)
     parse_args(sys.argv)
+    try:
+        targets = list(extensions.map(lambda ext: ext.plugin()))
+    except RuntimeError:
+        targets = []
     if CONF.subunit_files:
         if len(CONF.subunit_files) > 1 and CONF.run_id:
             print("You can not specify a run id for adding more than 1 stream")
             return 3
         streams = [subunit.ReadSubunit(open(s, 'r'),
                                        attachments=CONF.store_attachments,
-                                       attr_regex=CONF.attr_regex)
+                                       attr_regex=CONF.attr_regex,
+                                       targets=targets)
                    for s in CONF.subunit_files]
     else:
         streams = [subunit.ReadSubunit(sys.stdin,
                                        attachments=CONF.store_attachments,
-                                       attr_regex=CONF.attr_regex)]
+                                       attr_regex=CONF.attr_regex,
+                                       targets=targets)]
     for stream in streams:
         process_results(stream.get_results())
 

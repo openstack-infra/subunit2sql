@@ -156,7 +156,8 @@ class TestMain(base.TestCase):
         shell.main()
         read_subunit_mock.assert_called_once_with(sys.stdin,
                                                   attachments=False,
-                                                  attr_regex='\[(.*)\]')
+                                                  attr_regex='\[(.*)\]',
+                                                  targets=[])
         process_results_mock.assert_called_once_with(fake_get_results)
 
     @mock.patch('subunit2sql.read_subunit.ReadSubunit')
@@ -165,8 +166,8 @@ class TestMain(base.TestCase):
                                  read_subunit_mock):
         tfile1 = tempfile.NamedTemporaryFile()
         tfile2 = tempfile.NamedTemporaryFile()
-        tfile1.write('test me later 1')
-        tfile2.write('test me later 2')
+        tfile1.write(b'test me later 1')
+        tfile2.write(b'test me later 2')
         tfile1.flush()
         tfile2.flush()
         self.fake_args.extend([tfile1.name, tfile2.name])
@@ -180,17 +181,36 @@ class TestMain(base.TestCase):
         shell.main()
         read_subunit_mock.assert_called_with(mock.ANY,
                                              attachments=False,
-                                             attr_regex='\[(.*)\]')
+                                             attr_regex='\[(.*)\]',
+                                             targets=[])
         self.assertEqual(2, len(read_subunit_mock.call_args_list))
         file_1 = read_subunit_mock.call_args_list[0][0][0]
-        self.assertIsInstance(file_1, file)
         file_1.seek(0)
         self.assertEqual('test me later 1', file_1.read())
         file_2 = read_subunit_mock.call_args_list[1][0][0]
-        self.assertIsInstance(file_2, file)
         file_2.seek(0)
         self.assertEqual('test me later 2', file_2.read())
         self.assertEqual(fake_get_results_1,
                          process_results_mock.call_args_list[0][0][0])
         self.assertEqual(fake_get_results_2,
                          process_results_mock.call_args_list[1][0][0])
+
+    @mock.patch('stevedore.enabled.EnabledExtensionManager')
+    @mock.patch('subunit2sql.read_subunit.ReadSubunit')
+    @mock.patch('subunit2sql.shell.process_results')
+    def test_main_with_targets(self, process_results_mock, read_subunit_mock,
+                               ext_mock):
+        exts = mock.MagicMock('EnabledExtensionManager()')
+        ext_mock.return_value = exts
+        exts.map = mock.MagicMock('extensions.map')
+        exts.map.return_value = [mock.sentinel.extension]
+        fake_read_subunit = mock.MagicMock('ReadSubunit')
+        fake_get_results = 'fake results'
+        fake_read_subunit.get_results = mock.MagicMock('get_results')
+        fake_read_subunit.get_results.return_value = fake_get_results
+        read_subunit_mock.return_value = fake_read_subunit
+        shell.main()
+        read_subunit_mock.assert_called_once_with(
+            sys.stdin, attachments=False, attr_regex='\[(.*)\]',
+            targets=[mock.sentinel.extension])
+        process_results_mock.assert_called_once_with(fake_get_results)

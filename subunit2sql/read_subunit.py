@@ -33,14 +33,18 @@ def get_duration(start, end):
 
 class ReadSubunit(object):
 
-    def __init__(self, stream_file, attachments=False, attr_regex=None):
+    def __init__(self, stream_file, attachments=False, attr_regex=None,
+                 targets=None):
+        if targets is None:
+            targets = []
         self.stream_file = stream_file
         self.stream = subunit.ByteStreamToStreamResult(stream_file)
         starts = testtools.StreamResult()
         summary = testtools.StreamSummary()
         outcomes = testtools.StreamToDict(functools.partial(
             self.parse_outcome))
-        self.result = testtools.CopyStreamResult([starts, outcomes, summary])
+        targets.extend([starts, outcomes, summary])
+        self.result = testtools.CopyStreamResult(targets)
         self.results = {}
         self.attachments = attachments
         if attr_regex:

@@ -170,3 +170,8 @@ class TestReadSubunit(base.TestCase):
         test_name = read.cleanup_test_name(fake_id, strip_tags=True,
                                            strip_scenarios=False)
         self.assertEqual(fake_id, test_name)
+
+    @mock.patch('testtools.CopyStreamResult')
+    def test_targets_added_to_result(self, ttc_mock):
+        subunit.ReadSubunit(mock.MagicMock(), targets=['foo'])
+        self.assertIn('foo', ttc_mock.call_args[0][0])
