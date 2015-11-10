@@ -59,7 +59,7 @@ def generate_series():
 
     plt.figure()
     plt.barh(range(len(perc_data)), perc_data.values(), align='center')
-    locs, labels = plt.yticks(range(len(perc_data)), perc_data.keys())
+    locs, labels = plt.yticks(range(len(perc_data)), list(perc_data.keys()))
     plt.xlabel('Failure Percentage')
     plt.tight_layout()
     plt.savefig(CONF.output, dpi=900)

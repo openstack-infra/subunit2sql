@@ -14,6 +14,8 @@
 
 import datetime
 
+import six
+from six import moves
 import testscenarios
 
 from subunit2sql.db import api
@@ -214,7 +216,7 @@ class TestDatabaseAPI(base.TestCase):
         # 10 with 10 failures
         # 7 in 2010/2011 each, 6 in 2012
         # 10 in projecta/projectb each
-        for i in range(20):
+        for i in moves.range(20):
             if i % 2 == 1:
                 fails = 10
             else:
@@ -251,7 +253,7 @@ class TestDatabaseAPI(base.TestCase):
     def test_get_time_series_runs_by_key_value(self):
         runs = []
         run_at = datetime.datetime.utcnow()
-        for run_num in xrange(15):
+        for run_num in moves.range(15):
             run = api.create_run(run_num, run_num + 1, run_num + 2, 3,
                                  run_at=run_at)
             runs.append(run)
@@ -263,14 +265,14 @@ class TestDatabaseAPI(base.TestCase):
         runs_time_series = api.get_time_series_runs_by_key_value('test_key',
                                                                  'fun')
         self.assertEqual(1, len(runs_time_series))
-        timestamp = runs_time_series.keys()[0]
+        timestamp = list(runs_time_series.keys())[0]
         self.assertEqual(3, len(runs_time_series[timestamp]))
-        for run_num in xrange(3):
+        for run_num in moves.range(3):
             run_dict = {
-                'skip': long(run_num),
-                'fail': long(run_num + 1),
-                'pass': long(run_num + 2),
-                'id': unicode(runs[run_num].id),
+                'skip': run_num,
+                'fail': run_num + 1,
+                'pass': run_num + 2,
+                'id': six.text_type(runs[run_num].id),
                 'run_time': 3.0,
                 'metadata': {
                     u'test_key': u'fun',
@@ -278,12 +280,12 @@ class TestDatabaseAPI(base.TestCase):
                 }
             }
             self.assertIn(run_dict, runs_time_series[timestamp])
-        for run_num in range(3, 14):
+        for run_num in moves.range(3, 14):
             missing_run_dict = {
-                'skip': long(run_num),
-                'fail': long(run_num + 1),
-                'pass': long(run_num + 2),
-                'id': unicode(runs[run_num].id),
+                'skip': run_num,
+                'fail': run_num + 1,
+                'pass': run_num + 2,
+                'id': six.text_type(runs[run_num].id),
                 'run_time': 3.0,
                 'metadata': {
                     u'test_key': u'fun',

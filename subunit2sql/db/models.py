@@ -32,7 +32,7 @@ class SubunitBase(models.ModelBase):
         super(SubunitBase, self).save(session or db_api.get_session())
 
     def keys(self):
-        return self.__dict__.keys()
+        return list(self.__dict__.keys())
 
     def values(self):
         return self.__dict__.values()

@@ -18,6 +18,7 @@ import datetime
 from oslo_config import cfg
 from oslo_db.sqlalchemy import session as db_session
 from oslo_db.sqlalchemy import utils as db_utils
+import six
 import sqlalchemy
 from sqlalchemy.engine.url import make_url
 
@@ -45,7 +46,7 @@ def _create_facade_lazily():
     if facade is None:
         facade = db_session.EngineFacade(
             CONF.database.connection,
-            **dict(CONF.database.iteritems()))
+            **dict(six.iteritems(CONF.database)))
         _facades[db_backend] = facade
     return facade
 
@@ -852,7 +853,7 @@ def get_recent_successful_runs(num_runs=10, session=None):
     session = session or get_session()
     results = db_utils.model_query(models.Run, session).order_by(
         models.Run.run_at.desc()).filter_by(fails=0).limit(num_runs).all()
-    return map(lambda x: x.id, results)
+    return list(map(lambda x: x.id, results))
 
 
 def get_recent_failed_runs(num_runs=10, session=None):
@@ -868,7 +869,7 @@ def get_recent_failed_runs(num_runs=10, session=None):
     results = db_utils.model_query(models.Run, session).order_by(
         models.Run.run_at.desc()).filter(
         models.Run.fails > 0).limit(num_runs).all()
-    return map(lambda x: x.id, results)
+    return list(map(lambda x: x.id, results))
 
 
 def delete_old_runs(expire_age=186, session=None):
@@ -1104,7 +1105,7 @@ def get_all_runs_time_series_by_key(key, start_date=None,
                 'skip': run[3],
             }]}
         else:
-            if run[4] not in runs[run[0]].keys():
+            if run[4] not in list(runs[run[0]].keys()):
                 runs[run[0]][run[4]] = [{
                     'pass': run[1],
                     'fail': run[2],

@@ -14,13 +14,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import ConfigParser
 import datetime
 import os
 
 
 from alembic import config
 from alembic import script
+from six.moves import configparser as ConfigParser
 import sqlalchemy
 from sqlalchemy.engine import reflection
 
@@ -274,7 +274,7 @@ class TestWalkMigrations(base.TestCase):
         runs.insert().values(time_data).execute()
         runs = get_table(engine, 'runs')
         result = runs.select().execute()
-        run_at = map(lambda x: (x['id'], x['run_at']), result)
+        run_at = list(map(lambda x: (x['id'], x['run_at']), result))
         for run in data:
             self.assertIn((run['id'], None), run_at)
         self.assertIn((time_data['id'], now), run_at)
@@ -321,7 +321,7 @@ class TestWalkMigrations(base.TestCase):
         # Query the DB for the tests from the sample dataset above
         where = ' OR '.join(["tests.id='%s'" % x for x in test_ids])
         result = tests.select(where).execute()
-        run_time_pairs = map(lambda x: (x['id'], x['run_time']), result)
+        run_time_pairs = list(map(lambda x: (x['id'], x['run_time']), result))
         # Ensure the test with one failure is None
         self.assertIn(('fake_null_test_id_fails', None), run_time_pairs)
         # Ensure the test with 2 success each taking 4 sec lists the proper
