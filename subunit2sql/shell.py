@@ -42,6 +42,10 @@ SHELL_OPTS = [
     cfg.StrOpt('attr_regex', default='\[(.*)\]',
                help='The regex to use to extract the comma separated list of '
                     'test attributes from the test_id'),
+    cfg.StrOpt('test_attr_prefix', short='p', default=None,
+               help='An optional prefix to identify global test attrs '
+                    'and treat it as test metadata instead of test_run '
+                    'metadata'),
 ]
 
 _version_ = version.VersionInfo('subunit2sql').version_string()
@@ -109,6 +113,16 @@ def get_run_totals(results):
     return totals
 
 
+def _get_test_attrs_list(attrs):
+    if attrs:
+        attr_list = attrs.split(',')
+        test_attrs_list = [attr for attr in attr_list if attr.startswith(
+            CONF.test_attr_prefix)]
+        return test_attrs_list
+    else:
+        return None
+
+
 def process_results(results):
     session = api.get_session()
     run_time = results.pop('run_time')
@@ -146,6 +160,18 @@ def process_results(results):
                                        results[test]['end_time'],
                                        session)
         if results[test]['metadata']:
+            if CONF.test_attr_prefix:
+                attrs = results[test]['metadata'].get('attrs')
+                test_attr_list = _get_test_attrs_list(attrs)
+                test_metadata = api.get_test_metadata(db_test.id, session)
+                test_metadata = [(meta.key, meta.value) for meta in
+                                 test_metadata]
+                if test_attr_list:
+                    for attr in test_attr_list:
+                        if ('attr', attr) not in test_metadata:
+                            test_meta_dict = {'attr': attr}
+                            api.add_test_metadata(test_meta_dict, db_test.id,
+                                                  sesion=session)
             api.add_test_run_metadata(results[test]['metadata'], test_run.id,
                                       session)
         if results[test]['attachments']:
