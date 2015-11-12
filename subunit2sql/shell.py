@@ -181,18 +181,27 @@ def process_results(results):
     session.close()
 
 
-def main():
-    cli_opts()
-
+def get_extensions():
     def check_enabled(ext):
         return ext.plugin.enabled()
-    extensions = enabled.EnabledExtensionManager('subunit2sql.target',
-                                                 check_func=check_enabled)
-    parse_args(sys.argv)
+    return enabled.EnabledExtensionManager('subunit2sql.target',
+                                           check_func=check_enabled)
+
+
+def get_targets(extensions):
     try:
         targets = list(extensions.map(lambda ext: ext.plugin()))
     except RuntimeError:
         targets = []
+    return targets
+
+
+def main():
+    cli_opts()
+
+    extensions = get_extensions()
+    parse_args(sys.argv)
+    targets = get_targets(extensions)
     if CONF.subunit_files:
         if len(CONF.subunit_files) > 1 and CONF.run_id:
             print("You can not specify a run id for adding more than 1 stream")
