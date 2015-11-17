@@ -13,6 +13,7 @@
 # under the License.
 
 import matplotlib
+import matplotlib.dates as dates
 import matplotlib.pyplot as plt
 from oslo_config import cfg
 import pandas as pd
@@ -39,6 +40,9 @@ def generate_series():
     session.close()
     ts = pd.Series(run_times)
     ts = utils.filter_dates(ts)
+    if ts.count() == 0:
+        print("No data available. Check your query and try again.")
+        exit(-1)
     mean = pd.rolling_mean(ts, 20)
     rolling_std = pd.rolling_std(ts, 20)
     plt.figure()
@@ -47,6 +51,14 @@ def generate_series():
     else:
         plt.title(CONF.title)
     plt.ylabel('Time (sec.)')
+
+    # format x-axis with dates
+    fig, ax = plt.subplots(1)
+    fig.autofmt_xdate()
+    xfmt = dates.DateFormatter("%b %d %Y")
+    ax.xaxis_date()
+    ax.xaxis.set_major_formatter(xfmt)
+
     plt.plot(ts.index, ts, 'k', label='Run Time')
     plt.plot(mean.index, mean, 'b', label='Avg. Run Time')
     upper_std_dev = mean + 2 * rolling_std
