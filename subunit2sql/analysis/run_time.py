@@ -27,12 +27,15 @@ matplotlib.style.use('ggplot')
 
 def set_cli_opts(parser):
     parser.add_argument('test_id', nargs='?',
-                        help='Test id to extract time series for')
+                        help='Test id to extract time series for. This '
+                             'previously took a UUID from the tests.id '
+                             'column, however this will no longer work. It '
+                             'only works with a value from tests.test_id.')
 
 
 def generate_series():
-    test_id = CONF.command.test_id
     session = api.get_session()
+    test_id = api.get_id_from_test_id(CONF.command.test_id, session)
     run_times = api.get_test_run_time_series(test_id, session)
     if not CONF.title:
         test = api.get_test_by_id(test_id, session)
