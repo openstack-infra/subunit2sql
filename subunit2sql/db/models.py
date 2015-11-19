@@ -13,7 +13,6 @@
 # under the License.
 
 import datetime
-import uuid
 
 from oslo_db.sqlalchemy import models  # noqa
 import sqlalchemy as sa
@@ -48,10 +47,8 @@ class SubunitBase(models.ModelBase):
 
 class Test(BASE, SubunitBase):
     __tablename__ = 'tests'
-    __table_args__ = (sa.Index('ix_id', 'id'),
-                      sa.Index('ix_test_id', 'test_id'))
-    id = sa.Column(sa.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
+    __table_args__ = (sa.Index('ix_test_id', 'test_id'),)
+    id = sa.Column(sa.BigInteger, primary_key=True)
     test_id = sa.Column(sa.String(256))
     run_count = sa.Column(sa.Integer())
     success = sa.Column(sa.Integer())
@@ -61,9 +58,7 @@ class Test(BASE, SubunitBase):
 
 class Run(BASE, SubunitBase):
     __tablename__ = 'runs'
-    __table_args__ = (sa.Index('ix_run_id', 'id'), )
-    id = sa.Column(sa.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
+    id = sa.Column(sa.BigInteger, primary_key=True)
     skips = sa.Column(sa.Integer())
     fails = sa.Column(sa.Integer())
     passes = sa.Column(sa.Integer())
@@ -80,11 +75,11 @@ class TestRun(BASE, SubunitBase):
                       sa.UniqueConstraint('test_id', 'run_id',
                                           name='ix_test_run_test_id_run_id'))
 
-    id = sa.Column(sa.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
-    test_id = sa.Column(sa.String(36), sa.ForeignKey('tests.id'),
+    id = sa.Column(sa.BigInteger, primary_key=True)
+    test_id = sa.Column(sa.BigInteger, sa.ForeignKey('tests.id'),
                         nullable=False)
-    run_id = sa.Column(sa.String(36), sa.ForeignKey('runs.id'), nullable=False)
+    run_id = sa.Column(sa.BigInteger, sa.ForeignKey('runs.id'),
+                       nullable=False)
     status = sa.Column(sa.String(256))
     start_time = sa.Column(sa.DateTime())
     start_time_microsecond = sa.Column(sa.Integer(), default=0)
@@ -96,11 +91,10 @@ class RunMetadata(BASE, SubunitBase):
     __tablename__ = 'run_metadata'
     __table_args__ = (sa.Index('ix_run_metadata_run_id', 'run_id'),)
 
-    id = sa.Column(sa.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
+    id = sa.Column(sa.BigInteger, primary_key=True)
     key = sa.Column(sa.String(255))
     value = sa.Column(sa.String(255))
-    run_id = sa.Column(sa.String(36), sa.ForeignKey('runs.id'))
+    run_id = sa.Column(sa.BigInteger, sa.ForeignKey('runs.id'))
 
 
 class TestRunMetadata(BASE, SubunitBase):
@@ -108,11 +102,10 @@ class TestRunMetadata(BASE, SubunitBase):
     __table_args__ = (sa.Index('ix_test_run_metadata_test_run_id',
                                'test_run_id'),)
 
-    id = sa.Column(sa.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
+    id = sa.Column(sa.BigInteger, primary_key=True)
     key = sa.Column(sa.String(255))
     value = sa.Column(sa.String(255))
-    test_run_id = sa.Column(sa.String(36), sa.ForeignKey('test_runs.id'))
+    test_run_id = sa.Column(sa.BigInteger, sa.ForeignKey('test_runs.id'))
 
 
 class TestMetadata(BASE, SubunitBase):
@@ -120,19 +113,17 @@ class TestMetadata(BASE, SubunitBase):
     __table_args__ = (sa.Index('ix_test_metadata_test_id',
                                'test_id'),)
 
-    id = sa.Column(sa.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
+    id = sa.Column(sa.BigInteger, primary_key=True)
     key = sa.Column(sa.String(255))
     value = sa.Column(sa.String(255))
-    test_id = sa.Column(sa.String(36), sa.ForeignKey('tests.id'))
+    test_id = sa.Column(sa.BigInteger, sa.ForeignKey('tests.id'))
 
 
 class Attachments(BASE, SubunitBase):
     __tablename__ = 'attachments'
     __table_args__ = (sa.Index('ix_attachemnts_id',
                                'test_run_id'),)
-    id = sa.Column(sa.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
-    test_run_id = sa.Column(sa.String(36))
+    id = sa.Column(sa.BigInteger, primary_key=True)
+    test_run_id = sa.Column(sa.BigInteger)
     label = sa.Column(sa.String(255))
     attachment = sa.Column(sa.LargeBinary())
