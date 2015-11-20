@@ -209,7 +209,8 @@ def upgrade():
         op.drop_column('tests_new', 'id')
         op.alter_column('tests_new', 'new_id',
                         new_column_name='id')
-        op.drop_column('runs_new', 'id')
+        op.alter_column('runs_new', 'id',
+                        new_column_name='uuid')
         op.alter_column('runs_new', 'new_id',
                         new_column_name='id')
     else:
@@ -270,7 +271,8 @@ def upgrade():
                                   existing_type=new_id_type,
                                   autoincrement=True)
         with op.batch_alter_table("runs_new") as batch_op:
-            batch_op.drop_column('id')
+            batch_op.alter_column('id', new_column_name='uuid',
+                                  existing_type=sa.VARCHAR(36))
             batch_op.alter_column('new_id', new_column_name='id',
                                   primary_key=True,
                                   existing_type=new_id_type,
@@ -331,6 +333,7 @@ def upgrade():
                         ['test_id', 'start_time'])
         op.create_unique_constraint('uq_test_runs', 'test_runs',
                                     ['test_id', 'run_id'])
+    op.create_index('ix_run_uuid', 'runs', ['uuid'])
     op.create_index('ix_tests_test_id', 'tests', ['test_id'], mysql_length=30)
     op.create_index('ix_test_runs_test_id', 'test_runs', ['test_id'])
     op.create_index('ix_test_runs_run_id', 'test_runs', ['run_id'])

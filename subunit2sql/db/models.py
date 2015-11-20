@@ -13,8 +13,10 @@
 # under the License.
 
 import datetime
+import uuid
 
 from oslo_db.sqlalchemy import models  # noqa
+import six
 import sqlalchemy as sa
 from sqlalchemy.ext import declarative
 
@@ -58,6 +60,8 @@ class Test(BASE, SubunitBase):
 
 class Run(BASE, SubunitBase):
     __tablename__ = 'runs'
+    uuid = sa.Column(sa.String(36),
+                     default=lambda: six.text_type(uuid.uuid4()))
     id = sa.Column(sa.BigInteger, primary_key=True)
     skips = sa.Column(sa.Integer())
     fails = sa.Column(sa.Integer())

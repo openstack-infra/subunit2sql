@@ -522,7 +522,7 @@ class TestWalkMigrations(base.TestCase):
 
         # Check all the new ids match
         runs_t = get_table(engine, 'runs')
-        run_ids = [x[0] for x in runs_t.select().execute()]
+        run_ids = [x[1] for x in runs_t.select().execute()]
         run_metadatas_t = get_table(engine, 'run_metadata')
         tests_t = get_table(engine, 'tests')
         test_metadatas_t = get_table(engine, 'test_metadata')
@@ -547,10 +547,11 @@ class TestWalkMigrations(base.TestCase):
         # Check run
         run_row = list(runs_t.select().where(
             runs_t.c.id == test_run_row[2]).execute())[0]
-        self.assertEqual(data['run']['artifacts'], run_row[5])
+        self.assertEqual(data['run']['artifacts'], run_row[6])
+        self.assertEqual(data['run']['id'], run_row[0])
         # Check run metadata
         run_metadata_row = list(run_metadatas_t.select().where(
-            run_metadatas_t.c.run_id == run_row[0]).execute())[0]
+            run_metadatas_t.c.run_id == run_row[1]).execute())[0]
         self.assertEqual(data['run_metadata']['key'], run_metadata_row[1])
         self.assertEqual(data['run_metadata']['value'], run_metadata_row[2])
         # Check test metadata
