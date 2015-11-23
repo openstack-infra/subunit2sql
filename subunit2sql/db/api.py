@@ -172,7 +172,7 @@ def create_run(skips=0, fails=0, passes=0, run_time=0, artifacts=None,
     """
     run = models.Run()
     if id:
-        run.id = id
+        run.uuid = id
     if run_at:
         run.run_at = run_at
     run.skips = skips
@@ -562,10 +562,25 @@ def get_test_by_test_id(test_id, session=None):
     return test
 
 
-def get_run_by_id(id, session=None):
-    """Get an individual run by it's uuid.
+def get_run_id_from_uuid(uuid, session=None):
+    """Get the id for a run by it's uuid
 
-    :param str id: The uuid for the run (the id field in the DB)
+    :param str uuid: The uuid for the run
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+    :return: The id for the run with the provided uuid
+    :rtype: str
+    """
+    session = session or get_session()
+    run_id = session.query(models.Run.id).filter(
+        models.Run.uuid == uuid).first()
+    return run_id
+
+
+def get_run_by_id(id, session=None):
+    """Get an individual run by it's id.
+
+    :param str id: The id for the run
     :param session: optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
@@ -578,9 +593,9 @@ def get_run_by_id(id, session=None):
 
 
 def get_test_run_by_id(test_run_id, session=None):
-    """Get an individual test run by it's uuid.
+    """Get an individual test run by it's id.
 
-    :param str test_run_id: The uuid for the test run (the id field in the DB)
+    :param str test_run_id: The id for the test run
     :param session: optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
