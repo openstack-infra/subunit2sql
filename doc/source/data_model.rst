@@ -13,6 +13,7 @@ high level information about them
 
 Properties:
 
+* **uuid**: A unique human-readable identifier for the run.
 * **passes**: The total number of successful tests in the run.
 * **fails**: The total number of failed tests during the run.
 * **skips**: The total number of skipped tests during the run.
@@ -35,7 +36,6 @@ stored in the db.
 
 Properties:
 
-* **id**: Database uuid of the row
 * **test_id**: This would be normally be considered the test name, it is the id
   used in the subunit stream for an individual test
 * **success**: The total number of times this test has been run successfully
@@ -54,9 +54,12 @@ used for recording all the information about a single test's run.
 
 Properties:
 
-* **test_id**: The uuid representing the test which was run. This correlates
-               to the id column of the Tests table (And not the test_id column).
-* **run_id**: The uuid representing the run this was part of
+* **test_id**: The id representing the test which was run. This correlates
+               to the internal id column of the Tests table (And not the
+               test_id column).
+* **run_id**: The id representing the run which this was part of. This
+              correlates to the internal id column of the Runs table (And not
+              the uuid column).
 * **status**: The outcome of the test. The valid values here are:
   exists, xfail, unxsuccess, success, fail, skip. You can refer to
   the `testtools documentation <http://testtools.readthedocs.org/en/latest/api.html#testtools.StreamResult.status>`_
@@ -75,7 +78,8 @@ particular test_run.
 
 Properties:
 
-* **test_run_id**: The uuid representing the test_run the attachment is
-                   associated with.
+* **test_run_id**: The id representing the test_run the attachment is
+                   associated with. This correlates to the internal id column
+                   of the the TestRuns table.
 * **label**: The label for the attachment
 * **attachment**: The actual attachment

@@ -20,6 +20,11 @@ or::
 
     pip install $PATH_TO_subuni2sql[graph]
 
+For example::
+
+   git clone https://git.openstack.org/openstack-infra/subunit2sql .
+   pip install -e .[graph]
+
 
 Using subunit2sql-graph
 -----------------------
@@ -46,7 +51,7 @@ graph specific args must come after the graph on the CLI and general args must
 come before. This will likely change in the future, but at least for right now
 it's an existing issue.
 
-There are currently 3 graphs that it can generate:
+There are currently 4 graphs that it can generate:
 
 Run Time
 --------
@@ -56,7 +61,7 @@ specified test from the test_runs table.
 
 For example running something like::
 
-  subunit2sql-graph --database-connection mysql://test:test@localhost/subunit2sql --output test.png --title 'Test Run Times' run_time 0291fc87-1a6d-4c6b-91d2-00a7bb5c63e6
+  subunit2sql-graph --database-connection mysql://test:test@localhost/subunit2sql --output test.png --title 'Test Run Times' run_time tempest.api.identity.admin.v2.test_users.UsersTestJSON.test_update_user_password
 
 will generate a graph like:
 
@@ -77,7 +82,7 @@ for each of these counts (grouped daily) as different line plots on the same gra
 
 For example running something like::
 
-  subunit2sql-graph --database-connection mysql://test:test@localhost/subunit2sql --output test.png --title 'Test Failure Count' failures 0291fc87-1a6d-4c6b-91d2-00a7bb5c63e6
+  subunit2sql-graph --database-connection mysql://test:test@localhost/subunit2sql --output test.png --title 'Test Failure Count' failures tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_rebuild_server
 
 will generate a graph like:
 

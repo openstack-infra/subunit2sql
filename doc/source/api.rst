@@ -74,6 +74,7 @@ db.::
 
     subunit_file = open('subunit_file', 'r')
     # Load default config
+    shell.cli_opts()
     shell.parse_args([])
     # Set database connection
     db_uri = 'mysql://subunit:subunit@localhost/subunit'
@@ -99,7 +100,7 @@ like::
     db_uri = 'mysql://subunit:subunit@localhost/subunit'
     shell.CONF.set_override('connection', db_uri, group='database')
     # Set run metadata and artifact path
-    aritfacts = 'http://fake_url.com'
+    artifacts = 'http://fake_url.com'
     metadata = {
         'job_type': 'full-run',
         'job_queue': 'gate',
