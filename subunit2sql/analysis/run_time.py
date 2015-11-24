@@ -36,7 +36,14 @@ def set_cli_opts(parser):
 def generate_series():
     session = api.get_session()
     test_id = api.get_id_from_test_id(CONF.command.test_id, session)
+    if not test_id:
+        print("The test_id %s was not found in the database" %
+              CONF.command.test_id)
+        exit(2)
     run_times = api.get_test_run_time_series(test_id, session)
+    if not run_times:
+        print("There was no data found in the database")
+        exit(3)
     if not CONF.title:
         test = api.get_test_by_id(test_id, session)
     session.close()
