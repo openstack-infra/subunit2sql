@@ -11,3 +11,5 @@ oslosphinx
 PyMySql
 psycopg2
 os-testr
+# releasenotes
+reno>=0.1.1 # Apache2

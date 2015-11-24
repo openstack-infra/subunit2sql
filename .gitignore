@@ -16,3 +16,4 @@ build
 !.coveragerc
 cover/
 etc/*.conf
+releasenotes/build

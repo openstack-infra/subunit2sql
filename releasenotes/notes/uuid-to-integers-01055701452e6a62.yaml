@@ -1,0 +1,18 @@
+---
+prelude: >
+    subunit2sql is moving from using a UUID string as the primary key (aka the
+    id column) on all tables to using an integer.
+features:
+  - Significant performance improvement especially on the test_runs table
+    which can get very slow depending on the amount of data
+upgrade:
+  - This migration, 2822a408bdd0, is partially an offline upgrade. It is not
+    safe to write new data to the database while it is running.
+  - This migration is quite lengthy in operation it can take several days to
+    run and consumes quite a bit of space, especially with very large
+    databases.
+critical:
+  - The subunit2sql-graph commands which were previously using a tests.id
+    column to identify a test are changed to use the tests_id column. This is
+    because the switch from UUID to int will break the old mechanism anyway
+    and doing this conversion will protect against future internal changes
