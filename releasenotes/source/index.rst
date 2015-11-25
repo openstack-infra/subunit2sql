@@ -8,6 +8,7 @@ Contents
    :maxdepth: 2
 
    unreleased
+   v1.0.0
 
 
 Indices and tables
