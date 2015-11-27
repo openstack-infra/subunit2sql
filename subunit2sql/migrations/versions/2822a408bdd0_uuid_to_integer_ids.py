@@ -214,6 +214,15 @@ def upgrade():
         op.alter_column('runs_new', 'new_id',
                         new_column_name='id')
     else:
+        # http://dev.mysql.com/doc/refman/5.7/en/innodb-online-ddl-syntax.html
+        # Ths is a specific workaround for limited tmpdir space in the
+        # OpenStack infra MySQL server. With old_alter_table=OFF, mysql creates
+        # temporary files that are very large while building the new table.
+        # So generally, while the old method is less desirable for concurrency,
+        # it is safer, and we don't need online DDL since this migration
+        # uses a _new table anyway.
+        if migration_context.dialect.name == 'mysql':
+            op.execute('SET SESSION old_alter_table=ON')
         with op.batch_alter_table("attachments_new") as batch_op:
             batch_op.drop_column('id')
             batch_op.alter_column('new_id', new_column_name='id',
