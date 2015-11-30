@@ -70,7 +70,7 @@ class TestDatabaseAPI(base.TestCase):
         stop_time = datetime.datetime.utcnow()
         api.create_test_run(test_a.id, run.id, 'success',
                             start_time, stop_time)
-        test_run_dict = api.get_tests_run_dicts_from_run_id(run.id)
+        test_run_dict = api.get_tests_run_dicts_from_run_id(run.uuid)
         self.assertEqual(1, len(test_run_dict))
         self.assertIn('fake_test', test_run_dict)
         self.assertEqual(test_run_dict['fake_test']['status'], 'success')
@@ -85,7 +85,7 @@ class TestDatabaseAPI(base.TestCase):
         stop_time = None
         api.create_test_run(test_a.id, run.id, 'success',
                             start_time, stop_time)
-        test_run_dict = api.get_tests_run_dicts_from_run_id(run.id)
+        test_run_dict = api.get_tests_run_dicts_from_run_id(run.uuid)
         self.assertEqual(1, len(test_run_dict))
         self.assertIn('fake_test', test_run_dict)
         self.assertEqual(test_run_dict['fake_test']['status'], 'success')
@@ -99,7 +99,7 @@ class TestDatabaseAPI(base.TestCase):
         start_time = None
         api.create_test_run(test_a.id, run.id, 'success',
                             start_time, stop_time)
-        test_run_dict = api.get_tests_run_dicts_from_run_id(run.id)
+        test_run_dict = api.get_tests_run_dicts_from_run_id(run.uuid)
         self.assertEqual(1, len(test_run_dict))
         self.assertIn('fake_test', test_run_dict)
         self.assertEqual(test_run_dict['fake_test']['status'], 'success')
@@ -113,7 +113,7 @@ class TestDatabaseAPI(base.TestCase):
         start_time = None
         api.create_test_run(test_a.id, run.id, 'success',
                             start_time, stop_time)
-        test_run_dict = api.get_tests_run_dicts_from_run_id(run.id)
+        test_run_dict = api.get_tests_run_dicts_from_run_id(run.uuid)
         self.assertEqual(1, len(test_run_dict))
         self.assertIn('fake_test', test_run_dict)
         self.assertEqual(test_run_dict['fake_test']['status'], 'success')
@@ -132,7 +132,7 @@ class TestDatabaseAPI(base.TestCase):
             'attrs': 'test,smoke,notatest',
         }
         api.add_test_run_metadata(run_meta, test_run.id)
-        test_run_dict = api.get_tests_run_dicts_from_run_id(run.id)
+        test_run_dict = api.get_tests_run_dicts_from_run_id(run.uuid)
         self.assertEqual(3, len(test_run_dict['fake_test']['metadata']))
         for meta in run_meta:
             self.assertIn(meta, test_run_dict['fake_test']['metadata'])
@@ -159,7 +159,7 @@ class TestDatabaseAPI(base.TestCase):
                             datetime.datetime(1914, 6, 28, 10, 45, 0))
         api.create_test_run(test_c.id, run.id, 'success',
                             datetime.datetime(2014, 8, 26, 20, 00, 00))
-        test_run_dicts = api.get_tests_run_dicts_from_run_id(run.id)
+        test_run_dicts = api.get_tests_run_dicts_from_run_id(run.uuid)
         self.assertEqual(len(test_run_dicts), 3)
         prev = None
         for test_run in test_run_dicts:
@@ -196,9 +196,9 @@ class TestDatabaseAPI(base.TestCase):
                                         datetime.datetime.utcnow())
         testrun_c = api.create_test_run(test_a.id, run_c.id, 'success',
                                         datetime.datetime.utcnow())
-        test_runs_a = api.get_test_runs_by_run_id(run_a.id)
-        test_runs_b = api.get_test_runs_by_run_id(run_b.id)
-        test_runs_c = api.get_test_runs_by_run_id(run_c.id)
+        test_runs_a = api.get_test_runs_by_run_id(run_a.uuid)
+        test_runs_b = api.get_test_runs_by_run_id(run_b.uuid)
+        test_runs_c = api.get_test_runs_by_run_id(run_c.uuid)
         self.assertEqual(len(test_runs_a), 1)
         self.assertEqual(testrun_a.id, test_runs_a[0].id)
         self.assertEqual(testrun_a.status, test_runs_a[0].status)
@@ -271,7 +271,7 @@ class TestDatabaseAPI(base.TestCase):
                 'skip': run_num,
                 'fail': run_num + 1,
                 'pass': run_num + 2,
-                'id': runs[run_num].id,
+                'id': runs[run_num].uuid,
                 'run_time': 3.0,
                 'metadata': {
                     u'test_key': u'fun',

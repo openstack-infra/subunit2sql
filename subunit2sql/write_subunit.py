@@ -76,7 +76,6 @@ def write_test(output, start_time, stop_time, status, test_id, metadatas):
 
 def sql2subunit(run_id, output=sys.stdout):
     session = api.get_session()
-    run_id = api.get_run_id_from_uuid(run_id, session)
     test_runs = api.get_tests_run_dicts_from_run_id(run_id, session)
     session.close()
     output = subunit.v2.StreamResultToBytes(output)

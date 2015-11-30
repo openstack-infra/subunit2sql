@@ -569,11 +569,11 @@ def get_run_id_from_uuid(uuid, session=None):
     :param session: optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
     :return: The id for the run with the provided uuid
-    :rtype: str
+    :rtype: int
     """
     session = session or get_session()
     run_id = session.query(models.Run.id).filter(
-        models.Run.uuid == uuid).first()
+        models.Run.uuid == uuid).first()[0]
     return run_id
 
 
@@ -661,8 +661,8 @@ def get_test_runs_by_test_test_id(test_id, start_date=None, stop_date=None,
 def get_test_runs_by_run_id(run_id, session=None):
     """Get all test runs for a specific run.
 
-    :param str run_id: The run's uuid (the id column in the run table) which to
-                        get all test runs for
+    :param str run_id: The run's uuid (the uuid column in the run table) which
+                       to get all test runs for
     :param session: optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
@@ -670,9 +670,10 @@ def get_test_runs_by_run_id(run_id, session=None):
     :rtype: subunit2sql.models.TestRun
     """
     session = session or get_session()
-    test_runs = db_utils.model_query(models.TestRun,
-                                     session=session).filter_by(
-        run_id=run_id).all()
+    test_runs = db_utils.model_query(
+        models.TestRun, session=session).join(
+            models.Run).filter(
+                models.Run.uuid == run_id).all()
     return test_runs
 
 
@@ -734,18 +735,19 @@ def get_tests_run_dicts_from_run_id(run_id, session=None):
     """
     session = session or get_session()
     query = db_utils.model_query(models.Test, session=session).join(
-        models.TestRun).filter(models.TestRun.run_id == run_id).outerjoin(
-            models.TestRunMetadata).order_by(
-                models.TestRun.start_time,
-                models.TestRun.start_time_microsecond).values(
-                    models.Test.test_id,
-                    models.TestRun.status,
+        models.TestRun).join(models.Run).filter(
+            models.Run.uuid == run_id).outerjoin(
+                models.TestRunMetadata).order_by(
                     models.TestRun.start_time,
-                    models.TestRun.start_time_microsecond,
-                    models.TestRun.stop_time,
-                    models.TestRun.stop_time_microsecond,
-                    models.TestRunMetadata.key,
-                    models.TestRunMetadata.value)
+                    models.TestRun.start_time_microsecond).values(
+                        models.Test.test_id,
+                        models.TestRun.status,
+                        models.TestRun.start_time,
+                        models.TestRun.start_time_microsecond,
+                        models.TestRun.stop_time,
+                        models.TestRun.stop_time_microsecond,
+                        models.TestRunMetadata.key,
+                        models.TestRunMetadata.value)
     test_runs = collections.OrderedDict()
     for test_run in query:
         if test_run[0] not in test_runs:
@@ -868,7 +870,7 @@ def get_recent_successful_runs(num_runs=10, session=None):
     session = session or get_session()
     results = db_utils.model_query(models.Run, session).order_by(
         models.Run.run_at.desc()).filter_by(fails=0).limit(num_runs).all()
-    return list(map(lambda x: x.id, results))
+    return list(map(lambda x: x.uuid, results))
 
 
 def get_recent_failed_runs(num_runs=10, session=None):
@@ -884,7 +886,7 @@ def get_recent_failed_runs(num_runs=10, session=None):
     results = db_utils.model_query(models.Run, session).order_by(
         models.Run.run_at.desc()).filter(
         models.Run.fails > 0).limit(num_runs).all()
-    return list(map(lambda x: x.id, results))
+    return list(map(lambda x: x.uuid, results))
 
 
 def delete_old_runs(expire_age=186, session=None):
@@ -1158,7 +1160,7 @@ def get_time_series_runs_by_key_value(key, value, start_date=None,
     run_query = db_utils.model_query(models.Run, session).join(
         models.RunMetadata).filter(models.Run.id.in_(sub_query))
     run_query = _filter_runs_by_date(run_query, start_date, stop_date)
-    run_query = run_query.values(models.Run.id,
+    run_query = run_query.values(models.Run.uuid,
                                  models.Run.passes,
                                  models.Run.fails,
                                  models.Run.skips,
