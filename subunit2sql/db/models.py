@@ -60,6 +60,7 @@ class Test(BASE, SubunitBase):
 
 class Run(BASE, SubunitBase):
     __tablename__ = 'runs'
+    __table_args__ = (sa.Index('ix_run_at', 'run_at'),)
     uuid = sa.Column(sa.String(36),
                      default=lambda: six.text_type(uuid.uuid4()))
     id = sa.Column(sa.BigInteger, primary_key=True)
@@ -93,7 +94,8 @@ class TestRun(BASE, SubunitBase):
 
 class RunMetadata(BASE, SubunitBase):
     __tablename__ = 'run_metadata'
-    __table_args__ = (sa.Index('ix_run_metadata_run_id', 'run_id'),)
+    __table_args__ = (sa.Index('ix_run_key_value', 'key', 'value'),
+                      sa.Index('ix_run_id', 'run_id'))
 
     id = sa.Column(sa.BigInteger, primary_key=True)
     key = sa.Column(sa.String(255))
@@ -103,8 +105,8 @@ class RunMetadata(BASE, SubunitBase):
 
 class TestRunMetadata(BASE, SubunitBase):
     __tablename__ = 'test_run_metadata'
-    __table_args__ = (sa.Index('ix_test_run_metadata_test_run_id',
-                               'test_run_id'),)
+    __table_args__ = (sa.Index('ix_test_run_key_value', 'key', 'value'),
+                      sa.Index('ix_test_run_id', 'test_run_id'))
 
     id = sa.Column(sa.BigInteger, primary_key=True)
     key = sa.Column(sa.String(255))
@@ -114,8 +116,8 @@ class TestRunMetadata(BASE, SubunitBase):
 
 class TestMetadata(BASE, SubunitBase):
     __tablename__ = 'test_metadata'
-    __table_args__ = (sa.Index('ix_test_metadata_test_id',
-                               'test_id'),)
+    __table_args__ = (sa.Index('ix_test_key_value', 'key', 'value'),
+                      sa.Index('ix_test_id', 'test_id'))
 
     id = sa.Column(sa.BigInteger, primary_key=True)
     key = sa.Column(sa.String(255))
@@ -125,8 +127,7 @@ class TestMetadata(BASE, SubunitBase):
 
 class Attachments(BASE, SubunitBase):
     __tablename__ = 'attachments'
-    __table_args__ = (sa.Index('ix_attachemnts_id',
-                               'test_run_id'),)
+    __table_args__ = (sa.Index('ix_attach_test_run_id', 'test_run_id'),)
     id = sa.Column(sa.BigInteger, primary_key=True)
     test_run_id = sa.Column(sa.BigInteger)
     label = sa.Column(sa.String(255))

@@ -1,0 +1,8 @@
+---
+upgrade:
+  - Contains a DB schema migration to add indexes that were incorrectly
+    dropped as part of 2822a408bdd0
+fixes:
+  - Fixes performance issue on queries involving the metadata tables by
+    re-adding indexes that were accidently dropped
+
