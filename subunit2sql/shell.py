@@ -176,7 +176,7 @@ def process_results(results):
             api.add_test_run_metadata(results[test]['metadata'], test_run.id,
                                       session)
         if results[test]['attachments']:
-            api.add_test_run_attachments(results[test]['attachment'],
+            api.add_test_run_attachments(results[test]['attachments'],
                                          test_run.id, session)
     session.close()
 
