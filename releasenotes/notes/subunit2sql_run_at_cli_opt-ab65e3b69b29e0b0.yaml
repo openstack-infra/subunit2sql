@@ -1,0 +1,6 @@
+---
+features:
+  - A new CLI option, "run_at" is available on the subunit2sql CLI. This
+    enables setting a specific date and time to use for the run_at column
+    of the run being created. If one is not specified the previous default
+    behavior of using the current time is still used.
