@@ -84,6 +84,19 @@ def _filter_runs_by_date(query, start_date=None, stop_date=None):
     return query
 
 
+def _filter_test_runs_by_date(query, start_date=None, stop_date=None):
+    # Helper to apply a data range filter to a query on Run table
+    if isinstance(start_date, str):
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+    if isinstance(stop_date, str):
+        stop_date = datetime.datetime.strptime(stop_date, '%Y-%m-%d')
+    if start_date:
+        query = query.filter(models.TestRun.start_time >= start_date)
+    if stop_date:
+        query = query.filter(models.TestRun.start_time <= stop_date)
+    return query
+
+
 def get_engine(use_slave=False):
     """Get a new sqlalchemy engine instance
 
@@ -1058,8 +1071,8 @@ def get_test_run_dict_by_run_meta_key_value(key, value, start_date=None,
             models.TestRun,
             models.RunMetadata.run_id == models.TestRun.run_id).join(
                 models.Test)
-    query = _filter_runs_by_date(query, start_date=start_date,
-                                 stop_date=stop_date)
+    query = _filter_test_runs_by_date(query, start_date=start_date,
+                                      stop_date=stop_date)
     query = query.values(models.Test.test_id,
                          models.TestRun.status,
                          models.TestRun.start_time,
