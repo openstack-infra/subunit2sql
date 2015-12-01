@@ -16,6 +16,7 @@
 import copy
 import sys
 
+from dateutil import parser as date_parser
 from oslo_config import cfg
 from oslo_db import options
 from pbr import version
@@ -47,6 +48,10 @@ SHELL_OPTS = [
                help='An optional prefix to identify global test attrs '
                     'and treat it as test metadata instead of test_run '
                     'metadata'),
+    cfg.StrOpt('run_at', default=None,
+               help="The optional datetime string for the run was started, "
+                    "If one isn't provided the date and time of when "
+                    "subunit2sql is called will be used")
 ]
 
 _version_ = version.VersionInfo('subunit2sql').version_string()
@@ -128,9 +133,13 @@ def process_results(results):
     session = api.get_session()
     run_time = results.pop('run_time')
     totals = get_run_totals(results)
+    if CONF.run_at:
+        run_at = date_parser.parse(CONF.run_at)
+    else:
+        run_at = None
     db_run = api.create_run(totals['skips'], totals['fails'],
                             totals['success'], run_time, CONF.artifacts,
-                            id=CONF.run_id, session=session)
+                            id=CONF.run_id, run_at=run_at, session=session)
     if CONF.run_meta:
         api.add_run_metadata(CONF.run_meta, db_run.id, session)
     for test in results:
