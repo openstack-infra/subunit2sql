@@ -90,6 +90,12 @@ class TestRun(BASE, SubunitBase):
     start_time_microsecond = sa.Column(sa.Integer(), default=0)
     stop_time = sa.Column(sa.DateTime())
     stop_time_microsecond = sa.Column(sa.Integer(), default=0)
+    test = sa.orm.relationship(Test, backref=sa.orm.backref('test_run_test'),
+                               foreign_keys=test_id,
+                               primaryjoin=test_id == Test.id)
+    run = sa.orm.relationship(Run, backref=sa.orm.backref('test_run_run'),
+                              foreign_keys=run_id,
+                              primaryjoin=run_id == Run.id)
 
 
 class RunMetadata(BASE, SubunitBase):
@@ -101,6 +107,8 @@ class RunMetadata(BASE, SubunitBase):
     key = sa.Column(sa.String(255))
     value = sa.Column(sa.String(255))
     run_id = sa.Column(sa.BigInteger, sa.ForeignKey('runs.id'))
+    run = sa.orm.relationship(Run, backref='run', foreign_keys=run_id,
+                              primaryjoin=run_id == Run.id)
 
 
 class TestRunMetadata(BASE, SubunitBase):
@@ -112,6 +120,10 @@ class TestRunMetadata(BASE, SubunitBase):
     key = sa.Column(sa.String(255))
     value = sa.Column(sa.String(255))
     test_run_id = sa.Column(sa.BigInteger, sa.ForeignKey('test_runs.id'))
+    test_run = sa.orm.relationship(TestRun,
+                                   backref=sa.orm.backref('test_run_meta'),
+                                   foreign_keys=test_run_id,
+                                   primaryjoin=test_run_id == TestRun.id)
 
 
 class TestMetadata(BASE, SubunitBase):
@@ -123,6 +135,8 @@ class TestMetadata(BASE, SubunitBase):
     key = sa.Column(sa.String(255))
     value = sa.Column(sa.String(255))
     test_id = sa.Column(sa.BigInteger, sa.ForeignKey('tests.id'))
+    test = sa.orm.relationship(Test, backref='test', foreign_keys=test_id,
+                               primaryjoin=test_id == Test.id)
 
 
 class Attachments(BASE, SubunitBase):
@@ -132,3 +146,6 @@ class Attachments(BASE, SubunitBase):
     test_run_id = sa.Column(sa.BigInteger)
     label = sa.Column(sa.String(255))
     attachment = sa.Column(sa.LargeBinary())
+    test_run = sa.orm.relationship(TestRun, backref='test_run_attach',
+                                   foreign_keys=test_run_id,
+                                   primaryjoin=test_run_id == TestRun.id)
