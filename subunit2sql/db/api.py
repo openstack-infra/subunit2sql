@@ -275,8 +275,8 @@ def get_run_metadata(run_id, session=None):
     :rtype: subunit2sql.models.RunMetadata
     """
     session = session or get_session()
-    query = db_utils.model_query(models.RunMetadata, session).filter_by(
-        run_id=run_id)
+    query = db_utils.model_query(models.RunMetadata, session).join(
+        models.RunMetadata.run).filter(models.Run.uuid == run_id)
     return query.all()
 
 

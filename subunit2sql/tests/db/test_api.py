@@ -385,8 +385,8 @@ class TestDatabaseAPI(base.TestCase):
         self.assertEqual(1, api.get_session().query(
             models.RunMetadata.id).count())
         self.assertEqual(run_b.id, runs[0].id)
-        self.assertEqual(1, len(api.get_run_metadata(run_b.id)))
-        self.assertEqual(0, len(api.get_run_metadata(run_a.id)))
+        self.assertEqual(1, len(api.get_run_metadata(run_b.uuid)))
+        self.assertEqual(0, len(api.get_run_metadata(run_a.uuid)))
 
     def test_delete_old_test_runs(self):
         run_a = api.create_run()
