@@ -950,7 +950,7 @@ def delete_old_test_runs(expire_age=186, session=None):
 def get_id_from_test_id(test_id, session=None):
     """Return the id (uuid primary key) for a test given it's test_id value
 
-    :param str test_id:
+    :param str test_id: The test_id's string (not UUID) to identify the test
     :param session: optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
     :return: The id for the specified test
@@ -980,6 +980,7 @@ def get_test_counts_in_date_range(test_id, start_date=None, stop_date=None,
     Optionally you can provide a date to filter the results to be within a
     certain date range
 
+    :param str test_id: The test_id's ID(big integer) to identify the test
     :param str start_date: The date to use as the start for counting
     :param str stop_date: The date to use as the cutoff for counting
     :param session: optional session object if one isn't provided a new session
