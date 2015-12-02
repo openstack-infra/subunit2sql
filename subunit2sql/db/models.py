@@ -49,7 +49,10 @@ class SubunitBase(models.ModelBase):
 
 class Test(BASE, SubunitBase):
     __tablename__ = 'tests'
-    __table_args__ = (sa.Index('ix_test_id', 'test_id'),)
+    __table_args__ = (sa.Index('ix_test_ids', 'id', 'test_id',
+                               mysql_length={'test_id': 30}),
+                      sa.Index('ix_tests_test_id', 'test_id',
+                               mysql_length=30))
     id = sa.Column(sa.BigInteger, primary_key=True)
     test_id = sa.Column(sa.String(256))
     run_count = sa.Column(sa.Integer())
@@ -60,7 +63,8 @@ class Test(BASE, SubunitBase):
 
 class Run(BASE, SubunitBase):
     __tablename__ = 'runs'
-    __table_args__ = (sa.Index('ix_run_at', 'run_at'),)
+    __table_args__ = (sa.Index('ix_run_at', 'run_at'),
+                      sa.Index('ix_run_uuid', 'uuid'))
     uuid = sa.Column(sa.String(36),
                      default=lambda: six.text_type(uuid.uuid4()))
     id = sa.Column(sa.BigInteger, primary_key=True)
@@ -75,10 +79,15 @@ class Run(BASE, SubunitBase):
 
 class TestRun(BASE, SubunitBase):
     __tablename__ = 'test_runs'
-    __table_args__ = (sa.Index('ix_test_run_test_id', 'test_id'),
-                      sa.Index('ix_test_run_run_id', 'run_id'),
+    __table_args__ = (sa.Index('ix_test_id_status', 'test_id', 'status'),
+                      sa.Index('ix_test_id_start_time', 'test_id',
+                               'start_time'),
+                      sa.Index('ix_test_runs_test_id', 'test_id'),
+                      sa.Index('ix_test_runs_run_id', 'run_id'),
+                      sa.Index('ix_test_runs_start_time', 'start_time'),
+                      sa.Index('ix_test_runs_stop_time', 'stop_time'),
                       sa.UniqueConstraint('test_id', 'run_id',
-                                          name='ix_test_run_test_id_run_id'))
+                                          name='uq_test_runs'))
 
     id = sa.Column(sa.BigInteger, primary_key=True)
     test_id = sa.Column(sa.BigInteger, sa.ForeignKey('tests.id'),
