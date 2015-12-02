@@ -110,7 +110,9 @@ class TestRun(BASE, SubunitBase):
 class RunMetadata(BASE, SubunitBase):
     __tablename__ = 'run_metadata'
     __table_args__ = (sa.Index('ix_run_key_value', 'key', 'value'),
-                      sa.Index('ix_run_id', 'run_id'))
+                      sa.Index('ix_run_id', 'run_id'),
+                      sa.UniqueConstraint('run_id', 'key', 'value',
+                                          name='uq_run_metadata'))
 
     id = sa.Column(sa.BigInteger, primary_key=True)
     key = sa.Column(sa.String(255))
@@ -123,7 +125,9 @@ class RunMetadata(BASE, SubunitBase):
 class TestRunMetadata(BASE, SubunitBase):
     __tablename__ = 'test_run_metadata'
     __table_args__ = (sa.Index('ix_test_run_key_value', 'key', 'value'),
-                      sa.Index('ix_test_run_id', 'test_run_id'))
+                      sa.Index('ix_test_run_id', 'test_run_id'),
+                      sa.UniqueConstraint('test_run_id', 'key', 'value',
+                                          name='uq_test_run_metadata'))
 
     id = sa.Column(sa.BigInteger, primary_key=True)
     key = sa.Column(sa.String(255))
@@ -138,7 +142,9 @@ class TestRunMetadata(BASE, SubunitBase):
 class TestMetadata(BASE, SubunitBase):
     __tablename__ = 'test_metadata'
     __table_args__ = (sa.Index('ix_test_key_value', 'key', 'value'),
-                      sa.Index('ix_test_id', 'test_id'))
+                      sa.Index('ix_test_id', 'test_id'),
+                      sa.UniqueConstraint('test_id', 'key', 'value',
+                                          name='uq_test_metadata'))
 
     id = sa.Column(sa.BigInteger, primary_key=True)
     key = sa.Column(sa.String(255))

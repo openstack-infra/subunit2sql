@@ -1,0 +1,3 @@
+---
+upgrade:
+  - A new migration is added to add unique constraints on the metadata tables.
