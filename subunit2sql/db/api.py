@@ -179,6 +179,8 @@ def create_run(skips=0, fails=0, passes=0, run_time=0, artifacts=None,
     :param str id: the run id for the new run, needs to be a unique value
     :param session: optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
+    :param run_at: optional time at which the run was started. If not specified
+                   the time that data is added to the DB will be used instead
 
     :return: The run object stored in the DB
     :rtype: subunit2sql.models.Run
