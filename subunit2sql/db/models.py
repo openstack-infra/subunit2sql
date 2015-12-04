@@ -54,7 +54,8 @@ class Test(BASE, SubunitBase):
                       sa.Index('ix_tests_test_id', 'test_id',
                                mysql_length=30))
     id = sa.Column(sa.BigInteger, primary_key=True)
-    test_id = sa.Column(sa.String(256))
+    test_id = sa.Column(sa.String(256),
+                        nullable=False)
     run_count = sa.Column(sa.Integer())
     success = sa.Column(sa.Integer())
     failure = sa.Column(sa.Integer())
@@ -90,10 +91,8 @@ class TestRun(BASE, SubunitBase):
                                           name='uq_test_runs'))
 
     id = sa.Column(sa.BigInteger, primary_key=True)
-    test_id = sa.Column(sa.BigInteger,
-                        nullable=False)
-    run_id = sa.Column(sa.BigInteger,
-                       nullable=False)
+    test_id = sa.Column(sa.BigInteger)
+    run_id = sa.Column(sa.BigInteger)
     status = sa.Column(sa.String(256))
     start_time = sa.Column(sa.DateTime())
     start_time_microsecond = sa.Column(sa.Integer(), default=0)
