@@ -59,11 +59,12 @@ def convert_datetime(timestamp):
 def write_test(output, start_time, stop_time, status, test_id, metadatas):
     write_status = output.status
     kwargs = {}
-    if 'tags' in metadatas:
-        tags = metadatas['tags']
-        kwargs['test_tags'] = tags.split(',')
-    if 'attrs' in metadatas:
-        test_id = test_id + '[' + metadatas['attrs'] + ']'
+    if metadatas:
+        if 'tags' in metadatas:
+            tags = metadatas['tags']
+            kwargs['test_tags'] = tags.split(',')
+        if 'attrs' in metadatas:
+            test_id = test_id + '[' + metadatas['attrs'] + ']'
     start_time = convert_datetime(start_time)
     kwargs['timestamp'] = start_time
     kwargs['test_id'] = test_id
@@ -82,8 +83,11 @@ def sql2subunit(run_id, output=sys.stdout):
     output.startTestRun()
     for test_id in test_runs:
         test = test_runs[test_id]
+        # NOTE(mtreinish): test_run_metadata is not guaranteed to be present
+        # for the test_run.
+        metadata = test.get('metadata', None)
         write_test(output, test['start_time'], test['stop_time'],
-                   test['status'], test_id, test['metadata'])
+                   test['status'], test_id, metadata)
     output.stopTestRun()
 
 
