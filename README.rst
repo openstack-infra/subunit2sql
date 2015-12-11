@@ -60,15 +60,7 @@ or with a config file::
 
     subunit2sql-db-manage --config-file subunit2sql.conf upgrade head
 
-This will bring the DB schema up to the latest version for subunit2sql. Also,
-it is worth noting that the schema migrations used in subunit2sql do not
-currently support sqlite. While it is possible to fix this, sqlite only
-supports a subset of the necessary sql calls used by the migration scripts. As
-such, maintaining support for sqlite will be a continual extra effort, so if
-support is added back in the future, it is no guarantee that it will remain. In
-addition, the performance of running, even in a testing capacity, subunit2sql
-with MySQL or Postgres make it worth the effort of setting up one of them to
-use subunit2sql.
+This will bring the DB schema up to the latest version for subunit2sql.
 
 .. _subunit2sql:
 
@@ -86,9 +78,9 @@ There are several options for running subunit2sql, they can be listed with::
 
     subunit2sql --help
 
-The only required options are the state_path and the database-connections.
-These options and the other can either be used on the CLI, or put in a config
-file. If a config file is used you need to specify the location on the CLI.
+The only required option is --database-connection. The options can either be
+used on the CLI, or put in a config file. If a config file is used you need to
+specify the location on the CLI.
 
 Most of the optional arguments deal with how subunit2sql interacts with the
 SQL DB. However, it is worth pointing out that the artifacts option and the
