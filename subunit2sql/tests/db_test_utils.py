@@ -62,6 +62,8 @@ def is_backend_avail(backend,
         elif backend == "postgres":
             connect_uri = get_connect_string("postgres", user=user,
                                              passwd=passwd, database=database)
+        elif backend == "sqlite":
+            return True
         engine = sqlalchemy.create_engine(connect_uri)
         connection = engine.connect()
     except Exception:

@@ -20,6 +20,7 @@ import testscenarios
 from subunit2sql.db import api
 from subunit2sql.db import models
 from subunit2sql.tests import base
+from subunit2sql.tests import db_test_utils
 from subunit2sql.tests import subunit2sql_fixtures as fixtures
 
 load_tests = testscenarios.load_tests_apply_scenarios
@@ -27,15 +28,23 @@ load_tests = testscenarios.load_tests_apply_scenarios
 
 class TestDatabaseAPI(base.TestCase):
 
-    scenarios = [('mysql', {'dialect': 'mysql'})]
+    scenarios = [
+        ('mysql', {'dialect': 'mysql'}),
+        ('postgresql', {'dialect': 'postgres'}),
+        ('sqlite', {'dialect': 'sqlite'})
+    ]
 
     def setUp(self):
         super(TestDatabaseAPI, self).setUp()
+        if not db_test_utils.is_backend_avail(self.dialect):
+            raise self.skipTest('%s is not available' % self.dialect)
         self.useFixture(fixtures.LockFixture(self.dialect))
         if self.dialect == 'mysql':
             self.useFixture(fixtures.MySQLConfFixture())
-        else:
+        elif self.dialect == 'postgres':
             self.useFixture(fixtures.PostgresConfFixture())
+        elif self.dialect == 'sqlite':
+            self.useFixture(fixtures.SqliteConfFixture())
         self.useFixture(fixtures.Database())
 
     def test_create_test(self):
@@ -221,7 +230,7 @@ class TestDatabaseAPI(base.TestCase):
             else:
                 fails = 0
             year = 2010 + (i % 3)
-            run_at = '%d-01-%02d 12:00:00' % (year, i + 1)
+            run_at = datetime.datetime(year, 1, i + 1, 12, 0, 0)
             run = api.create_run(fails=fails, passes=10, run_at=run_at)
             self.assertIsNotNone(run)
             if i < 10:
