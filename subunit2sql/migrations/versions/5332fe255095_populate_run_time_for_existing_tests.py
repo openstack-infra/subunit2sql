@@ -36,7 +36,8 @@ def upgrade():
     query = db_utils.model_query(
         models.Test, db_api.get_session()).filter(
             models.Test.success > 0, models.Test.run_time == None).join(
-                models.TestRun).filter_by(
+                models.TestRun,
+                models.Test.id == models.TestRun.test_id).filter_by(
                     status='success').values(models.Test.id,
                                              models.TestRun.start_time,
                                              models.TestRun.stop_time)

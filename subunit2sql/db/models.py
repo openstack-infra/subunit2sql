@@ -90,9 +90,9 @@ class TestRun(BASE, SubunitBase):
                                           name='uq_test_runs'))
 
     id = sa.Column(sa.BigInteger, primary_key=True)
-    test_id = sa.Column(sa.BigInteger, sa.ForeignKey('tests.id'),
+    test_id = sa.Column(sa.BigInteger,
                         nullable=False)
-    run_id = sa.Column(sa.BigInteger, sa.ForeignKey('runs.id'),
+    run_id = sa.Column(sa.BigInteger,
                        nullable=False)
     status = sa.Column(sa.String(256))
     start_time = sa.Column(sa.DateTime())
@@ -117,7 +117,7 @@ class RunMetadata(BASE, SubunitBase):
     id = sa.Column(sa.BigInteger, primary_key=True)
     key = sa.Column(sa.String(255))
     value = sa.Column(sa.String(255))
-    run_id = sa.Column(sa.BigInteger, sa.ForeignKey('runs.id'))
+    run_id = sa.Column(sa.BigInteger)
     run = sa.orm.relationship(Run, backref='run', foreign_keys=run_id,
                               primaryjoin=run_id == Run.id)
 
@@ -132,7 +132,7 @@ class TestRunMetadata(BASE, SubunitBase):
     id = sa.Column(sa.BigInteger, primary_key=True)
     key = sa.Column(sa.String(255))
     value = sa.Column(sa.String(255))
-    test_run_id = sa.Column(sa.BigInteger, sa.ForeignKey('test_runs.id'))
+    test_run_id = sa.Column(sa.BigInteger)
     test_run = sa.orm.relationship(TestRun,
                                    backref=sa.orm.backref('test_run_meta'),
                                    foreign_keys=test_run_id,
@@ -149,7 +149,7 @@ class TestMetadata(BASE, SubunitBase):
     id = sa.Column(sa.BigInteger, primary_key=True)
     key = sa.Column(sa.String(255))
     value = sa.Column(sa.String(255))
-    test_id = sa.Column(sa.BigInteger, sa.ForeignKey('tests.id'))
+    test_id = sa.Column(sa.BigInteger)
     test = sa.orm.relationship(Test, backref='test', foreign_keys=test_id,
                                primaryjoin=test_id == Test.id)
 
