@@ -13,7 +13,7 @@ the DB api would need to be created to parse a different test result output
 format. It's also worth pointing out that subunit has several language library
 bindings available. So as a user you could create a small filter to convert a
 different format to subunit. Creating a filter should be fairly easy and then
-you don't have to worry about writing a tool like :ref:_`subunit2sql` to use a
+you don't have to worry about writing a tool like :ref:`subunit2sql` to use a
 different format.
 
 .. _subunit: https://github.com/testing-cabal/subunit/blob/master/README.rst
