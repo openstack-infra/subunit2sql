@@ -817,20 +817,34 @@ def get_test_run_time_series(test_id, session=None):
     return time_series
 
 
-def get_test_run_series(start_date=None, stop_date=None, session=None):
+def get_test_run_series(start_date=None, stop_date=None, session=None,
+                        key='build_queue', value='gate'):
     """Returns a time series dict of total daily run counts
 
     :param str start_date: Optional start date to filter results on
     :param str stop_date: Optional stop date to filter results on
     :param session: optional session object if one isn't provided a new session
-
+    :param str key: optional run_metadata key to filter the runs used on. Key
+                    must be specified with value for filtering to occur.
+                    This defaults to 'build_queue' for backwards compatibility
+                    with earlier versions. Note, this default will be removed
+                    in the future.
+    :param str value: optional run_metadata value to filter the runs used on.
+                      Value must be specified with key for filtering to occur.
+                      This defaults to 'gate' for backwards
+                      compatibility with earlier versions. Note, this default
+                      will be removed in the future.
     :return dict: A dictionary with the dates as the keys and the values
                   being the total run count for that day. (The sum of success
                   and failures from all runs that started that day)
     """
     session = session or get_session()
-    full_query = db_utils.model_query(models.Run, session=session).join(
-        models.RunMetadata).filter_by(key='build_queue', value='gate')
+    full_query = db_utils.model_query(models.Run, session=session)
+    if key and value:
+        full_query = full_query.join(
+            models.RunMetadata,
+            models.Run.id == models.RunMetadata.run_id).filter_by(
+                key=key, value=value)
 
     # Process date bounds
     full_query = _filter_runs_by_date(full_query, start_date, stop_date)

@@ -360,6 +360,40 @@ class TestDatabaseAPI(base.TestCase):
         self.assertEqual(sorted(['test_a', 'test_b', 'test_c', 'test_d']),
                          sorted(keys))
 
+    def test_get_test_run_series(self):
+        timestamp_a = datetime.datetime.utcnow()
+        timestamp_b = timestamp_a + datetime.timedelta(minutes=2)
+        api.create_run(passes=5, run_at=timestamp_a)
+        api.create_run(fails=2, run_at=timestamp_b)
+        result = api.get_test_run_series(key=None, value=None)
+        self.assertEqual(2, len(result.keys()))
+        self.assertIn(timestamp_a.replace(microsecond=0),
+                      [x.replace(microsecond=0) for x in list(result.keys())])
+        self.assertIn(timestamp_b.replace(microsecond=0),
+                      [x.replace(microsecond=0) for x in list(result.keys())])
+        for timestamp in result:
+            if timestamp.replace(
+                microsecond=0) == timestamp_a.replace(microsecond=0):
+                self.assertEqual(5, result[timestamp])
+            else:
+                self.assertEqual(2, result[timestamp])
+
+    def test_get_test_run_series_with_meta(self):
+        timestamp_a = datetime.datetime.utcnow()
+        timestamp_b = timestamp_a + datetime.timedelta(minutes=2)
+        run_a = api.create_run(passes=5, run_at=timestamp_a)
+        api.create_run(fails=2, run_at=timestamp_b)
+        api.add_run_metadata({'not_a_key': 'not_a_value'}, run_a.id)
+        result = api.get_test_run_series(key='not_a_key',
+                                         value='not_a_value')
+        self.assertEqual(1, len(result.keys()))
+        self.assertIn(timestamp_a.replace(microsecond=0),
+                      [x.replace(microsecond=0) for x in list(result.keys())])
+        self.assertNotIn(timestamp_b.replace(microsecond=0),
+                         [x.replace(microsecond=0) for x in list(
+                             result.keys())])
+        self.assertEqual(5, result[list(result.keys())[0]])
+
     def test_get_test_run_dict_by_run_meta_key_value(self):
         timestamp_a = datetime.datetime.utcnow()
         timestamp_b = timestamp_a + datetime.timedelta(minutes=2)
