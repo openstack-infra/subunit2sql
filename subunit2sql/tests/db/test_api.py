@@ -449,3 +449,59 @@ class TestDatabaseAPI(base.TestCase):
         self.assertEqual(test_run_b.id, test_runs[0].id)
         self.assertEqual(1, len(api.get_test_run_metadata(test_run_b.id)))
         self.assertEqual(0, len(api.get_test_run_metadata(test_run_a.id)))
+
+    def test_get_run_metadata(self):
+        run_a = api.create_run()
+        run_b = api.create_run()
+        api.add_run_metadata({'not_a_key': 'not_a_value'}, run_b.id)
+        a_metadata = api.get_run_metadata(run_a.uuid)
+        b_metadata = api.get_run_metadata(run_b.uuid)
+        self.assertEqual([], a_metadata)
+        self.assertEqual(1, len(b_metadata))
+        b_metadata = b_metadata[0].to_dict()
+        self.assertEqual(run_b.id, b_metadata['run_id'])
+        self.assertEqual('not_a_key', b_metadata['key'])
+        self.assertEqual('not_a_value', b_metadata['value'])
+
+    def test_get_runs_by_key_value(self):
+        api.create_run()
+        run_b = api.create_run()
+        api.add_run_metadata({'not_a_key': 'not_a_value'}, run_b.id)
+        found_runs = api.get_runs_by_key_value('not_a_key', 'not_a_value')
+        self.assertEqual(1, len(found_runs))
+        self.assertEqual(run_b.id, found_runs[0].id)
+        self.assertEqual(run_b.uuid, found_runs[0].uuid)
+
+    def test_get_tests_from_run_id(self):
+        run_a = api.create_run()
+        run_b = api.create_run()
+        test_a = api.create_test('fake_test')
+        test_b = api.create_test('fake_test2')
+        api.create_test_run(test_a.id, run_a.id, 'fail',
+                            start_time=datetime.datetime(1914, 6, 28, 10, 45,
+                                                         0))
+        api.create_test_run(test_a.id, run_b.id, 'fail',
+                            start_time=datetime.datetime.utcnow())
+        api.create_test_run(test_b.id, run_a.id, 'success',
+                            start_time=datetime.datetime(1914, 6, 28, 10, 45,
+                                                         0))
+        result = api.get_tests_from_run_id(run_a.id)
+        self.assertEqual(2, len(result))
+        self.assertIn(test_a.id, [x.id for x in result])
+        self.assertIn(test_a.test_id, [x.test_id for x in result])
+        self.assertIn(test_b.id, [x.id for x in result])
+        self.assertIn(test_b.test_id, [x.test_id for x in result])
+
+    def test_get_all_runs_time_series_by_key(self):
+        time_a = datetime.datetime(1914, 6, 28, 10, 45, 0)
+        run_a = api.create_run(run_at=time_a)
+        run_b = api.create_run()
+        time_c = datetime.datetime(1918, 11, 11, 11, 11, 11)
+        run_c = api.create_run(run_at=time_c)
+        api.add_run_metadata({'not_a_key': 'not_a_value'}, run_b.id)
+        api.add_run_metadata({'a_key': 'a_value'}, run_a.id)
+        api.add_run_metadata({'a_key': 'c_value'}, run_c.id)
+        result = api.get_all_runs_time_series_by_key('a_key')
+        self.assertEqual(2, len(result.keys()))
+        self.assertIn(time_a.date(), [x.date() for x in result.keys()])
+        self.assertIn(time_c.date(), [x.date() for x in result.keys()])
