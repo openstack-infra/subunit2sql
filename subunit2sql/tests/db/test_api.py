@@ -505,3 +505,31 @@ class TestDatabaseAPI(base.TestCase):
         self.assertEqual(2, len(result.keys()))
         self.assertIn(time_a.date(), [x.date() for x in result.keys()])
         self.assertIn(time_c.date(), [x.date() for x in result.keys()])
+
+    def test_get_recent_runs_by_key_value_metadata(self):
+        run_a = api.create_run()
+        run_b = api.create_run()
+        run_c = api.create_run()
+        api.add_run_metadata({'a_key': 'a_value'}, run_a.id)
+        api.add_run_metadata({'a_key': 'a_value'}, run_c.id)
+        api.add_run_metadata({'a_key': 'b_value'}, run_b.id)
+        result = api.get_recent_runs_by_key_value_metadata('a_key', 'a_value')
+        self.assertEqual(2, len(result))
+        self.assertIn(run_a.id, [x.id for x in result])
+        self.assertNotIn(run_b.id, [x.id for x in result])
+        self.assertIn(run_c.id, [x.id for x in result])
+
+    def test_get_recent_runs_by_key_value_metadata_one_run(self):
+        timestamp = datetime.datetime(1914, 6, 28, 10, 45, 0)
+        run_a = api.create_run(run_at=timestamp)
+        run_b = api.create_run()
+        run_c = api.create_run()
+        api.add_run_metadata({'a_key': 'a_value'}, run_a.id)
+        api.add_run_metadata({'a_key': 'a_value'}, run_c.id)
+        api.add_run_metadata({'a_key': 'b_value'}, run_b.id)
+        result = api.get_recent_runs_by_key_value_metadata('a_key', 'a_value',
+                                                           num_runs=1)
+        self.assertEqual(1, len(result))
+        self.assertNotIn(run_a.id, [x.id for x in result])
+        self.assertNotIn(run_b.id, [x.id for x in result])
+        self.assertIn(run_c.id, [x.id for x in result])

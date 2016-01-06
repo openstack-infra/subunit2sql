@@ -926,6 +926,25 @@ def get_recent_failed_runs(num_runs=10, session=None):
     return list(map(lambda x: x.uuid, results))
 
 
+def get_recent_runs_by_key_value_metadata(key, value, num_runs=10,
+                                          session=None):
+    """Get a list of runs for recent runs with a key value metadata pair
+
+    :param int num_runs: The number of runs to return in the list
+    :param session: optional session object if one isn't provided a new session
+    :return list: A list of run objects for the most recent runs.
+    :rtype subunit2sql.db.models.Run
+    """
+    session = session or get_session()
+    results = db_utils.model_query(models.Run, session).join(
+        models.RunMetadata,
+        models.Run.id == models.RunMetadata.run_id).filter(
+            models.RunMetadata.key == key,
+            models.RunMetadata.value == value).order_by(
+                models.Run.run_at.desc()).limit(num_runs).all()
+    return results
+
+
 def delete_old_runs(expire_age=186, session=None):
     """Delete all runs and associated metadata older than the provided age
 
