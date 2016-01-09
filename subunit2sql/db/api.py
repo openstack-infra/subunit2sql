@@ -1307,6 +1307,36 @@ def get_time_series_runs_by_key_value(key, value, start_date=None,
     return runs
 
 
+def get_run_failure_rate_by_key_value_metadata(key, value, start_date=None,
+                                               stop_date=None, session=None):
+    """Return the failure percentage of runs with a set of run metadata
+
+    :param str key: the metadata key to use for matching the runs
+    :param str value: the metadata value to use for matching the runs
+    :param start_date: Optional start date to filter results on
+    :param str stop_date: Optional stop date to filter results on
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return failure_rate: The percentage of runs that failed, will be None if
+                          no runs are found
+    :rtype: float
+    """
+    session = session or get_session()
+    base_query = db_utils.model_query(models.Run, session).join(
+        models.RunMetadata,
+        models.Run.id == models.RunMetadata.run_id).filter(
+            models.RunMetadata.key == key,
+            models.RunMetadata.value == value)
+    base_query = _filter_runs_by_date(base_query, start_date, stop_date)
+    fails = base_query.filter(models.Run.fails >= 1).count()
+    successes = base_query.filter(models.Run.passes > 0,
+                                  models.Run.fails == 0).count()
+    if fails == 0 and successes == 0:
+        return None
+    return (float(fails) / float(successes + fails)) * 100
+
+
 def add_test_run_attachments(attach_dict, test_run_id, session=None):
     """Add attachments a specific test run.
 
