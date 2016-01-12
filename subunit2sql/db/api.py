@@ -960,10 +960,10 @@ def delete_old_runs(expire_age=186, session=None):
         models.Run.run_at < expire_date).subquery()
     db_utils.model_query(models.RunMetadata, session).filter(
         models.RunMetadata.run_id.in_(sub_query)).delete(
-            synchronize_session='fetch')
+            synchronize_session=False)
     # Delete the runs
     db_utils.model_query(models.Run, session).filter(
-        models.Run.run_at < expire_date).delete(synchronize_session='evaluate')
+        models.Run.run_at < expire_date).delete(synchronize_session=False)
 
 
 def delete_old_test_runs(expire_age=186, session=None):
@@ -981,11 +981,11 @@ def delete_old_test_runs(expire_age=186, session=None):
         models.TestRun.start_time < expire_date).subquery()
     db_utils.model_query(models.TestRunMetadata, session).filter(
         models.TestRunMetadata.test_run_id.in_(sub_query)).delete(
-            synchronize_session='fetch')
+            synchronize_session=False)
     # Delete the test runs
     db_utils.model_query(models.TestRun, session).filter(
         models.TestRun.start_time < expire_date).delete(
-            synchronize_session='evaluate')
+            synchronize_session=False)
 
 
 def get_id_from_test_id(test_id, session=None):
