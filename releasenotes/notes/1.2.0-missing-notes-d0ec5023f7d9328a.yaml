@@ -1,0 +1,12 @@
+---
+features:
+  - A new DB API method to get a list of recent runs with a set of run_metadata
+  - A new subunit2sql-graph type run_time_meta
+upgrade:
+  - Min versions are set for the graph extras requirements
+fixes:
+  - A hard coded filter used in get_test_run_series() is removed
+  - write_subunit will now handle test_runs without any metadata
+other:
+  - DB API tests now run against all supported backends
+  - New tests are added to ensure sqlalchemy models and migrations are in sync
