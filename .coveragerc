@@ -1,0 +1,7 @@
+[run]
+branch = True
+source = subunit2sql
+omit = subunit2sql/tests/*
+
+[report]
+ignore_errors = True
