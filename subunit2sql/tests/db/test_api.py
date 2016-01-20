@@ -313,6 +313,23 @@ class TestDatabaseAPI(base.TestCase):
         self.assertEqual(test_b.id, res[0].test_id)
         self.assertEqual(run.id, res[0].run_id)
 
+    def test_get_test_runs_test_test_id_with_run_metadata(self):
+        run_a = api.create_run()
+        run_b = api.create_run()
+        api.add_run_metadata({'a_key': 'a_value'}, run_a.id)
+        api.add_run_metadata({'b_key': 'b_value'}, run_b.id)
+        test_a = api.create_test('fake_test')
+        test_b = api.create_test('less_fake_test')
+        api.create_test_run(test_a.id, run_a.id, 'success')
+        api.create_test_run(test_a.id, run_b.id, 'success')
+        api.create_test_run(test_b.id, run_a.id, 'success')
+        api.create_test_run(test_b.id, run_b.id, 'success')
+        res = api.get_test_runs_by_test_test_id('less_fake_test', key='a_key',
+                                                value='a_value')
+        self.assertEqual(1, len(res))
+        self.assertEqual(test_b.id, res[0].test_id)
+        self.assertEqual(run_a.id, res[0].run_id)
+
     def test_get_all_run_metadata_keys(self):
         run = api.create_run()
         meta_dict = {
