@@ -542,3 +542,53 @@ class TestDatabaseAPI(base.TestCase):
         self.assertNotIn(run_a.id, [x.id for x in result])
         self.assertNotIn(run_b.id, [x.id for x in result])
         self.assertIn(run_c.id, [x.id for x in result])
+
+    def test_get_test_runs_by_status_for_run_ids_no_meta(self):
+        run_b = api.create_run(artifacts='fake_url')
+        run_a = api.create_run()
+        run_c = api.create_run()
+        test_a = api.create_test('fake_test')
+        start_timestamp = datetime.datetime(1914, 6, 28, 10, 45, 0)
+        stop_timestamp = datetime.datetime(1914, 6, 28, 10, 50, 0)
+        api.create_test_run(test_a.id, run_a.id, 'success',
+                            datetime.datetime.utcnow())
+        api.create_test_run(test_a.id, run_b.id, 'fail',
+                            start_timestamp, stop_timestamp)
+        api.create_test_run(test_a.id, run_c.id, 'success',
+                            datetime.datetime.utcnow())
+        result = api.get_test_runs_by_status_for_run_ids(
+            'fail', [run_a.uuid, run_b.uuid, run_c.uuid])
+        self.assertEqual(1, len(result))
+        self.assertEqual({
+            'test_id': u'fake_test',
+            'link': u'fake_url',
+            'start_time': start_timestamp,
+            'stop_time': stop_timestamp,
+        }, result[0])
+
+    def test_get_test_runs_by_status_for_run_ids_with_meta(self):
+        run_b = api.create_run(artifacts='fake_url')
+        run_a = api.create_run()
+        run_c = api.create_run()
+        test_a = api.create_test('fake_test')
+        api.add_run_metadata({'a_key': 'b'}, run_b.id)
+        api.add_run_metadata({'a_key': 'a'}, run_a.id)
+        api.add_run_metadata({'a_key': 'c'}, run_c.id)
+        start_timestamp = datetime.datetime(1914, 6, 28, 10, 45, 0)
+        stop_timestamp = datetime.datetime(1914, 6, 28, 10, 50, 0)
+        api.create_test_run(test_a.id, run_a.id, 'success',
+                            datetime.datetime.utcnow())
+        api.create_test_run(test_a.id, run_b.id, 'fail',
+                            start_timestamp, stop_timestamp)
+        api.create_test_run(test_a.id, run_c.id, 'success',
+                            datetime.datetime.utcnow())
+        result = api.get_test_runs_by_status_for_run_ids(
+            'fail', [run_a.uuid, run_b.uuid, run_c.uuid], key='a_key')
+        self.assertEqual(1, len(result))
+        self.assertEqual({
+            'test_id': u'fake_test',
+            'link': u'fake_url',
+            'start_time': start_timestamp,
+            'stop_time': stop_timestamp,
+            'a_key': 'b',
+        }, result[0])

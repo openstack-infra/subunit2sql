@@ -1371,6 +1371,65 @@ def get_runs_by_status_grouped_by_run_metadata(key, start_date=None,
     return result
 
 
+def get_test_runs_by_status_for_run_ids(status, run_ids, key=None,
+                                        session=None):
+    """Get a list of test run dicts by status for all the specified runs
+
+    :param str status: The test status to filter the returned test runs on
+    :param list run_ids: A list of run ids (the uuid column from the runs
+                         table) to get the test runs from
+    :param str key: An optional run_metadata key to add the values for a run
+                    to the output dict for each test_run
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return test_runs: a list of dicts for the test_runs and associated data
+    :rtype: list
+    """
+    session = session or get_session()
+    query = db_utils.model_query(models.TestRun, session).filter(
+        models.TestRun.status == status).join(
+            models.Test, models.TestRun.test_id == models.Test.id).join(
+                models.Run, models.TestRun.run_id == models.Run.id).filter(
+                    models.Run.uuid.in_(run_ids))
+
+    if key:
+        query = query.join(
+            models.RunMetadata,
+            models.TestRun.run_id == models.RunMetadata.run_id).filter(
+                models.RunMetadata.key == key)
+        results = query.values(models.Test.test_id, models.Run.artifacts,
+                               models.TestRun.start_time,
+                               models.TestRun.start_time_microsecond,
+                               models.TestRun.stop_time,
+                               models.TestRun.stop_time_microsecond,
+                               models.RunMetadata.value)
+    else:
+        results = query.values(models.Test.test_id, models.Run.artifacts,
+                               models.TestRun.start_time,
+                               models.TestRun.start_time_microsecond,
+                               models.TestRun.stop_time,
+                               models.TestRun.stop_time_microsecond)
+    test_runs = []
+    for result in results:
+        test_run = {
+            'test_id': result.test_id,
+            'link': result.artifacts,
+            'start_time': result.start_time,
+            'stop_time': result.stop_time,
+        }
+        if result.start_time_microsecond is not None:
+            test_run['start_time'] = test_run['start_time'].replace(
+                microsecond=result.start_time_microsecond)
+        if result.stop_time_microsecond is not None:
+            test_run['stop_time'] = test_run['stop_time'].replace(
+                microsecond=result.stop_time_microsecond)
+        if hasattr(result, "value"):
+            test_run[key] = result.value
+        test_runs.append(test_run)
+    return test_runs
+
+
 def get_all_run_metadata_keys(session=None):
     """Get a list of all the keys used in the run_metadata table
 
