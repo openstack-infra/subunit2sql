@@ -89,8 +89,6 @@ class TestModelsMigrations(test_migrations.ModelsMigrationsSync,
             self.useFixture(fixtures.MySQLConfFixture())
         elif self.dialect == 'postgres':
             self.useFixture(fixtures.PostgresConfFixture())
-        elif self.dialect == 'sqlite':
-            self.useFixture(fixtures.SqliteConfFixture())
         connect_string = db_test_utils.get_connect_string(self.dialect)
         self.engine = sqlalchemy.create_engine(connect_string)
 
