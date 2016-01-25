@@ -1040,10 +1040,10 @@ def get_run_times_grouped_by_run_metadata_key(key, start_date=None,
                                        models.RunMetadata.value)
     result = {}
     for run in run_times:
-        if result.get(run[2]):
-            result[run[2]].append(run[1])
+        if result.get(run.value):
+            result[run.value].append(run.run_time)
         else:
-            result[run[2]] = [run[1]]
+            result[run.value] = [run.run_time]
     return result
 
 
@@ -1158,19 +1158,21 @@ def get_test_run_dict_by_run_meta_key_value(key, value, start_date=None,
                          models.TestRun.stop_time_microsecond)
     tests = []
     for test in query:
-        if test[2]:
-            start_time = test[2]
-            start_time = start_time.replace(microsecond=test[3])
+        if test.start_time:
+            start_time = test.start_time
+            start_time = start_time.replace(
+                microsecond=test.start_time_microsecond)
         else:
             start_time = None
-        if test[4]:
-            stop_time = test[4]
-            stop_time = stop_time.replace(microsecond=test[5])
+        if test.stop_time:
+            stop_time = test.stop_time
+            stop_time = stop_time.replace(
+                microsecond=test.stop_time_microsecond)
         else:
             stop_time = None
         test_run_dict = {
-            'test_id': test[0],
-            'status': test[1],
+            'test_id': test.test_id,
+            'status': test.status,
             'start_time': start_time,
             'stop_time': stop_time,
         }
@@ -1207,24 +1209,24 @@ def get_all_runs_time_series_by_key(key, start_date=None,
                                    models.RunMetadata.value)
     runs = {}
     for run in runs_query:
-        if run[0] not in runs:
-            runs[run[0]] = {run[4]: [{
-                'pass': run[1],
-                'fail': run[2],
-                'skip': run[3],
+        if run.run_at not in runs:
+            runs[run.run_at] = {run.value: [{
+                'pass': run.passes,
+                'fail': run.fails,
+                'skip': run.skips,
             }]}
         else:
-            if run[4] not in list(runs[run[0]].keys()):
-                runs[run[0]][run[4]] = [{
-                    'pass': run[1],
-                    'fail': run[2],
-                    'skip': run[3],
+            if run.value not in list(runs[run.run_at].keys()):
+                runs[run.run_at[run.value]] = [{
+                    'pass': run.passes,
+                    'fail': run.fails,
+                    'skip': run.skips,
                 }]
             else:
-                runs[run[0]][run[4]].append({
-                    'pass': run[1],
-                    'fail': run[2],
-                    'skip': run[3],
+                runs[run.run_at[run.value]].append({
+                    'pass': run.passes,
+                    'fail': run.fails,
+                    'skip': run.skips,
                 })
     return runs
 
@@ -1264,8 +1266,8 @@ def get_time_series_runs_by_key_value(key, value, start_date=None,
                                  models.RunMetadata.value)
     runs = {}
     for run in run_query:
-        run_at = run[5]
-        run_id = run[0]
+        run_at = run.run_at
+        run_id = run.uuid
         if run_at not in runs:
             # We have hit a new time stamp so we need to add a top level key
             # for the timestamp and populate the run list with a new dict for
@@ -1273,11 +1275,11 @@ def get_time_series_runs_by_key_value(key, value, start_date=None,
             runs[run_at] = []
             run_dict = {
                 'id': run_id,
-                'pass': run[1],
-                'fail': run[2],
-                'skip': run[3],
-                'run_time': run[4],
-                'metadata': {run[6]: run[7]}
+                'pass': run.passes,
+                'fail': run.fails,
+                'skip': run.skips,
+                'run_time': run.run_time,
+                'metadata': {run.key: run.value}
             }
             runs[run_at].append(run_dict)
         else:
@@ -1286,11 +1288,11 @@ def get_time_series_runs_by_key_value(key, value, start_date=None,
                 # append a new run dict to the list of runs for that timestamp
                 run_dict = {
                     'id': run_id,
-                    'pass': run[1],
-                    'fail': run[2],
-                    'skip': run[3],
-                    'run_time': run[4],
-                    'metadata': {run[6]: run[7]}
+                    'pass': run.passes,
+                    'fail': run.fails,
+                    'skip': run.skips,
+                    'run_time': run.run_time,
+                    'metadata': {run.key: run.value}
                 }
                 runs[run_at].append(run_dict)
             else:
@@ -1301,7 +1303,7 @@ def get_time_series_runs_by_key_value(key, value, start_date=None,
                 for index, run_dict in list(enumerate(runs[run_at])):
                     if run_dict['id'] == run_id:
                         update_index = index
-                runs[run_at][update_index]['metadata'][run[6]] = run[7]
+                runs[run_at][update_index]['metadata'][run.key] = run.value
     return runs
 
 
