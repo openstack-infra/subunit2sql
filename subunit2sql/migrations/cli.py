@@ -106,8 +106,10 @@ def validate_head_file(config):
 def expire_old(config, cmd):
     expire_age = int(CONF.command.expire_age)
     if not CONF.command.no_runs:
+        print('Expiring old runs.')
         db_api.delete_old_runs(expire_age)
     if not CONF.command.no_test_runs:
+        print('Expiring old test_runs')
         db_api.delete_old_test_runs(expire_age)
 
 
