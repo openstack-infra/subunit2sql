@@ -592,3 +592,21 @@ class TestDatabaseAPI(base.TestCase):
             'stop_time': stop_timestamp,
             'a_key': 'b',
         }, result[0])
+
+    def test_get_all_runs_time_series_by_key_with_overlap(self):
+        time_a = datetime.datetime(1914, 6, 28, 10, 45, 0)
+        run_a = api.create_run(run_at=time_a)
+        run_b = api.create_run()
+        time_c = datetime.datetime(1918, 11, 11, 11, 11, 11)
+        run_c = api.create_run(run_at=time_c)
+        run_d = api.create_run(run_at=time_a)
+        api.add_run_metadata({'not_a_key': 'not_a_value'}, run_b.id)
+        api.add_run_metadata({'a_key': 'a_value'}, run_a.id)
+        api.add_run_metadata({'a_key': 'c_value'}, run_c.id)
+        api.add_run_metadata({'a_key': 'a_value'}, run_d.id)
+        result = api.get_all_runs_time_series_by_key('a_key')
+        self.assertEqual(2, len(result.keys()))
+        self.assertIn(time_a.date(), [x.date() for x in result.keys()])
+        self.assertIn(time_c.date(), [x.date() for x in result.keys()])
+        self.assertIn(time_a.date(), [x.date() for x in result.keys()])
+        self.assertEqual(len(result[time_a]['a_value']), 2)

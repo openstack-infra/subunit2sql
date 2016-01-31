@@ -1217,13 +1217,13 @@ def get_all_runs_time_series_by_key(key, start_date=None,
             }]}
         else:
             if run.value not in list(runs[run.run_at].keys()):
-                runs[run.run_at[run.value]] = [{
+                runs[run.run_at][run.value] = [{
                     'pass': run.passes,
                     'fail': run.fails,
                     'skip': run.skips,
                 }]
             else:
-                runs[run.run_at[run.value]].append({
+                runs[run.run_at][run.value].append({
                     'pass': run.passes,
                     'fail': run.fails,
                     'skip': run.skips,
