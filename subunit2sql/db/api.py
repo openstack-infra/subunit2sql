@@ -646,7 +646,7 @@ def get_test_runs_by_test_id(test_id, session=None):
 
 
 def get_test_runs_by_test_test_id(test_id, start_date=None, stop_date=None,
-                                  session=None):
+                                  session=None, key=None, value=None):
     """Get all test runs for a specific test by the test'stest_id column
 
     :param str test_id: The test's test_id (the test_id column in the test
@@ -657,6 +657,12 @@ def get_test_runs_by_test_test_id(test_id, start_date=None, stop_date=None,
                                          results
     :param datetime.datetime stop_date: The date to use as the cutoff date for
                                         results
+    :param str key: an optional key for run metadata to filter the test runs
+                    on. Must be specified with a value otherwise it does
+                    nothing.
+    :param str value: an optional value for run metadata to filter the test
+                      runs on. Must be specified with a key otherwise it does
+                      nothing.
 
     :return list: The list of test run objects for the specified test
     :rtype: subunit2sql.models.TestRun
@@ -673,6 +679,12 @@ def get_test_runs_by_test_test_id(test_id, start_date=None, stop_date=None,
     if stop_date:
         test_runs_query = test_runs_query.filter(
             models.TestRun.start_time <= stop_date)
+    if key and value:
+        test_runs_query = test_runs_query.join(
+            models.RunMetadata,
+            models.TestRun.run_id == models.RunMetadata.run_id).filter(
+                models.RunMetadata.key == key,
+                models.RunMetadata.value == value)
     test_runs = test_runs_query.all()
     return test_runs
 
