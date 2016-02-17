@@ -627,3 +627,14 @@ class TestDatabaseAPI(base.TestCase):
         self.assertIn(time_c.date(), [x.date() for x in result.keys()])
         self.assertIn(time_a.date(), [x.date() for x in result.keys()])
         self.assertEqual(len(result[time_a]['a_value']), 2)
+
+    def test_get_run_failure_rate_by_key_value_metadata(self):
+        run_a = api.create_run(fails=100, passes=0)
+        run_b = api.create_run()
+        run_c = api.create_run(passes=100, fails=0)
+        api.add_run_metadata({'a_key': 'a_value'}, run_a.id)
+        api.add_run_metadata({'a_key': 'a_value'}, run_c.id)
+        api.add_run_metadata({'a_key': 'b_value'}, run_b.id)
+        fail_rate = api.get_run_failure_rate_by_key_value_metadata(
+            'a_key', 'a_value')
+        self.assertEqual(50, fail_rate)
