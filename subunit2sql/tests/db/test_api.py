@@ -72,6 +72,37 @@ class TestDatabaseAPI(base.TestCase):
         self.assertEqual(len(all_runs), 1)
         self.assertEqual(res.id, all_runs[0].id)
 
+    def test_update_run_and_list(self):
+        res = api.create_run()
+        dt = datetime.datetime.utcnow()
+        # NOTE(masayukig): The DateTime column in some DB envs can't store a
+        # microseconds resolution value. So this removes the microseconds value
+        # here.
+        dt = dt.replace(microsecond=0)
+        dt_dummy = dt - datetime.timedelta(days=1)
+        res_dummy = api.create_run(run_at=dt_dummy)
+
+        values = {'skips': 98, 'fails': 97, 'passes': 96, 'run_time': 1.123,
+                  'artifacts': 'fake_url', 'run_at': dt}
+        updated_res = api.update_run(values, res.id)
+        all_runs = api.get_all_runs()
+        self.assertEqual(len(all_runs), 2)
+        for run in all_runs:
+            if run.id == res.id:
+                self.assertEqual(updated_res.id, run.id)
+                for key in values:
+                    self.assertEqual(values[key], run[key])
+                    self.assertEqual(run[key], updated_res[key])
+            elif run.id == res_dummy.id:
+                self.assertNotEqual(updated_res.id, run.id)
+                for key in values:
+                    if key == 'run_at':
+                        continue
+                    self.assertNotEqual(values[key], run[key])
+                    self.assertNotEqual(run[key], updated_res[key])
+            else:
+                self.fail('an unexpected run(%s) was found' % run.id)
+
     def test_get_test_runs_dicts_with_no_meta(self):
         run = api.create_run()
         test_a = api.create_test('fake_test')
