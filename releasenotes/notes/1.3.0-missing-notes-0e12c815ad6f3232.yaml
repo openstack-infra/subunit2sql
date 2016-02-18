@@ -1,0 +1,9 @@
+---
+features:
+  - A new DB API method, get_test_runs_by_status_for_run_ids(), to get tests
+    by status from a list runs
+  - A set of optional paramaters on get_test_runs_by_test_test_id() to filter
+    the result set by a run_metadata key value pair
+  - A new DB API method, get_run_failure_rate_by_key_value_metadata(), to get
+    the failure rate as a percentage for runs with a particular run_metadata
+    key value pair
