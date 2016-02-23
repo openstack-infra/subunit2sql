@@ -669,3 +669,40 @@ class TestDatabaseAPI(base.TestCase):
         fail_rate = api.get_run_failure_rate_by_key_value_metadata(
             'a_key', 'a_value')
         self.assertEqual(50, fail_rate)
+
+    def test_get_test_prefixes(self):
+        api.create_test('prefix.token.token')
+        api.create_test('setUpClass (prefix.token.token)')
+        api.create_test('other.token.token')
+        api.create_test('justonetoken')
+
+        prefixes = api.get_test_prefixes()
+        self.assertEqual(len(prefixes), 3)
+        self.assertIn('prefix', prefixes)
+        self.assertIn('other', prefixes)
+        self.assertIn('justonetoken', prefixes)
+
+    def test_get_tests_by_prefix(self):
+        api.create_test('prefix.token.token')
+        api.create_test('setUpClass (prefix.token.token)')
+        api.create_test('other.token.token')
+        api.create_test('justonetoken')
+
+        tests = api.get_tests_by_prefix('prefix')
+        self.assertEqual(len(tests), 2)
+        self.assertIn('prefix.token.token', [test.test_id for test in tests])
+        self.assertIn('setUpClass (prefix.token.token)',
+                      [test.test_id for test in tests])
+
+        tests = api.get_tests_by_prefix('other')
+        self.assertEqual(len(tests), 1)
+        self.assertIn('other.token.token', [test.test_id for test in tests])
+
+        tests = api.get_tests_by_prefix('prefix', limit=1, offset=1)
+        self.assertEqual(len(tests), 1)
+        self.assertIn('setUpClass (prefix.token.token)',
+                      [test.test_id for test in tests])
+
+        tests = api.get_tests_by_prefix('justonetoken')
+        self.assertEqual(len(tests), 1)
+        self.assertIn('justonetoken', [test.test_id for test in tests])
