@@ -38,7 +38,7 @@ class ReadSubunit(object):
         if targets is None:
             targets = []
         self.stream_file = stream_file
-        self.stream = subunit.ByteStreamToStreamResult(stream_file)
+        self.stream = subunit.ByteStreamToStreamResult(self.stream_file)
         starts = testtools.StreamResult()
         summary = testtools.StreamSummary()
         outcomes = testtools.StreamToDict(functools.partial(
