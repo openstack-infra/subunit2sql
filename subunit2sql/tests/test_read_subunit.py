@@ -175,3 +175,18 @@ class TestReadSubunit(base.TestCase):
     def test_targets_added_to_result(self, ttc_mock):
         subunit.ReadSubunit(mock.MagicMock(), targets=['foo'])
         self.assertIn('foo', ttc_mock.call_args[0][0])
+
+    @mock.patch('testtools.CopyStreamResult')
+    def test_targets_not_modified(self, ttc_mock):
+        # A regression test that verifies that the subunit reader does
+        # not modify the passed in value of targets.
+        targets = ['foo']
+
+        subunit.ReadSubunit(mock.MagicMock(), targets=targets)
+        ntargets1 = len(ttc_mock.call_args[0][0])
+
+        subunit.ReadSubunit(mock.MagicMock(), targets=targets)
+        ntargets2 = len(ttc_mock.call_args[0][0])
+
+        self.assertEqual(ntargets1, ntargets2)
+        self.assertEqual(targets, ['foo'])

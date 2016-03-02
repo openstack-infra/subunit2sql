@@ -37,6 +37,8 @@ class ReadSubunit(object):
                  targets=None):
         if targets is None:
             targets = []
+        else:
+            targets = targets[:]
         self.stream_file = stream_file
         self.stream = subunit.ByteStreamToStreamResult(self.stream_file)
         starts = testtools.StreamResult()
