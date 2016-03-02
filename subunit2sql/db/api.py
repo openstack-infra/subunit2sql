@@ -464,6 +464,148 @@ def get_all_tests(session=None):
     return query.all()
 
 
+def _get_test_prefixes_mysql(session):
+    query = session.query(
+        sqlalchemy.func.substring_index(models.Test.test_id, '.', 1))
+
+    prefixes = set()
+    for prefix in query.distinct().all():
+        prefix = prefix[0]
+
+        # strip out any wrapped function names, e.g. 'setUpClass (
+        if '(' in prefix:
+            prefix = prefix.split('(', 1)[1]
+
+        prefixes.add(prefix)
+
+    return list(prefixes)
+
+
+def _get_test_prefixes_other(session):
+    query = session.query(models.Test.test_id)
+
+    unique = set()
+    for test_id in query:
+        # get the first '.'-separated token (possibly including 'setUpClass (')
+        prefix = test_id[0].split('.', 1)[0]
+        if '(' in prefix:
+            # strip out the function name and paren, e.g. 'setUpClass(a' -> 'a'
+            prefix = prefix.split('(', 1)[1]
+
+        unique.add(prefix)
+
+    return list(unique)
+
+
+def get_test_prefixes(session=None):
+    """Returns all test prefixes from the DB.
+
+    This returns a list of unique test_id prefixes from the database, defined
+    as the first dot-separated token in the test id. Prefixes wrapped in
+    function syntax, such as 'setUpClass (a', will have this extra syntax
+    stripped out of the returned value, up to and including the '(' character.
+
+    As an example, given an input test with an ID 'prefix.test.Clazz.a_method',
+    the derived prefix would be 'prefix'. Given a second test with an ID
+    'setUpClass (prefix.test.Clazz)', the derived prefix would also be
+    'prefix'. If this function were called on a database containing only these
+    tests, a list with only one entry, 'prefix', would be returned.
+
+    Note that this implementation assumes that tests ids are semantically
+    separated by a period. If this is not the case (and no period characters
+    occur at any position within test ids), the full test id will be considered
+    the prefix, and the result of this function will be all unique test ids in
+    the database.
+
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+    :return list: a list of all unique prefix strings, with any extraneous
+                  details removed, e.g. 'setUpClass ('.
+    :rtype: str
+    """
+    session = session or get_session()
+
+    backend = session.bind.dialect.name
+    if backend == 'mysql':
+        return _get_test_prefixes_mysql(session)
+    else:
+        return _get_test_prefixes_other(session)
+
+
+def _get_tests_by_prefix_mysql(prefix, session, limit, offset):
+    # use mysql's substring_index to pull the prefix out of the full test_id
+    func_filter = sqlalchemy.func.substring_index(models.Test.test_id, '.', 1)
+
+    # query for tests against the prefix token, but use an ends-with compare
+    # this way, if a test_id has a function call, e.g. 'setUpClass (a.b..c)' we
+    # can still match it here
+    # (we use an ugly 'like' query here, but this won't be operating on an
+    # index regardless)
+    query = db_utils.model_query(models.Test, session).filter(
+        func_filter.like('%' + prefix)).order_by(models.Test.test_id.asc())
+
+    return query.limit(limit).offset(offset).all()
+
+
+def _get_tests_by_prefix_other(prefix, session, limit, offset):
+    query = db_utils.model_query(models.Test, session).order_by(
+        models.Test.test_id.asc())
+
+    # counter to track progress toward offset
+    skipped = 0
+
+    ret = []
+    for test in query:
+        test_prefix = test.test_id.split('.', 1)[0]
+        # compare via endswith to match wrapped test_ids: given
+        # 'setUpClass (a.b.c)',  the first token will be 'setUpClass (a',
+        # which endswith() will catch
+        if test_prefix.endswith(prefix):
+            # manually track offset progress since we aren't checking for
+            # matches on the database-side
+            if offset > 0 and skipped < offset:
+                skipped += 1
+                continue
+
+            ret.append(test)
+
+            if len(ret) >= limit:
+                break
+
+    return ret
+
+
+def get_tests_by_prefix(prefix, session=None, limit=100, offset=0):
+    """Returns all tests with the given prefix in the DB.
+
+    A test prefix is the first segment of a test_id when split using a period
+    ('.'). This function will return a list of tests whose first
+    period-separated token ends with the specified prefix. As a side-effect,
+    given an input 'a', this will return tests with prefixes 'a', but also
+    prefixes wrapped in function syntax, such as 'setUpClass (a'.
+
+    Note that this implementation assumes that tests ids are semantically
+    separated by a period. If no period character exists in a test id, its
+    prefix will be considered the full test id, and this method may return
+    unexpected results.
+
+    :param str prefix: the test prefix to search for
+    :param session: optional session object: if one isn't provided, a new
+                    session will be acquired for the duration of this operation
+    :param int limit: the maximum number of results to return
+    :param int offset: the starting index, for pagination purposes
+    :return list: the list of matching test objects, ordered by their test id
+    :rtype: subunit2sql.models.Test
+    """
+    session = session or get_session()
+
+    backend = session.bind.dialect.name
+    if backend == 'mysql':
+        return _get_tests_by_prefix_mysql(prefix, session, limit, offset)
+    else:
+        return _get_tests_by_prefix_other(prefix, session, limit, offset)
+
+
 def get_all_runs_by_date(start_date=None, stop_date=None, session=None):
     """Return all runs from the DB.
 
