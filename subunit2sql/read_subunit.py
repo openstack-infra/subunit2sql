@@ -95,7 +95,6 @@ class ReadSubunit(object):
             'metadata': metadata,
             'attachments': attachment_dict
         }
-        self.stream_file.flush()
 
     def get_attrs(self, name):
         matches = self.attr_regex.search(name)
