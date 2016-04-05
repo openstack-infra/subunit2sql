@@ -36,9 +36,9 @@ class TestDatabaseAPI(base.TestCase):
 
     def setUp(self):
         super(TestDatabaseAPI, self).setUp()
+        self.useFixture(fixtures.LockFixture(self.dialect))
         if not db_test_utils.is_backend_avail(self.dialect):
             raise self.skipTest('%s is not available' % self.dialect)
-        self.useFixture(fixtures.LockFixture(self.dialect))
         if self.dialect == 'mysql':
             self.useFixture(fixtures.MySQLConfFixture())
         elif self.dialect == 'postgres':
