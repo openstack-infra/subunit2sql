@@ -138,10 +138,10 @@ class TestWalkMigrations(base.TestCase):
             self.fail("Shouldn't have connected")
 
     def test_mysql_opportunistically(self):
+        self.useFixture(fixtures.LockFixture('mysql'))
         if not db_test_utils.is_backend_avail('mysql'):
             raise self.skipTest('mysql is not available')
 
-        self.useFixture(fixtures.LockFixture('mysql'))
         self.useFixture(fixtures.MySQLConfFixture())
         # Test that table creation on mysql only builds InnoDB tables
         # add this to the global lists to make reset work with it, it's removed
@@ -182,9 +182,9 @@ class TestWalkMigrations(base.TestCase):
 
     def test_postgresql_opportunistically(self):
         # Test postgresql database migration walk
+        self.useFixture(fixtures.LockFixture('postgres'))
         if not db_test_utils.is_backend_avail('postgres'):
             raise self.skipTest('postgres is not available')
-        self.useFixture(fixtures.LockFixture('postgres'))
         self.useFixture(fixtures.PostgresConfFixture())
         # add this to the global lists to make reset work with it, it's removed
         # automatically in tearDown so no need to clean it up here.
