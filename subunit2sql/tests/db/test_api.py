@@ -706,3 +706,40 @@ class TestDatabaseAPI(base.TestCase):
         tests = api.get_tests_by_prefix('justonetoken')
         self.assertEqual(len(tests), 1)
         self.assertIn('justonetoken', [test.test_id for test in tests])
+
+    def test_update_test(self):
+        create_res = api.create_test('fake_test')
+        values = {'run_count': 2, 'run_time': 1.2}
+        update_res = api.update_test(values, create_res.id)
+        res = api.get_test_by_test_id('fake_test')
+        self.assertEqual(res.id, update_res.id)
+        self.assertEqual(res.test_id, 'fake_test')
+        self.assertEqual(res.run_time, 1.2)
+        self.assertEqual(res.run_count, 2)
+
+    def test_update_test_run(self):
+        run = api.create_run()
+        test = api.create_test('fake_test')
+        test_run = api.create_test_run(test.id, run.id, 'fail')
+        start_time = datetime.datetime.utcnow()
+        stop_time = datetime.datetime.utcnow()
+        start_time = start_time.replace(microsecond=0)
+        stop_time = start_time.replace(microsecond=0)
+        values = {'status': 'success', 'start_time': start_time,
+                  'stop_time': stop_time}
+        update_test_run = api.update_test_run(values, test_run.id)
+        all_test_runs = api.get_all_test_runs()
+        self.assertEqual(len(all_test_runs), 1)
+        self.assertEqual(update_test_run.id, all_test_runs[0].id)
+        self.assertEqual(all_test_runs[0].status, 'success')
+        self.assertEqual(all_test_runs[0].start_time, start_time)
+        self.assertEqual(all_test_runs[0].stop_time, stop_time)
+
+    def test_get_test_run_by_id(self):
+        run = api.create_run()
+        test = api.create_test('fake_test')
+        test_run = api.create_test_run(test.id, run.id, 'fail')
+        res = api.get_test_run_by_id(test_run.id)
+        self.assertEqual(res.id, test_run.id)
+        self.assertEqual(res.status, 'fail')
+        self.assertEqual(res.run_id, run.id)
