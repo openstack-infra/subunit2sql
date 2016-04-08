@@ -120,19 +120,15 @@ class PostgresConfFixture(config_fixture.Config):
         sqlcmd = ('psql -w -U %(user)s -h %(host)s -c'
                   ' "%(sql)s" -d template1')
 
-        sql = "\list"
-        databases = execute_cmd(sqlcmd % {'user': user, 'host': host,
-                                          'sql': sql})
-        if database in databases.decode('UTF-8'):
-            # NOTE(masayukig): We terminate sessions because some closed
-            # sessions are remaining until here
-            sql = ("select pg_terminate_backend(pg_stat_activity.pid) "
-                   "from pg_stat_activity "
-                   "where pg_stat_activity.datname = '%(database)s';")
-            sql = sql % {'database': database}
-            term_session = sqlcmd % {'user': user, 'host': host,
-                                     'sql': sql}
-            execute_cmd(term_session)
+        # NOTE(masayukig): We terminate sessions because some closed
+        # sessions are remaining until here
+        sql = ("select pg_terminate_backend(pg_stat_activity.pid) "
+               "from pg_stat_activity "
+               "where pg_stat_activity.datname = '%(database)s';")
+        sql = sql % {'database': database}
+        term_session = sqlcmd % {'user': user, 'host': host,
+                                 'sql': sql}
+        execute_cmd(term_session)
 
         sql = ("drop database if exists %(database)s;")
         sql = sql % {'database': database}
