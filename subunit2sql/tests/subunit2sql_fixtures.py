@@ -36,6 +36,7 @@ def execute_cmd(cmd=None):
     output = proc.communicate()[0]
     if proc.returncode != 0:
         raise Exception('Command failed with output:\n%s' % output)
+    return output
 
 
 class Database(fix.Fixture):
@@ -116,8 +117,23 @@ class PostgresConfFixture(config_fixture.Config):
         # note(boris-42): We must create and drop database, we can't
         # drop database which we have connected to, so for such
         # operations there is a special database template1.
-        sqlcmd = ("psql -w -U %(user)s -h %(host)s -c"
-                  " '%(sql)s' -d template1")
+        sqlcmd = ('psql -w -U %(user)s -h %(host)s -c'
+                  ' "%(sql)s" -d template1')
+
+        sql = "\list"
+        databases = execute_cmd(sqlcmd % {'user': user, 'host': host,
+                                          'sql': sql})
+        if database in databases.decode('UTF-8'):
+            # NOTE(masayukig): We terminate sessions because some closed
+            # sessions are remaining until here
+            sql = ("select pg_terminate_backend(pg_stat_activity.pid) "
+                   "from pg_stat_activity "
+                   "where pg_stat_activity.datname = '%(database)s';")
+            sql = sql % {'database': database}
+            term_session = sqlcmd % {'user': user, 'host': host,
+                                     'sql': sql}
+            execute_cmd(term_session)
+
         sql = ("drop database if exists %(database)s;")
         sql = sql % {'database': database}
         droptable = sqlcmd % {'user': user, 'host': host,
