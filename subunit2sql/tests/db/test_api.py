@@ -743,3 +743,36 @@ class TestDatabaseAPI(base.TestCase):
         self.assertEqual(res.id, test_run.id)
         self.assertEqual(res.status, 'fail')
         self.assertEqual(res.run_id, run.id)
+
+    def test_get_test_by_id(self):
+        create_res = api.create_test('fake_test', 2, 1, 1, 1.2)
+        res = api.get_test_by_id(create_res.id)
+        self.assertEqual(res.id, create_res.id)
+        self.assertEqual(res.test_id, 'fake_test')
+        self.assertEqual(res.run_time, 1.2)
+        self.assertEqual(res.run_count, 2)
+
+    def test_get_run_id_from_uuid(self):
+        run = api.create_run()
+        run_id = api.get_run_id_from_uuid(run.uuid)
+        self.assertEqual(run_id, run.id)
+
+    def test_get_run_by_id(self):
+        run = api.create_run()
+        res = api.get_run_by_id(run.id)
+        self.assertEqual(res.id, run.id)
+        self.assertEqual(res.uuid, run.uuid)
+
+    def test_get_test_runs_by_test_id(self):
+        run_a = api.create_run()
+        run_b = api.create_run()
+        run_c = api.create_run()
+        test = api.create_test('fake_test')
+        api.create_test_run(test.id, run_a.id, 'success')
+        api.create_test_run(test.id, run_b.id, 'fail')
+        api.create_test_run(test.id, run_c.id, 'success')
+        res = api.get_test_runs_by_test_id(test.id)
+        self.assertEqual(3, len(res))
+        self.assertIn(run_a.id, [x.run_id for x in res])
+        self.assertIn(run_b.id, [x.run_id for x in res])
+        self.assertIn(run_c.id, [x.run_id for x in res])
