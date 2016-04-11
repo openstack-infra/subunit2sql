@@ -446,7 +446,7 @@ def get_test_metadata(test_id, session=None):
     """
     session = session or get_session()
     query = db_utils.model_query(models.TestMetadata, session).filter_by(
-        id=test_id)
+        test_id=test_id)
     return query.all()
 
 

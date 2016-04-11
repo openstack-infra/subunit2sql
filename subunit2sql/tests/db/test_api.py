@@ -776,3 +776,17 @@ class TestDatabaseAPI(base.TestCase):
         self.assertIn(run_a.id, [x.run_id for x in res])
         self.assertIn(run_b.id, [x.run_id for x in res])
         self.assertIn(run_c.id, [x.run_id for x in res])
+
+    def test_get_test_metadata(self):
+        test = api.create_test('fake_test')
+        test_meta = {
+            'test_a': 'a',
+            'test_b': 'b',
+            'test_c': 'c',
+        }
+        api.add_test_metadata(test_meta, test.id)
+        test_metadata = api.get_test_metadata(test.id)
+        self.assertEqual(3, len(test_metadata))
+        for meta in test_metadata:
+            self.assertIn(meta.key, test_meta.keys())
+            self.assertIn(meta.value, test_meta.values())
