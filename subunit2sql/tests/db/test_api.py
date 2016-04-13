@@ -815,3 +815,80 @@ class TestDatabaseAPI(base.TestCase):
             'zeon', 'zaku', start_date=datetime.date(1970, 1, 1))
         self.assertEqual(1, len(results))
         self.assertEqual(run_c.id, results[0].id)
+
+    def test_get_test_run_metadata(self):
+        run = api.create_run()
+        test = api.create_test('fake_test')
+        test_run = api.create_test_run(test.id, run.id, 'success',
+                                       datetime.datetime.utcnow(),
+                                       datetime.datetime.utcnow())
+        run_meta = {
+            'key_a': 'value_b',
+            'key_b': 'value_a',
+        }
+        api.add_test_run_metadata(run_meta, test_run.id)
+        test_run_metadata = api.get_test_run_metadata(test_run.id)
+        self.assertEqual(2, len(test_run_metadata))
+        for meta in test_run_metadata:
+            self.assertIn(meta.key, run_meta.keys())
+            self.assertIn(meta.value, run_meta.values())
+
+    def test_get_all_runs_by_date(self):
+        timestamp_a = datetime.datetime.utcnow().replace(microsecond=0)
+        timestamp_b = timestamp_a + datetime.timedelta(minutes=10)
+        timestamp_c = timestamp_a + datetime.timedelta(minutes=20)
+        api.create_run(run_at=timestamp_a)
+        api.create_run(run_at=timestamp_b)
+        api.create_run(run_at=timestamp_c)
+        res = api.get_all_runs_by_date()
+        self.assertEqual(3, len(res))
+        self.assertIn(timestamp_a, [x.run_at for x in res])
+        self.assertIn(timestamp_b, [x.run_at for x in res])
+        self.assertIn(timestamp_c, [x.run_at for x in res])
+        res = api.get_all_runs_by_date(start_date=timestamp_c)
+        self.assertEqual(1, len(res))
+        self.assertEqual(timestamp_c, res[0].run_at)
+        res = api.get_all_runs_by_date(stop_date=timestamp_a)
+        self.assertEqual(1, len(res))
+        self.assertEqual(timestamp_a, res[0].run_at)
+        res = api.get_all_runs_by_date(start_date=timestamp_a,
+                                       stop_date=timestamp_b)
+        self.assertEqual(2, len(res))
+        self.assertIn(timestamp_a, [x.run_at for x in res])
+        self.assertIn(timestamp_b, [x.run_at for x in res])
+
+    def test_get_latest_run(self):
+        timestamp_a = datetime.datetime.utcnow().replace(microsecond=0)
+        timestamp_b = timestamp_a + datetime.timedelta(minutes=10)
+        timestamp_c = timestamp_a + datetime.timedelta(minutes=20)
+        api.create_run(run_at=timestamp_a)
+        api.create_run(run_at=timestamp_b)
+        api.create_run(run_at=timestamp_c)
+        res = api.get_latest_run()
+        self.assertEqual(timestamp_c, res.run_at)
+
+    def test_get_failing_from_run(self):
+        timestamp_a = datetime.datetime.utcnow().replace(microsecond=0)
+        timestamp_b = timestamp_a + datetime.timedelta(minutes=10)
+        timestamp_c = timestamp_a + datetime.timedelta(minutes=20)
+        run_a = api.create_run()
+        run_b = api.create_run()
+        test_a = api.create_test('fake_test')
+        test_b = api.create_test('fake_test2')
+        api.create_test_run(test_a.id, run_a.id, 'fail',
+                            start_time=timestamp_a)
+        api.create_test_run(test_a.id, run_b.id, 'fail',
+                            start_time=timestamp_a)
+        api.create_test_run(test_b.id, run_b.id, 'fail',
+                            start_time=timestamp_b)
+        api.create_test_run(test_b.id, run_a.id, 'success',
+                            start_time=timestamp_c)
+        res = api.get_failing_from_run(run_a.id)
+        self.assertEqual(1, len(res))
+        self.assertEqual(test_a.id, res[0].test_id)
+        self.assertEqual(timestamp_a, res[0].start_time)
+        res = api.get_failing_from_run(run_b.id)
+        self.assertEqual(2, len(res))
+        self.assertEqual('fail', res[0].status)
+        self.assertIn(timestamp_a, [x.start_time for x in res])
+        self.assertIn(timestamp_b, [x.start_time for x in res])
