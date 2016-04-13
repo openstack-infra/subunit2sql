@@ -1,0 +1,5 @@
+---
+features:
+  - Adds a new DB API method get_recent_failed_runs_by_run_metadata() that
+    will return a list of models.Run objects for recent failures on runs
+    with a specified run_metadata key value pair

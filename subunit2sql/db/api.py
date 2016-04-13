@@ -1522,6 +1522,31 @@ def add_test_run_attachments(attach_dict, test_run_id, session=None):
     return attachments
 
 
+def get_recent_failed_runs_by_run_metadata(key, value, num_runs=10,
+                                           start_date=None, session=None):
+    """Get a list of recent failed runs for a given run metadata pair
+
+    :param str key: the run_metadata key to get failed runs
+    :param str value: The run_metadata value to get failed runs
+    :param int num_runs: The number of results to fetch, defaults to 10
+    :param datetime start_date: the optional starting dates to get runs from.
+                                Nothing older than this date will be returned
+    :param session: optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return list: The list of recent failed Run objects
+    :rtype: subunit2sql.models.Run
+    """
+    session = session or get_session()
+    query = db_utils.model_query(models.Run, session).join(
+        models.RunMetadata, models.Run.id == models.RunMetadata.run_id).filter(
+            models.RunMetadata.key == key,
+            models.RunMetadata.value == value)
+    query = _filter_runs_by_date(query, start_date)
+    return query.filter(models.Run.fails > 0).order_by(
+        models.Run.run_at.desc()).limit(num_runs).all()
+
+
 def get_runs_by_status_grouped_by_run_metadata(key, start_date=None,
                                                stop_date=None, session=None):
     session = session or get_session()
