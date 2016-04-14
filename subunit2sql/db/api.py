@@ -672,12 +672,12 @@ def get_latest_run(session=None):
 
 
 def get_failing_from_run(run_id, session=None):
-    """Return the set of failing test_ids for a give run.
+    """Return the set of failing test runs for a give run.
 
     This method will return all the test run objects that failed during the
     specified run.
 
-    :param str run_id: uuid for run tho find all the failing runs
+    :param str run_id: uuid for the run to find all the failing runs
     :param session: optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
