@@ -1,0 +1,7 @@
+---
+features:
+  - An optional `start_date` parameter was added to all DB API functions that
+    returned a recent runs list. This includes get_recent_successful_runs(),
+    get_recent_failed_runs(), and get_recent_runs_by_key_value_metadata(). This
+    is to set a starting point for the list of recent runs returned by these
+    methods.

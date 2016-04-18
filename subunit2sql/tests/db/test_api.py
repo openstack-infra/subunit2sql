@@ -577,6 +577,22 @@ class TestDatabaseAPI(base.TestCase):
         self.assertNotIn(run_b.id, [x.id for x in result])
         self.assertIn(run_c.id, [x.id for x in result])
 
+    def test_get_recent_runs_by_key_value_metadata_with_start_date(self):
+        run_a = api.create_run(run_at=datetime.datetime(
+            1914, 6, 28, 10, 45, 0))
+        run_b = api.create_run()
+        run_c = api.create_run()
+        api.add_run_metadata({'a_key': 'a_value'}, run_a.id)
+        api.add_run_metadata({'a_key': 'a_value'}, run_c.id)
+        api.add_run_metadata({'a_key': 'b_value'}, run_b.id)
+        result = api.get_recent_runs_by_key_value_metadata(
+            'a_key', 'a_value', start_date=datetime.datetime(
+                1918, 11, 11, 11, 11, 11))
+        self.assertEqual(1, len(result))
+        self.assertNotIn(run_a.id, [x.id for x in result])
+        self.assertNotIn(run_b.id, [x.id for x in result])
+        self.assertIn(run_c.id, [x.id for x in result])
+
     def test_get_recent_runs_by_key_value_metadata_one_run(self):
         timestamp = datetime.datetime(1914, 6, 28, 10, 45, 0)
         run_a = api.create_run(run_at=timestamp)
@@ -939,6 +955,18 @@ class TestDatabaseAPI(base.TestCase):
         self.assertIn(run_c.uuid, res)
         self.assertIn(run_d.uuid, res)
 
+    def test_get_recent_failed_runs_with_start_date(self):
+        api.create_run(fails=1, run_at=datetime.datetime(
+            1914, 6, 28, 10, 45, 0))
+        api.create_run()
+        run_c = api.create_run(fails=2)
+        run_d = api.create_run(fails=1)
+        res = api.get_recent_failed_runs(start_date=datetime.datetime(
+            1918, 11, 11, 11, 11, 11))
+        self.assertEqual(2, len(res))
+        self.assertIn(run_c.uuid, res)
+        self.assertIn(run_d.uuid, res)
+
     def test_get_recent_successful_runs(self):
         run_a = api.create_run(passes=1)
         run_b = api.create_run()
@@ -947,6 +975,18 @@ class TestDatabaseAPI(base.TestCase):
         res = api.get_recent_successful_runs()
         self.assertEqual(3, len(res))
         self.assertIn(run_a.uuid, res)
+        self.assertIn(run_b.uuid, res)
+        self.assertIn(run_c.uuid, res)
+
+    def test_get_recent_successful_runs_with_start_date(self):
+        api.create_run(passes=1, run_at=datetime.datetime(
+            1914, 6, 28, 10, 45, 0))
+        run_b = api.create_run()
+        run_c = api.create_run(passes=2)
+        api.create_run(fails=1)
+        res = api.get_recent_successful_runs(start_date=datetime.datetime(
+            1918, 11, 11, 11, 11, 11))
+        self.assertEqual(2, len(res))
         self.assertIn(run_b.uuid, res)
         self.assertIn(run_c.uuid, res)
 

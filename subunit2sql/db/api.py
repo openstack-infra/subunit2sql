@@ -1049,53 +1049,68 @@ def get_test_status_time_series(test_id, session=None):
     return status_series
 
 
-def get_recent_successful_runs(num_runs=10, session=None):
+def get_recent_successful_runs(num_runs=10, session=None, start_date=None):
     """Return a list of run uuid strings for the most recent successful runs
 
     :param int num_runs: The number of runs to return in the list
-    :param session: Optional session object if one isn't provided a new session
+    :param datetime start_date: An optional date to use as the starting point
+                                for getting recent runs. Only runs after this
+                                date will be returned.
 
     :return list: A list of run uuid strings (the id column in the runs table)
                   for the most recent runs.
     """
     session = session or get_session()
-    results = db_utils.model_query(models.Run, session).order_by(
+    results = db_utils.model_query(models.Run, session)
+    results = _filter_runs_by_date(results, start_date)
+    results = results.order_by(
         models.Run.run_at.desc()).filter_by(fails=0).limit(num_runs).all()
     return list(map(lambda x: x.uuid, results))
 
 
-def get_recent_failed_runs(num_runs=10, session=None):
+def get_recent_failed_runs(num_runs=10, session=None, start_date=None):
     """Return a list of run uuid strings for the most recent failed runs
 
     :param int num_runs: The number of runs to return in the list
     :param session: Optional session object if one isn't provided a new session
+    :param datetime start_date: An optional date to use as the starting point
+                                for getting recent runs. Only runs after this
+                                date will be returned.
 
     :return list: A list of run uuid strings (the id column in the runs table)
                   for the most recent runs.
     """
     session = session or get_session()
-    results = db_utils.model_query(models.Run, session).order_by(
+    results = db_utils.model_query(models.Run, session)
+    results = _filter_runs_by_date(results, start_date)
+    results = results.order_by(
         models.Run.run_at.desc()).filter(
         models.Run.fails > 0).limit(num_runs).all()
     return list(map(lambda x: x.uuid, results))
 
 
 def get_recent_runs_by_key_value_metadata(key, value, num_runs=10,
-                                          session=None):
+                                          session=None, start_date=None):
     """Get a list of runs for recent runs with a key value metadata pair
 
     :param int num_runs: The number of runs to return in the list
     :param session: Optional session object if one isn't provided a new session
+    :param datetime start_date: An optional date to use as the starting point
+                                for getting recent runs. Only runs after this
+                                date will be returned.
+
     :return list: A list of run objects for the most recent runs.
     :rtype subunit2sql.db.models.Run
     """
     session = session or get_session()
     results = db_utils.model_query(models.Run, session).join(
         models.RunMetadata,
-        models.Run.id == models.RunMetadata.run_id).filter(
-            models.RunMetadata.key == key,
-            models.RunMetadata.value == value).order_by(
-                models.Run.run_at.desc()).limit(num_runs).all()
+        models.Run.id == models.RunMetadata.run_id)
+    results = _filter_runs_by_date(results, start_date)
+    results = results.filter(
+        models.RunMetadata.key == key,
+        models.RunMetadata.value == value).order_by(
+            models.Run.run_at.desc()).limit(num_runs).all()
     return results
 
 
