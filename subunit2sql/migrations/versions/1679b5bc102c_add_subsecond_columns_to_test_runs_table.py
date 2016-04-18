@@ -29,11 +29,7 @@ import os
 from alembic import context
 from alembic import op
 from oslo_config import cfg
-from oslo_db.sqlalchemy import utils as db_utils
 import sqlalchemy as sa
-
-from subunit2sql.db import api as db_api
-from subunit2sql.db import models
 
 
 CONF = cfg.CONF
@@ -54,17 +50,19 @@ def upgrade():
         op.add_column('test_runs', sa.Column('stop_time_microsecond',
                                              sa.Integer(), default=0))
         if not CONF.disable_microsecond_data_migration:
-            session = db_api.get_session()
-            query = db_utils.model_query(models.TestRun, session).values(
-                models.TestRun.id, models.TestRun.start_time,
-                models.TestRun.stop_time)
-            for test_run in query:
-                start_micro = test_run[1].microsecond
-                stop_micro = test_run[2].microsecond
+            bind = op.get_bind()
+            metadata = sa.schema.MetaData()
+            metadata.bind = bind
+            test_runs = sa.Table('test_runs', metadata, autoload=True)
+            res = test_runs.select().execute()
+            for test_run in res:
+                start_micro = test_run[4].microsecond
+                stop_micro = test_run[5].microsecond
                 values = {'start_time_microsecond': start_micro,
                           'stop_time_microsecond': stop_micro}
-                db_api.update_test_run(values, test_run[0], session)
-            session.close()
+                op.execute(test_runs.update().where(
+                    test_runs.c.id == test_run[0]).values(values))
+            res.close()
 
 
 def downgrade():
