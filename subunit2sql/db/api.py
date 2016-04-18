@@ -100,7 +100,7 @@ def _filter_test_runs_by_date(query, start_date=None, stop_date=None):
 def get_engine(use_slave=False):
     """Get a new sqlalchemy engine instance
 
-    :param bool use_slave if possible, use 'slave' database for this engine
+    :param bool use_slave: If possible, use 'slave' database for this engine
 
     :return: The engine object for the database connection
     :rtype: sqlalchemy.engine.Engine
@@ -117,15 +117,15 @@ def create_test(test_id, run_count=0, success=0, failure=0, run_time=0.0,
     track the run history of a unique test over all runs.
 
     :param str test_id: test_id identifying the test
-    :param int run_count: total number or runs defaults to 0
-    :param int success: number of successful runs defaults 0
-    :param int failure: number of failed runs defaults to 0
-    :param session: optional session object if one isn't provided a new session
+    :param int run_count: Total number or runs defaults to 0
+    :param int success: Number of successful runs defaults 0
+    :param int failure: Number of failed runs defaults to 0
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
     :return: The test object stored in the DB
     :rtype: subunit2sql.models.Test
 
-    :raises InvalidRunCount: if the run_count doesn't equal the sum of the
+    :raises InvalidRunCount: If the run_count doesn't equal the sum of the
                              successes and failures.
     """
     if run_count != success + failure:
@@ -148,12 +148,12 @@ def update_test(values, test_id, session=None):
     This method will take a dictionary of fields to update for a specific test.
     If a field is omitted it will not be changed in the DB.
 
-    :param dict values: dict of values to update the test with. The key is the
+    :param dict values: Dict of values to update the test with. The key is the
                         column name and the value is the new value to be stored
                         in the DB
-    :param str test_id: the uuid of the test to update. (value of the id column
+    :param str test_id: The uuid of the test to update. (value of the id column
                         for the row to be updated)
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return: The updated test object stored in the DB
@@ -170,16 +170,16 @@ def create_run(skips=0, fails=0, passes=0, run_time=0, artifacts=None,
                id=None, session=None, run_at=None):
     """Create a new run record in the database
 
-    :param int skips: total number of skipped tests defaults to 0
-    :param int fails: total number of failed tests defaults to 0
-    :param int passes: total number of passed tests defaults to 0
-    :param float run_time: total run timed defaults to 0
+    :param int skips: Total number of skipped tests defaults to 0
+    :param int fails: Total number of failed tests defaults to 0
+    :param int passes: Total number of passed tests defaults to 0
+    :param float run_time: Total run timed defaults to 0
     :param str artifacts: A link to any artifacts from the test run defaults to
                           None
-    :param str id: the run id for the new run, needs to be a unique value
-    :param session: optional session object if one isn't provided a new session
+    :param str id: The run id for the new run, needs to be a unique value
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
-    :param run_at: optional time at which the run was started. If not specified
+    :param run_at: Optional time at which the run was started. If not specified
                    the time that data is added to the DB will be used instead
 
     :return: The run object stored in the DB
@@ -207,12 +207,12 @@ def update_run(values, run_id, session=None):
     This method will take a dictionary of fields to update for a specific run.
     If a field is omitted it will not be changed in the DB.
 
-    :param dict values: dict of values to update the test with. The key is the
+    :param dict values: Dict of values to update the test with. The key is the
                         column name and the value is the new value to be stored
                         in the DB
-    :param str run_id: the uuid of the run to update. (value of the id column
+    :param str run_id: The uuid of the run to update. (value of the id column
                         for the row to be updated)
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return: The updated run object stored in the DB
@@ -231,12 +231,12 @@ def update_test_run(values, test_run_id, session=None):
     This method will take a dictionary of fields to update for a specific
     test_run. If a field is omitted it will not be changed in the DB.
 
-    :param dict values: dict of values to update the test with. The key is the
+    :param dict values: Dict of values to update the test with. The key is the
                         column name and the value is the new value to be stored
                         in the DB
-    :param str test_run_id: the uuid of the test_run to update. (value of the
+    :param str test_run_id: The uuid of the test_run to update. (value of the
                         id column for the row to be updated)
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return: The updated test_run object stored in the DB
@@ -255,11 +255,11 @@ def add_run_metadata(meta_dict, run_id, session=None):
     This method will take a dictionary and store key value pair metadata in the
     DB associated with the specified run.
 
-    :param dict meta_dict: a dictionary which will generate a separate key
+    :param dict meta_dict: A dictionary which will generate a separate key
                            value pair row associated with the run_id
-    :param str run_id: the uuid of the run to update. (value of the id column
+    :param str run_id: The uuid of the run to update. (value of the id column
                        for the row to be updated)
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of created metadata objects
@@ -283,7 +283,7 @@ def get_run_metadata(run_id, session=None):
     """Return all run metadata objects associated with a given run.
 
     :param str run_id: The uuid of the run to get all the metadata
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of metadata objects
@@ -302,7 +302,7 @@ def get_runs_by_key_value(key, value, session=None):
 
     :param key: The key to be matched
     :param value: The value to be matched
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
     :return list: The list of runs
     :rtype: subunit2sql.models.Run
@@ -322,14 +322,14 @@ def create_test_run(test_id, run_id, status, start_time=None,
 
     This method creates a new record in the database
 
-    :param str test_id: uuid for test that was run
-    :param str run_id: uuid for run that this was a member of
-    :param str status: status of the test run, normally success, fail, or skip
-    :param datetime.Datetime start_time: when the test was started defaults to
+    :param str test_id: UUID for test that was run
+    :param str run_id: UUID for run that this was a member of
+    :param str status: Status of the test run, normally success, fail, or skip
+    :param datetime.Datetime start_time: When the test was started defaults to
                                          None
-    :param datetime.Datetime end_time: when the test was finished defaults to
+    :param datetime.Datetime end_time: When the test was finished defaults to
                                        None
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return: The test_run object stored in the DB
@@ -366,11 +366,11 @@ def add_test_run_metadata(meta_dict, test_run_id, session=None):
     This method will take a dictionary and store key value pair metadata in the
     DB associated with the specified run.
 
-    :param dict meta_dict: a dictionary which will generate a separate key
+    :param dict meta_dict: A dictionary which will generate a separate key
                            value pair row associated with the test_run_id
-    :param str test_run_id: the uuid of the test_run to update. (value of the
+    :param str test_run_id: The uuid of the test_run to update. (value of the
                             id column for the row to be updated)
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of created metadata objects
@@ -393,7 +393,7 @@ def get_test_run_metadata(test_run_id, session=None):
     """Return all run metadata objects for associated with a given run.
 
     :param str test_run_id: The uuid of the test_run to get all the metadata
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of created metadata objects
@@ -411,11 +411,11 @@ def add_test_metadata(meta_dict, test_id, session=None):
     This method will take a dictionary and store key value pair metadata in the
     DB associated with the specified run.
 
-    :param dict meta_dict: a dictionary which will generate a separate key
+    :param dict meta_dict: A dictionary which will generate a separate key
                            value pair row associated with the test_run_id
-    :param str test_id: the uuid of the test to update. (value of the
+    :param str test_id: The uuid of the test to update. (value of the
                         id column for the row to be updated)
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of created metadata objects
@@ -438,7 +438,7 @@ def get_test_metadata(test_id, session=None):
     """Return all test metadata objects for associated with a given test.
 
     :param str test_id: The uuid of the test to get all the metadata
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of created metadata objects
@@ -453,7 +453,7 @@ def get_test_metadata(test_id, session=None):
 def get_all_tests(session=None):
     """Return all tests from the DB.
 
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of test objects
@@ -517,9 +517,9 @@ def get_test_prefixes(session=None):
     the prefix, and the result of this function will be all unique test ids in
     the database.
 
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
-    :return list: a list of all unique prefix strings, with any extraneous
+    :return list: A list of all unique prefix strings, with any extraneous
                   details removed, e.g. 'setUpClass ('.
     :rtype: str
     """
@@ -589,12 +589,12 @@ def get_tests_by_prefix(prefix, session=None, limit=100, offset=0):
     prefix will be considered the full test id, and this method may return
     unexpected results.
 
-    :param str prefix: the test prefix to search for
-    :param session: optional session object: if one isn't provided, a new
+    :param str prefix: The test prefix to search for
+    :param session: Optional session object: if one isn't provided, a new
                     session will be acquired for the duration of this operation
-    :param int limit: the maximum number of results to return
-    :param int offset: the starting index, for pagination purposes
-    :return list: the list of matching test objects, ordered by their test id
+    :param int limit: The maximum number of results to return
+    :param int offset: The starting index, for pagination purposes
+    :return list: The list of matching test objects, ordered by their test id
     :rtype: subunit2sql.models.Test
     """
     session = session or get_session()
@@ -609,11 +609,11 @@ def get_tests_by_prefix(prefix, session=None, limit=100, offset=0):
 def get_all_runs_by_date(start_date=None, stop_date=None, session=None):
     """Return all runs from the DB.
 
-    :param str: optional start_date, if provided only runs started at or after
+    :param str: Optional start_date, if provided only runs started at or after
                 the start_date will be included in the response
-    :param str: optional end_date, if provided only runs started at or before
+    :param str: Optional end_date, if provided only runs started at or before
                 the end_date will be included in the response
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of run objects
@@ -632,7 +632,7 @@ def get_all_runs_by_date(start_date=None, stop_date=None, session=None):
 def get_all_runs(session=None):
     """Return all runs from the DB.
 
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of run objects
@@ -645,7 +645,7 @@ def get_all_runs(session=None):
 def get_all_test_runs(session=None):
     """Return all test runs from the DB.
 
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of test run objects
@@ -659,7 +659,7 @@ def get_all_test_runs(session=None):
 def get_latest_run(session=None):
     """Return the most recently created run from the DB.
 
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return: The latest run object
@@ -677,8 +677,8 @@ def get_failing_from_run(run_id, session=None):
     This method will return all the test run objects that failed during the
     specified run.
 
-    :param str run_id: uuid for the run to find all the failing runs
-    :param session: optional session object if one isn't provided a new session
+    :param str run_id: UUID for the run to find all the failing runs
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of failing test runs for the given run
@@ -694,7 +694,7 @@ def get_test_by_id(id, session=None):
     """Get an individual test by it's uuid.
 
     :param str id: The uuid for the test (the id field in the DB)
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return: The specified test object
@@ -711,7 +711,7 @@ def get_test_by_test_id(test_id, session=None):
 
     :param str test_id: The id (aka the test name) for the test (the test_id
                         field in the DB)
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return: The specified test object
@@ -727,7 +727,7 @@ def get_run_id_from_uuid(uuid, session=None):
     """Get the id for a run by it's uuid
 
     :param str uuid: The uuid for the run
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
     :return: The id for the run with the provided uuid
     :rtype: int
@@ -742,7 +742,7 @@ def get_run_by_id(id, session=None):
     """Get an individual run by it's id.
 
     :param str id: The id for the run
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return: The specified run object
@@ -757,7 +757,7 @@ def get_test_run_by_id(test_run_id, session=None):
     """Get an individual test run by it's id.
 
     :param str test_run_id: The id for the test run
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return: The specified test run object
@@ -774,7 +774,7 @@ def get_test_runs_by_test_id(test_id, session=None):
 
     :param str test_id: The test's uuid (the id column in the test table) which
                         to get all test runs for
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of test run objects for the specified test
@@ -793,16 +793,16 @@ def get_test_runs_by_test_test_id(test_id, start_date=None, stop_date=None,
 
     :param str test_id: The test's test_id (the test_id column in the test
                         table) which to get all test runs for
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
     :param datetime.datetime start_date: The date to use as the start date for
                                          results
     :param datetime.datetime stop_date: The date to use as the cutoff date for
                                         results
-    :param str key: an optional key for run metadata to filter the test runs
+    :param str key: An optional key for run metadata to filter the test runs
                     on. Must be specified with a value otherwise it does
                     nothing.
-    :param str value: an optional value for run metadata to filter the test
+    :param str value: An optional value for run metadata to filter the test
                       runs on. Must be specified with a key otherwise it does
                       nothing.
 
@@ -836,7 +836,7 @@ def get_test_runs_by_run_id(run_id, session=None):
 
     :param str run_id: The run's uuid (the uuid column in the run table) which
                        to get all test runs for
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of test run objects for the specified test
@@ -855,7 +855,7 @@ def get_test_run_duration(test_run_id, session=None):
 
     :param str test_run_id: The test_run's uuid (the id column in the test_run
                             table) to get the duration of
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return: The duration of the test run in secs
@@ -879,7 +879,7 @@ def get_tests_from_run_id(run_id, session=None):
 
     :param str run_id: The run's uuid (the id column in the run table) which to
                        get all tests for
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
 
     :return list: The list of test objects for the specified test
     :rtype: subunit2sql.models.Test
@@ -902,7 +902,7 @@ def get_tests_run_dicts_from_run_id(run_id, session=None):
 
     :param str run_id: The run's uuid (the id column in the run table) which to
                        use to select it's run ids to collect information for.
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
 
     :return dict: A dictionary with the test_id from the tests for keys that
                   contains all the stored information about the test_runs.
@@ -958,7 +958,7 @@ def get_test_run_time_series(test_id, session=None):
 
     :param str test_id: The test's uuid (the id column in the test table) which
                         will be used to get all the test run times for.
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
 
     :return dict: A dictionary with the start times as the keys and the values
                   being the duration of the test that started at that time in
@@ -985,13 +985,13 @@ def get_test_run_series(start_date=None, stop_date=None, session=None,
 
     :param str start_date: Optional start date to filter results on
     :param str stop_date: Optional stop date to filter results on
-    :param session: optional session object if one isn't provided a new session
-    :param str key: optional run_metadata key to filter the runs used on. Key
+    :param session: Optional session object if one isn't provided a new session
+    :param str key: Optional run_metadata key to filter the runs used on. Key
                     must be specified with value for filtering to occur.
                     This defaults to 'build_queue' for backwards compatibility
                     with earlier versions. Note, this default will be removed
                     in the future.
-    :param str value: optional run_metadata value to filter the runs used on.
+    :param str value: Optional run_metadata value to filter the runs used on.
                       Value must be specified with key for filtering to occur.
                       This defaults to 'gate' for backwards
                       compatibility with earlier versions. Note, this default
@@ -1030,7 +1030,7 @@ def get_test_status_time_series(test_id, session=None):
 
     :param str test_id: The test's uuid (the id column in the test table) which
                         will be used to get all the test run times for.
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
 
     :return dict: A dictionary with the start times as the keys and the values
                   being the status of that test run.
@@ -1053,7 +1053,7 @@ def get_recent_successful_runs(num_runs=10, session=None):
     """Return a list of run uuid strings for the most recent successful runs
 
     :param int num_runs: The number of runs to return in the list
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
 
     :return list: A list of run uuid strings (the id column in the runs table)
                   for the most recent runs.
@@ -1068,7 +1068,7 @@ def get_recent_failed_runs(num_runs=10, session=None):
     """Return a list of run uuid strings for the most recent failed runs
 
     :param int num_runs: The number of runs to return in the list
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
 
     :return list: A list of run uuid strings (the id column in the runs table)
                   for the most recent runs.
@@ -1085,7 +1085,7 @@ def get_recent_runs_by_key_value_metadata(key, value, num_runs=10,
     """Get a list of runs for recent runs with a key value metadata pair
 
     :param int num_runs: The number of runs to return in the list
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
     :return list: A list of run objects for the most recent runs.
     :rtype subunit2sql.db.models.Run
     """
@@ -1104,7 +1104,7 @@ def delete_old_runs(expire_age=186, session=None):
 
     :param int expire_age: The number of days into the past to use as the
                            expiration date for deleting the runs
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
     """
     session = session or get_session()
     expire_date = datetime.date.today() - datetime.timedelta(days=expire_age)
@@ -1125,7 +1125,7 @@ def delete_old_test_runs(expire_age=186, session=None):
 
     :param int expire_age: The number of days into the past to use as the
                            expiration date for deleting the test runs
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
     """
     session = session or get_session()
     expire_date = datetime.date.today() - datetime.timedelta(days=expire_age)
@@ -1146,7 +1146,7 @@ def get_id_from_test_id(test_id, session=None):
     """Return the id (uuid primary key) for a test given it's test_id value
 
     :param str test_id: The test_id's string (not UUID) to identify the test
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
     :return: The id for the specified test
     :rtype: str
@@ -1159,7 +1159,7 @@ def get_id_from_test_id(test_id, session=None):
 def get_ids_for_all_tests(session=None):
     """Return a list of ids (uuid primary key) for all tests in the database
 
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
     :return: The list of all ids for tests in the tests table
     :rtype: list
@@ -1211,9 +1211,9 @@ def get_test_counts_in_date_range(test_id, start_date=None, stop_date=None,
     :param str test_id: The test_id's ID(big integer) to identify the test
     :param str start_date: The date to use as the start for counting
     :param str stop_date: The date to use as the cutoff for counting
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
-    :return: a dict containing the number of successes, failures, and skips
+    :return: A dict containing the number of successes, failures, and skips
     :rtype: dict
     """
     start_date = datetime.datetime.strptime(start_date, '%b %d %Y')
@@ -1259,7 +1259,7 @@ def get_failing_test_ids_from_runs_by_key_value(key, value, session=None):
     :param str key: The key to use to match runs from in run_metadata
     :param str value: The value of the key in run_metadata to match runs
                       against
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return: A list of test_ids that failed from runs that match the provided
@@ -1341,12 +1341,12 @@ def get_all_runs_time_series_by_key(key, start_date=None,
     This method will get a time series dictionary of run summary views which
     are grouped by the values of the specified key
 
-    :param str key: the key to use for grouping the run summaries
+    :param str key: The key to use for grouping the run summaries
     :param str start_date: Optional start date to filter results on
     :param str stop_date: Optional stop date to filter results on
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
-    :return runs: a time series dictionary of runs grouped by values of the
+    :return runs: A time series dictionary of runs grouped by values of the
                   specified key
     :rtype: dict
     """
@@ -1389,15 +1389,15 @@ def get_time_series_runs_by_key_value(key, value, start_date=None,
                                       stop_date=None, session=None):
     """Get a time series of runs with meta for all runs with a key value pai
 
-    :param str key: the metadata key to use for matching the runs
-    :param str value: the metadata value to use for matching the runs
+    :param str key: The metadata key to use for matching the runs
+    :param str value: The metadata value to use for matching the runs
     :param start_date: Optional start date to filter results on
     :param str stop_date: Optional stop date to filter results on
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
 
-    :return runs: a time series dictionary (where the top level key is a
+    :return runs: A time series dictionary (where the top level key is a
                   timestamp) that contains all the runs which
     :rtype: dict
     """
@@ -1465,11 +1465,11 @@ def get_run_failure_rate_by_key_value_metadata(key, value, start_date=None,
                                                stop_date=None, session=None):
     """Return the failure percentage of runs with a set of run metadata
 
-    :param str key: the metadata key to use for matching the runs
-    :param str value: the metadata value to use for matching the runs
+    :param str key: The metadata key to use for matching the runs
+    :param str value: The metadata value to use for matching the runs
     :param start_date: Optional start date to filter results on
     :param str stop_date: Optional stop date to filter results on
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return failure_rate: The percentage of runs that failed, will be None if
@@ -1497,12 +1497,12 @@ def add_test_run_attachments(attach_dict, test_run_id, session=None):
     This method will take a dictionary and store key blob pair attachments in
     the DB associated with the specified test_run.
 
-    :param dict attachments_dict: a dictionary which will generate a separate
+    :param dict attachments_dict: A dictionary which will generate a separate
                                   key blob pair row associated with the
                                   test_run_id
-    :param str test_run_id: the uuid of the test_run to update. (value of the
+    :param str test_run_id: The uuid of the test_run to update. (value of the
                             id column for the row to be updated)
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of created attachment objects
@@ -1526,12 +1526,12 @@ def get_recent_failed_runs_by_run_metadata(key, value, num_runs=10,
                                            start_date=None, session=None):
     """Get a list of recent failed runs for a given run metadata pair
 
-    :param str key: the run_metadata key to get failed runs
+    :param str key: The run_metadata key to get failed runs
     :param str value: The run_metadata value to get failed runs
     :param int num_runs: The number of results to fetch, defaults to 10
-    :param datetime start_date: the optional starting dates to get runs from.
+    :param datetime start_date: The optional starting dates to get runs from.
                                 Nothing older than this date will be returned
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
     :return list: The list of recent failed Run objects
@@ -1591,10 +1591,10 @@ def get_test_runs_by_status_for_run_ids(status, run_ids, key=None,
                          table) to get the test runs from
     :param str key: An optional run_metadata key to add the values for a run
                     to the output dict for each test_run
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
-    :return test_runs: a list of dicts for the test_runs and associated data
+    :return test_runs: A list of dicts for the test_runs and associated data
     :rtype: list
     """
     session = session or get_session()
@@ -1644,10 +1644,10 @@ def get_test_runs_by_status_for_run_ids(status, run_ids, key=None,
 def get_all_run_metadata_keys(session=None):
     """Get a list of all the keys used in the run_metadata table
 
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
-    :return keys: a list of all keys used in the run_metadata table
+    :return keys: A list of all keys used in the run_metadata table
     :rtype: list
     """
     session = session or get_session()
@@ -1658,10 +1658,10 @@ def get_all_run_metadata_keys(session=None):
 def get_all_test_metadata_keys(session=None):
     """Get a list of all the keys used in the test_metadata table
 
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
-    :return keys: a list of all keys used in the test_metadata table
+    :return keys: A list of all keys used in the test_metadata table
     :rtype: list
     """
     session = session or get_session()
@@ -1672,10 +1672,10 @@ def get_all_test_metadata_keys(session=None):
 def get_all_test_run_metadata_keys(session=None):
     """Get a list of all the keys used in the test_run_metadata table
 
-    :param session: optional session object if one isn't provided a new session
+    :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
 
-    :return keys: a list of all keys used in the test_run_metadata table
+    :return keys: A list of all keys used in the test_run_metadata table
     :rtype: list
     """
     session = session or get_session()
