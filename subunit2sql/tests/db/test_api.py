@@ -892,3 +892,59 @@ class TestDatabaseAPI(base.TestCase):
         self.assertEqual('fail', res[0].status)
         self.assertIn(timestamp_a, [x.start_time for x in res])
         self.assertIn(timestamp_b, [x.start_time for x in res])
+
+    def test_get_test_run_time_series(self):
+        timestamp_a = datetime.datetime.utcnow().replace(microsecond=0)
+        timestamp_b = timestamp_a + datetime.timedelta(minutes=10)
+        timestamp_c = timestamp_a + datetime.timedelta(minutes=15)
+        run_a = api.create_run()
+        run_b = api.create_run()
+        test = api.create_test('fake_test')
+        api.create_test_run(test.id, run_a.id, 'success',
+                            start_time=timestamp_a,
+                            end_time=timestamp_b)
+        api.create_test_run(test.id, run_b.id, 'success',
+                            start_time=timestamp_b,
+                            end_time=timestamp_c)
+        res = api.get_test_run_time_series(test.id)
+        self.assertEqual(res[timestamp_a], 600)
+        self.assertEqual(res[timestamp_b], 300)
+
+    def test_get_test_status_time_series(self):
+        timestamp_a = datetime.datetime.utcnow().replace(microsecond=0)
+        timestamp_b = timestamp_a + datetime.timedelta(minutes=10)
+        timestamp_c = timestamp_a + datetime.timedelta(minutes=20)
+        run_a = api.create_run()
+        run_b = api.create_run()
+        test = api.create_test('fake_test')
+        api.create_test_run(test.id, run_a.id, 'success',
+                            start_time=timestamp_a,
+                            end_time=timestamp_b)
+        api.create_test_run(test.id, run_b.id, 'fail',
+                            start_time=timestamp_b,
+                            end_time=timestamp_c)
+        res = api.get_test_status_time_series(test.id)
+        self.assertEqual(res[timestamp_a], 'success')
+        self.assertEqual(res[timestamp_b], 'fail')
+
+    def test_get_recent_failed_runs(self):
+        run_a = api.create_run(fails=1)
+        api.create_run()
+        run_c = api.create_run(fails=2)
+        run_d = api.create_run(fails=1)
+        res = api.get_recent_failed_runs()
+        self.assertEqual(3, len(res))
+        self.assertIn(run_a.uuid, res)
+        self.assertIn(run_c.uuid, res)
+        self.assertIn(run_d.uuid, res)
+
+    def test_get_recent_successful_runs(self):
+        run_a = api.create_run(passes=1)
+        run_b = api.create_run()
+        run_c = api.create_run(passes=2)
+        api.create_run(fails=1)
+        res = api.get_recent_successful_runs()
+        self.assertEqual(3, len(res))
+        self.assertIn(run_a.uuid, res)
+        self.assertIn(run_b.uuid, res)
+        self.assertIn(run_c.uuid, res)
