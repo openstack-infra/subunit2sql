@@ -948,3 +948,65 @@ class TestDatabaseAPI(base.TestCase):
         self.assertIn(run_a.uuid, res)
         self.assertIn(run_b.uuid, res)
         self.assertIn(run_c.uuid, res)
+
+    def test_get_test_counts_in_date_range(self):
+        timestamp_str_a = 'Dec 01 2015'
+        timestamp_str_b = 'Dec 20 2015'
+        timestamp_a = datetime.datetime(2015, 12, 2, 10, 00, 00)
+        timestamp_b = timestamp_a + datetime.timedelta(minutes=10)
+        timestamp_c = timestamp_a + datetime.timedelta(minutes=20)
+        timestamp_d = datetime.datetime(2015, 12, 22, 10, 00, 00)
+        run_a = api.create_run()
+        run_b = api.create_run()
+        run_c = api.create_run()
+        run_d = api.create_run()
+        test = api.create_test('fake_test')
+        api.create_test_run(test.id, run_a.id, 'success',
+                            timestamp_a, timestamp_b)
+        api.create_test_run(test.id, run_b.id, 'fail',
+                            timestamp_a, timestamp_c)
+        api.create_test_run(test.id, run_c.id, 'success',
+                            timestamp_a, timestamp_d)
+        api.create_test_run(test.id, run_d.id, 'skip',
+                            timestamp_c, timestamp_d)
+        res = api.get_test_counts_in_date_range(test.id,
+                                                timestamp_str_a,
+                                                timestamp_str_b)
+        self.assertEqual(1, res['success'])
+        self.assertEqual(1, res['failure'])
+        self.assertEqual(0, res['skips'])
+
+    def test_get_failing_test_ids_from_runs_by_key_value(self):
+        test_a = api.create_test('fake_test')
+        test_b = api.create_test('fake_test1')
+        test_c = api.create_test('fake_test2')
+        test_d = api.create_test('fake_test3')
+        run_a = api.create_run()
+        run_b = api.create_run()
+        run_c = api.create_run()
+        api.add_run_metadata({'a_key': 'a_value'}, run_a.id)
+        api.add_run_metadata({'a_key': 'a_value'}, run_b.id)
+        api.add_run_metadata({'a_key': 'b_value'}, run_c.id)
+        api.create_test_run(test_a.id, run_a.id, 'fail')
+        api.create_test_run(test_b.id, run_b.id, 'success')
+        api.create_test_run(test_c.id, run_b.id, 'fail')
+        api.create_test_run(test_d.id, run_c.id, 'fail')
+        res = api.get_failing_test_ids_from_runs_by_key_value('a_key',
+                                                              'a_value')
+        self.assertEqual(2, len(res))
+        self.assertIn(test_a.test_id, res)
+        self.assertIn(test_c.test_id, res)
+
+    def test_add_test_run_attachments(self):
+        test = api.create_test('fake_test')
+        run = api.create_run()
+        test_run = api.create_test_run(test.id, run.id, 'success')
+        attach_dict = {'attach_label': b'attach',
+                       'attach_label_a': b'attach_a'}
+        res = api.add_test_run_attachments(attach_dict, test_run.id)
+        self.assertEqual(2, len(res))
+        self.assertEqual(test_run.id, res[0].test_run_id)
+        self.assertIn('attach_label', [x.label for x in res])
+        self.assertIn('attach_label_a', [x.label for x in res])
+        self.assertIn(b'attach', [x.attachment for x in res])
+        self.assertIn(b'attach_a', [x.attachment for x in res])
