@@ -13,6 +13,7 @@
 # under the License.
 
 import datetime
+import types
 
 from six import moves
 import testscenarios
@@ -1010,3 +1011,14 @@ class TestDatabaseAPI(base.TestCase):
         self.assertIn('attach_label_a', [x.label for x in res])
         self.assertIn(b'attach', [x.attachment for x in res])
         self.assertIn(b'attach_a', [x.attachment for x in res])
+
+    def test_get_ids_for_all_tests(self):
+        test_a = api.create_test('fake_test')
+        test_b = api.create_test('fake_test1')
+        test_c = api.create_test('fake_test2')
+        res = api.get_ids_for_all_tests()
+        self.assertIsInstance(res, types.GeneratorType)
+        res = list(res)
+        self.assertIn((test_c.id,), res)
+        self.assertIn((test_b.id,), res)
+        self.assertIn((test_a.id,), res)

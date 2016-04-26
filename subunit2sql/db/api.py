@@ -1157,15 +1157,15 @@ def get_id_from_test_id(test_id, session=None):
 
 
 def get_ids_for_all_tests(session=None):
-    """Return a list of ids (uuid primary key) for all tests in the database
+    """Return an iterator of ids (uuid primary key) for all tests in the database
 
     :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
-    :return: The list of all ids for tests in the tests table
-    :rtype: list
+    :return: The iterator of all ids for tests in the tests table
+    :rtype: iterator
     """
     session = session or get_session()
-    return db_utils.model_query(models.Test, session).value(models.Test.id)
+    return db_utils.model_query(models.Test, session).values(models.Test.id)
 
 
 def get_run_times_grouped_by_run_metadata_key(key, start_date=None,
