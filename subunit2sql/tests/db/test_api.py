@@ -641,6 +641,35 @@ class TestDatabaseAPI(base.TestCase):
             'a_key': 'b',
         }, result[0])
 
+    def test_get_test_runs_by_status_for_run_ids_with_run_id(self):
+        run_b = api.create_run(artifacts='fake_url')
+        run_a = api.create_run()
+        run_c = api.create_run()
+        test_a = api.create_test('fake_test')
+        api.add_run_metadata({'a_key': 'b'}, run_b.id)
+        api.add_run_metadata({'a_key': 'a'}, run_a.id)
+        api.add_run_metadata({'a_key': 'c'}, run_c.id)
+        start_timestamp = datetime.datetime(1914, 6, 28, 10, 45, 0)
+        stop_timestamp = datetime.datetime(1914, 6, 28, 10, 50, 0)
+        api.create_test_run(test_a.id, run_a.id, 'success',
+                            datetime.datetime.utcnow())
+        api.create_test_run(test_a.id, run_b.id, 'fail',
+                            start_timestamp, stop_timestamp)
+        api.create_test_run(test_a.id, run_c.id, 'success',
+                            datetime.datetime.utcnow())
+        result = api.get_test_runs_by_status_for_run_ids(
+            'fail', [run_a.uuid, run_b.uuid, run_c.uuid], key='a_key',
+            include_run_id=True)
+        self.assertEqual(1, len(result))
+        self.assertEqual({
+            'test_id': u'fake_test',
+            'link': u'fake_url',
+            'start_time': start_timestamp,
+            'stop_time': stop_timestamp,
+            'a_key': 'b',
+            'uuid': run_b.uuid,
+        }, result[0])
+
     def test_get_all_runs_time_series_by_key_with_overlap(self):
         time_a = datetime.datetime(1914, 6, 28, 10, 45, 0)
         run_a = api.create_run(run_at=time_a)

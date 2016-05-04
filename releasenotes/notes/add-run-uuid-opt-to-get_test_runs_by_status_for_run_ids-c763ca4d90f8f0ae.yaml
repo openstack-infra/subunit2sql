@@ -1,0 +1,4 @@
+---
+features:
+  - A new option on get_test_runs_by_status_for_run_ids(), include_run_id, to
+    include the run uuid in the run dicts returned
