@@ -949,7 +949,7 @@ class TestDatabaseAPI(base.TestCase):
         self.assertIn(run_b.uuid, res)
         self.assertIn(run_c.uuid, res)
 
-    def test_get_test_counts_in_date_range(self):
+    def test_get_test_counts_in_date_range_as_str(self):
         timestamp_str_a = 'Dec 01 2015'
         timestamp_str_b = 'Dec 20 2015'
         timestamp_a = datetime.datetime(2015, 12, 2, 10, 00, 00)
@@ -972,6 +972,33 @@ class TestDatabaseAPI(base.TestCase):
         res = api.get_test_counts_in_date_range(test.id,
                                                 timestamp_str_a,
                                                 timestamp_str_b)
+        self.assertEqual(1, res['success'])
+        self.assertEqual(1, res['failure'])
+        self.assertEqual(0, res['skips'])
+
+    def test_get_test_counts_in_date_range(self):
+        timestamp_a = datetime.datetime(2015, 12, 2, 10, 00, 00)
+        timestamp_b = timestamp_a + datetime.timedelta(minutes=10)
+        timestamp_c = timestamp_a + datetime.timedelta(minutes=20)
+        timestamp_d = datetime.datetime(2015, 12, 22, 10, 00, 00)
+        timerange_a = datetime.datetime(2015, 12, 1)
+        timerange_b = datetime.datetime(2015, 12, 20)
+        run_a = api.create_run()
+        run_b = api.create_run()
+        run_c = api.create_run()
+        run_d = api.create_run()
+        test = api.create_test('fake_test')
+        api.create_test_run(test.id, run_a.id, 'success',
+                            timestamp_a, timestamp_b)
+        api.create_test_run(test.id, run_b.id, 'fail',
+                            timestamp_a, timestamp_c)
+        api.create_test_run(test.id, run_c.id, 'success',
+                            timestamp_a, timestamp_d)
+        api.create_test_run(test.id, run_d.id, 'skip',
+                            timestamp_c, timestamp_d)
+        res = api.get_test_counts_in_date_range(test.id,
+                                                timerange_a,
+                                                timerange_b)
         self.assertEqual(1, res['success'])
         self.assertEqual(1, res['failure'])
         self.assertEqual(0, res['skips'])
