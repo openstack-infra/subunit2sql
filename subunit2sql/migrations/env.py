@@ -79,7 +79,7 @@ def run_migrations_online():
     facade = db_api._create_facade_lazily()
     engine = facade.get_engine()
     connection = engine.connect()
-    facade._session_maker.configure(bind=connection)
+    facade.get_sessionmaker().configure(bind=connection)
 
     context.configure(connection=connection,
                       target_metadata=target_metadata,
@@ -90,7 +90,7 @@ def run_migrations_online():
             context.run_migrations()
     finally:
         connection.close()
-        facade._session_maker.configure(bind=engine)
+        facade.get_sessionmaker().configure(bind=engine)
 
 if context.is_offline_mode():
     run_migrations_offline()
