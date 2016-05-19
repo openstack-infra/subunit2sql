@@ -1,7 +1,6 @@
 alembic>=0.4.1
 oslo.config>=1.4.0.0a3
 oslo.db>=2.1.0
-oslo.concurrency
 pbr>=1.0.0
 python-subunit>=0.0.18
 six>=1.5.2
