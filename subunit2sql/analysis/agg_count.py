@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from dateutil import parser as date_parser
 from oslo_config import cfg
 import pandas as pd
 
@@ -48,13 +49,19 @@ def generate_series():
                     'failure': int(test.failure),
                 }
     else:
+        start_date = None
+        stop_date = None
+        if CONF.start_date:
+            start_date = date_parser.parse(CONF.start_date)
+        if CONF.stop_date:
+            stop_date = date_parser.parse(CONF.stop_date)
         if CONF.command.test_ids:
             ids = [api.get_id_from_test_id(x) for x in CONF.command.test_ids]
         else:
             ids = api.get_ids_for_all_tests(session)
         for test in ids:
             test_dict[test] = api.get_test_counts_in_date_range(
-                test, CONF.start_date, CONF.stop_date, session)
+                test, start_date, stop_date, session)
     if CONF.command.no_success_graph:
         for test in test_dict:
             test_dict[test].pop('success')

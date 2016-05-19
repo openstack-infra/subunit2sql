@@ -1,0 +1,10 @@
+---
+deprecations:
+    - Passing in the date as a string in the format "%b %d %Y" to the function
+      get_test_counts_in_date_rage() in the DB API. Instead pass the date in
+      as a datetime object.
+fixes:
+  - Setting the date as an ISO8601, as indicated by the docs and --help, for
+    the subunit2sql-graph command agg_count will now work correctly. It would
+    previously stack trace. (Story 2000581)
+

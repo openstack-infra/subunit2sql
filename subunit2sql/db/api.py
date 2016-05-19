@@ -1209,14 +1209,22 @@ def get_test_counts_in_date_range(test_id, start_date=None, stop_date=None,
     certain date range
 
     :param str test_id: The test_id's ID(big integer) to identify the test
-    :param str start_date: The date to use as the start for counting
-    :param str stop_date: The date to use as the cutoff for counting
+    :param datetime start_date: The date to use as the start for counting. A
+                                str in the datetime str format "%b %d %Y" was
+                                the previous format here and will still work
+                                but is deprecated in favor of passing in a
+                                datetime object.
+    :param datetime stop_date: The date to use as the cutoff for counting. A
+                               str in the datetime str format "%b %d %Y" was
+                               the previous format here and will still work but
+                               is deprecated in favor of passing in a datetime.
     :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
     :return: A dict containing the number of successes, failures, and skips
     :rtype: dict
     """
-    start_date = datetime.datetime.strptime(start_date, '%b %d %Y')
+    if isinstance(start_date, str):
+        start_date = datetime.datetime.strptime(start_date, '%b %d %Y')
     if isinstance(stop_date, str):
         stop_date = datetime.datetime.strptime(stop_date, '%b %d %Y')
     session = session or get_session()
