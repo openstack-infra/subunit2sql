@@ -116,3 +116,8 @@ along with any options that you would normally use to either specify a config
 file or the DB connection info. Running this command will print to stdout the
 subunit v2 stream for the run specified by $RUN_ID, unless the --out_path
 argument is specified to write it to a file instead.
+
+ChangeLog
+=========
+
+To see the release notes go here: `http://docs.openstack.org/releasenotes/subunit2sql/ <http://docs.openstack.org/releasenotes/subunit2sql/>`_
