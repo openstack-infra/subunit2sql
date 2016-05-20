@@ -1607,7 +1607,7 @@ def get_runs_by_status_grouped_by_run_metadata(key, start_date=None,
 
 
 def get_test_runs_by_status_for_run_ids(status, run_ids, key=None,
-                                        session=None):
+                                        session=None, include_run_id=False):
     """Get a list of test run dicts by status for all the specified runs
 
     :param str status: The test status to filter the returned test runs on
@@ -1617,6 +1617,8 @@ def get_test_runs_by_status_for_run_ids(status, run_ids, key=None,
                     to the output dict for each test_run
     :param session: Optional session object if one isn't provided a new session
                     will be acquired for the duration of this operation
+    :param bool include_run_id: boolean flag to enable including the run uuid
+                    in the test run dicts returned
 
     :return test_runs: A list of dicts for the test_runs and associated data
     :rtype: list
@@ -1638,13 +1640,15 @@ def get_test_runs_by_status_for_run_ids(status, run_ids, key=None,
                                models.TestRun.start_time_microsecond,
                                models.TestRun.stop_time,
                                models.TestRun.stop_time_microsecond,
-                               models.RunMetadata.value)
+                               models.RunMetadata.value,
+                               models.Run.uuid)
     else:
         results = query.values(models.Test.test_id, models.Run.artifacts,
                                models.TestRun.start_time,
                                models.TestRun.start_time_microsecond,
                                models.TestRun.stop_time,
-                               models.TestRun.stop_time_microsecond)
+                               models.TestRun.stop_time_microsecond,
+                               models.Run.uuid)
     test_runs = []
     for result in results:
         test_run = {
@@ -1653,6 +1657,8 @@ def get_test_runs_by_status_for_run_ids(status, run_ids, key=None,
             'start_time': result.start_time,
             'stop_time': result.stop_time,
         }
+        if include_run_id:
+            test_run['uuid'] = result.uuid
         if result.start_time_microsecond is not None:
             test_run['start_time'] = test_run['start_time'].replace(
                 microsecond=result.start_time_microsecond)
