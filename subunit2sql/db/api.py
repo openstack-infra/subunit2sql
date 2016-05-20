@@ -1053,6 +1053,7 @@ def get_recent_successful_runs(num_runs=10, session=None, start_date=None):
     """Return a list of run uuid strings for the most recent successful runs
 
     :param int num_runs: The number of runs to return in the list
+    :param session: Optional session object if one isn't provided a new session
     :param datetime start_date: An optional date to use as the starting point
                                 for getting recent runs. Only runs after this
                                 date will be returned.
