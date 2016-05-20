@@ -108,7 +108,7 @@ class TestModelsMigrations(test_migrations.ModelsMigrationsSync,
             object_, name, type_, reflected, compare_to)
 
     def filter_metadata_diff(self, diff):
-        return filter(self.remove_unrelated_errors, diff)
+        return list(filter(self.remove_unrelated_errors, diff))
 
     def remove_unrelated_errors(self, element):
         insp = sqlalchemy.engine.reflection.Inspector.from_engine(
