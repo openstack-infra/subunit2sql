@@ -1101,7 +1101,7 @@ def get_recent_runs_by_key_value_metadata(key, value, num_runs=10,
                                 date will be returned.
 
     :return list: A list of run objects for the most recent runs.
-    :rtype subunit2sql.db.models.Run
+    :rtype: subunit2sql.db.models.Run
     """
     session = session or get_session()
     results = db_utils.model_query(models.Run, session).join(

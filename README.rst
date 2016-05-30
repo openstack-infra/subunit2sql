@@ -28,7 +28,7 @@ different format.
 
 For multiple distributed test runs that are generating subunit output it is
 useful to store the results in a unified repository. This is the motivation for
-the _`testrepository` project which does a good job for centralizing the
+the `testrepository`_ project which does a good job for centralizing the
 results from multiple test runs.
 
 .. _testrepository: http://testrepository.readthedocs.org/en/latest/
