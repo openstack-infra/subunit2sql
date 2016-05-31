@@ -862,6 +862,37 @@ class TestDatabaseAPI(base.TestCase):
         self.assertEqual(1, len(results))
         self.assertEqual(run_c.id, results[0].id)
 
+    def test_get_runs_counts_by_run_metadata_no_start_date(self):
+        run_a = api.create_run(fails=1)
+        api.create_run()
+        run_c = api.create_run(fails=2)
+        api.add_run_metadata({'fake_key': 'fake_value'}, run_a.id)
+        api.add_run_metadata({'zeon': 'zaku'}, run_c.id)
+        results = api.get_runs_counts_by_run_metadata('zeon', 'zaku')
+        self.assertEqual(1, results)
+        results = api.get_runs_counts_by_run_metadata('zeon', 'dom')
+        self.assertEqual(0, results)
+
+    def test_get_runs_counts_by_run_metadata_with_start_date(self):
+        run_a = api.create_run(fails=1)
+        api.create_run()
+        run_c = api.create_run(fails=2)
+        run_d = api.create_run(fails=3,
+                               run_at=datetime.datetime(1914, 6, 28,
+                                                        10, 45, 0))
+        api.add_run_metadata({'fake_key': 'fake_value'}, run_a.id)
+        api.add_run_metadata({'zeon': 'zaku'}, run_c.id)
+        api.add_run_metadata({'zeon': 'zaku'}, run_d.id)
+        results = api.get_runs_counts_by_run_metadata(
+            'zeon', 'zaku', start_date=datetime.date(1970, 1, 1))
+        self.assertEqual(1, results)
+        results = api.get_runs_counts_by_run_metadata(
+            'zeon', 'zaku', start_date=datetime.date(1914, 6, 27))
+        self.assertEqual(2, results)
+        results = api.get_runs_counts_by_run_metadata(
+            'zeon', 'dom', start_date=datetime.date(1914, 6, 27))
+        self.assertEqual(0, results)
+
     def test_get_test_run_metadata(self):
         run = api.create_run()
         test = api.create_test('fake_test')
