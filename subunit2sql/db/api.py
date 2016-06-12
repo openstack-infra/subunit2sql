@@ -1571,6 +1571,28 @@ def get_recent_failed_runs_by_run_metadata(key, value, num_runs=10,
         models.Run.run_at.desc()).limit(num_runs).all()
 
 
+def get_runs_counts_by_run_metadata(key, value, start_date=None, session=None):
+    """Check runs for a given run metadata pair
+
+    :param str key: The run_metadata key to check runs
+    :param str value: The run_metadata value to check runs
+    :param datetime start_date: The optional starting dates to get runs from.
+                                Nothing older than this date will be returned
+    :param session: Optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return count: A count for a given run metadata key-value pair
+    :rtype: int
+    """
+    session = session or get_session()
+    query = db_utils.model_query(models.Run, session).join(
+        models.RunMetadata, models.Run.id == models.RunMetadata.run_id).filter(
+            models.RunMetadata.key == key,
+            models.RunMetadata.value == value)
+    query = _filter_runs_by_date(query, start_date)
+    return query.count()
+
+
 def get_runs_by_status_grouped_by_run_metadata(key, start_date=None,
                                                stop_date=None, session=None):
     session = session or get_session()
