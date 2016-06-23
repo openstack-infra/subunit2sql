@@ -1149,3 +1149,29 @@ class TestDatabaseAPI(base.TestCase):
         self.assertIn((test_c.id,), res)
         self.assertIn((test_b.id,), res)
         self.assertIn((test_a.id,), res)
+
+    def test_get_recent_successful_runs_by_run_metadata_no_start_date(self):
+        run_a = api.create_run(fails=0, passes=1)
+        api.create_run()
+        run_c = api.create_run(fails=0, passes=2)
+        api.add_run_metadata({'fake_key': 'fake_value'}, run_a.id)
+        api.add_run_metadata({'zeon': 'zaku'}, run_c.id)
+        results = api.get_recent_successful_runs_by_run_metadata('zeon',
+                                                                 'zaku')
+        self.assertEqual(1, len(results))
+        self.assertEqual(run_c.id, results[0].id)
+
+    def test_get_recent_successful_runs_by_run_metadata_with_start_date(self):
+        run_a = api.create_run(fails=0, passes=1)
+        api.create_run()
+        run_c = api.create_run(fails=0, passes=2)
+        run_d = api.create_run(fails=0, passes=3,
+                               run_at=datetime.datetime(1914, 6, 28,
+                                                        10, 45, 0))
+        api.add_run_metadata({'fake_key': 'fake_value'}, run_a.id)
+        api.add_run_metadata({'zeon': 'zaku'}, run_c.id)
+        api.add_run_metadata({'zeon': 'zaku'}, run_d.id)
+        results = api.get_recent_successful_runs_by_run_metadata(
+            'zeon', 'zaku', start_date=datetime.date(1970, 1, 1))
+        self.assertEqual(1, len(results))
+        self.assertEqual(run_c.id, results[0].id)

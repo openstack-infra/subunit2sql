@@ -1733,3 +1733,29 @@ def get_all_test_run_metadata_keys(session=None):
     session = session or get_session()
     keys = session.query(models.TestRunMetadata.key).distinct().all()
     return [key[0] for key in keys]
+
+
+def get_recent_successful_runs_by_run_metadata(key, value, num_runs=10,
+                                               start_date=None, session=None):
+    """Get a list of recent successful runs for a given run metadata pair
+
+    :param str key: The run_metadata key to get successful runs
+    :param str value: The run_metadata value to get successful runs
+    :param int num_runs: The number of results to fetch, defaults to 10
+    :param datetime start_date: The optional starting dates to get runs from.
+                                Nothing older than this date will be returned
+    :param session: Optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return list: The list of recent failed Run objects
+    :rtype: subunit2sql.models.Run
+    """
+    session = session or get_session()
+    query = db_utils.model_query(models.Run, session).join(
+        models.RunMetadata, models.Run.id == models.RunMetadata.run_id).filter(
+            models.RunMetadata.key == key,
+            models.RunMetadata.value == value)
+    query = _filter_runs_by_date(query, start_date)
+    return query.filter(models.Run.passes >= 1).filter(
+        models.Run.fails == 0).order_by(
+            models.Run.run_at.desc()).limit(num_runs).all()

@@ -1,0 +1,5 @@
+---
+features:
+  - A new DB API function, get_recent_successful_runs_by_run_metadata, was
+    added. This enabled returning a list of recent successful runs with a key
+    value run_metadata pair.
