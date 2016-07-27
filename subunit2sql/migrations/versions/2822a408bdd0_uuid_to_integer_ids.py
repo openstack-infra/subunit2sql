@@ -227,6 +227,7 @@ def upgrade():
             batch_op.drop_column('id')
             batch_op.alter_column('new_id', new_column_name='id',
                                   primary_key=True,
+                                  nullable=False,
                                   existing_type=new_id_type,
                                   autoincrement=True)
             batch_op.drop_column('test_run_id')
@@ -237,6 +238,7 @@ def upgrade():
             batch_op.drop_column('id')
             batch_op.alter_column('new_id', new_column_name='id',
                                   primary_key=True,
+                                  nullable=False,
                                   existing_type=new_id_type,
                                   autoincrement=True)
             batch_op.drop_column('test_run_id')
@@ -247,6 +249,7 @@ def upgrade():
             batch_op.drop_column('id')
             batch_op.alter_column('new_id', new_column_name='id',
                                   primary_key=True,
+                                  nullable=False,
                                   existing_type=new_id_type,
                                   autoincrement=True)
             batch_op.drop_column('run_id')
@@ -256,6 +259,7 @@ def upgrade():
             batch_op.drop_column('id')
             batch_op.alter_column('new_id', new_column_name='id',
                                   primary_key=True,
+                                  nullable=False,
                                   existing_type=new_id_type,
                                   autoincrement=True)
             batch_op.drop_column('test_id')
@@ -265,6 +269,7 @@ def upgrade():
             batch_op.drop_column('id')
             batch_op.alter_column('new_id', new_column_name='id',
                                   primary_key=True,
+                                  nullable=False,
                                   existing_type=new_id_type,
                                   autoincrement=True)
             batch_op.drop_column('test_id')
@@ -277,6 +282,7 @@ def upgrade():
             batch_op.drop_column('id')
             batch_op.alter_column('new_id', new_column_name='id',
                                   primary_key=True,
+                                  nullable=False,
                                   existing_type=new_id_type,
                                   autoincrement=True)
         with op.batch_alter_table("runs_new") as batch_op:
@@ -284,6 +290,7 @@ def upgrade():
                                   existing_type=sa.VARCHAR(36))
             batch_op.alter_column('new_id', new_column_name='id',
                                   primary_key=True,
+                                  nullable=False,
                                   existing_type=new_id_type,
                                   autoincrement=True)
 

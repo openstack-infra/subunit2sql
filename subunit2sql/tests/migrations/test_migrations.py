@@ -442,7 +442,7 @@ class TestWalkMigrations(base.TestCase):
         data['test_metadata'] = test_metadata
 
         # Add test run
-        now = datetime.datetime.now()
+        now = datetime.datetime.now().replace(microsecond=0)
         future_now = now + datetime.timedelta(0, 4)
 
         test_runs = get_table(engine, 'test_runs')

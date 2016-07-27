@@ -107,8 +107,8 @@ class TestDatabaseAPI(base.TestCase):
     def test_get_test_runs_dicts_with_no_meta(self):
         run = api.create_run()
         test_a = api.create_test('fake_test')
-        start_time = datetime.datetime.utcnow()
-        stop_time = datetime.datetime.utcnow()
+        start_time = datetime.datetime.utcnow().replace(microsecond=0)
+        stop_time = datetime.datetime.utcnow().replace(microsecond=0)
         api.create_test_run(test_a.id, run.id, 'success',
                             start_time, stop_time)
         test_run_dict = api.get_tests_run_dicts_from_run_id(run.uuid)
@@ -122,7 +122,7 @@ class TestDatabaseAPI(base.TestCase):
     def test_get_test_runs_dicts_with_no_stop_time(self):
         run = api.create_run()
         test_a = api.create_test('fake_test')
-        start_time = datetime.datetime.utcnow()
+        start_time = datetime.datetime.utcnow().replace(microsecond=0)
         stop_time = None
         api.create_test_run(test_a.id, run.id, 'success',
                             start_time, stop_time)
@@ -136,7 +136,7 @@ class TestDatabaseAPI(base.TestCase):
     def test_get_test_runs_dicts_with_no_start_time(self):
         run = api.create_run()
         test_a = api.create_test('fake_test')
-        stop_time = datetime.datetime.utcnow()
+        stop_time = datetime.datetime.utcnow().replace(microsecond=0)
         start_time = None
         api.create_test_run(test_a.id, run.id, 'success',
                             start_time, stop_time)
@@ -410,16 +410,14 @@ class TestDatabaseAPI(base.TestCase):
                          sorted(keys))
 
     def test_get_test_run_series(self):
-        timestamp_a = datetime.datetime.utcnow()
+        timestamp_a = datetime.datetime.utcnow().replace(microsecond=0)
         timestamp_b = timestamp_a + datetime.timedelta(minutes=2)
         api.create_run(passes=5, run_at=timestamp_a)
         api.create_run(fails=2, run_at=timestamp_b)
         result = api.get_test_run_series(key=None, value=None)
         self.assertEqual(2, len(result.keys()))
-        self.assertIn(timestamp_a.replace(microsecond=0),
-                      [x.replace(microsecond=0) for x in list(result.keys())])
-        self.assertIn(timestamp_b.replace(microsecond=0),
-                      [x.replace(microsecond=0) for x in list(result.keys())])
+        self.assertIn(timestamp_a, result.keys())
+        self.assertIn(timestamp_b, result.keys())
         for timestamp in result:
             if timestamp.replace(
                 microsecond=0) == timestamp_a.replace(microsecond=0):
@@ -428,7 +426,7 @@ class TestDatabaseAPI(base.TestCase):
                 self.assertEqual(2, result[timestamp])
 
     def test_get_test_run_series_with_meta(self):
-        timestamp_a = datetime.datetime.utcnow()
+        timestamp_a = datetime.datetime.utcnow().replace(microsecond=0)
         timestamp_b = timestamp_a + datetime.timedelta(minutes=2)
         run_a = api.create_run(passes=5, run_at=timestamp_a)
         api.create_run(fails=2, run_at=timestamp_b)
@@ -436,11 +434,8 @@ class TestDatabaseAPI(base.TestCase):
         result = api.get_test_run_series(key='not_a_key',
                                          value='not_a_value')
         self.assertEqual(1, len(result.keys()))
-        self.assertIn(timestamp_a.replace(microsecond=0),
-                      [x.replace(microsecond=0) for x in list(result.keys())])
-        self.assertNotIn(timestamp_b.replace(microsecond=0),
-                         [x.replace(microsecond=0) for x in list(
-                             result.keys())])
+        self.assertIn(timestamp_a, result.keys())
+        self.assertNotIn(timestamp_b, result.keys())
         self.assertEqual(5, result[list(result.keys())[0]])
 
     def test_get_run_times_grouped_by_run_metadata_key(self):
@@ -453,7 +448,7 @@ class TestDatabaseAPI(base.TestCase):
         self.assertEqual(expected_res, res)
 
     def test_get_test_run_dict_by_run_meta_key_value(self):
-        timestamp_a = datetime.datetime.utcnow()
+        timestamp_a = datetime.datetime.utcnow().replace(microsecond=0)
         timestamp_b = timestamp_a + datetime.timedelta(minutes=2)
         run_a = api.create_run()
         run_b = api.create_run()
@@ -463,7 +458,7 @@ class TestDatabaseAPI(base.TestCase):
         api.create_test_run(test_a.id, run_a.id, 'success', timestamp_a,
                             timestamp_b)
         api.create_test_run(test_a.id, run_b.id, 'fail', timestamp_a,
-                            datetime.datetime.utcnow())
+                            datetime.datetime.utcnow().replace(microsecond=0))
         test_run_dicts = api.get_test_run_dict_by_run_meta_key_value('key',
                                                                      'true')
         self.assertEqual(1, len(test_run_dicts))
