@@ -1,0 +1,4 @@
+---
+features:
+  - A new DB API function, get_runs_by_ids(), was added. This function returns
+    a list of Run objects from a list of run ids.
