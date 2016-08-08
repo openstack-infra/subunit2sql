@@ -788,7 +788,8 @@ def get_test_runs_by_test_id(test_id, session=None):
 
 
 def get_test_runs_by_test_test_id(test_id, start_date=None, stop_date=None,
-                                  session=None, key=None, value=None):
+                                  session=None, key=None, value=None,
+                                  most_recent_first=False):
     """Get all test runs for a specific test by the test'stest_id column
 
     :param str test_id: The test's test_id (the test_id column in the test
@@ -805,6 +806,8 @@ def get_test_runs_by_test_test_id(test_id, start_date=None, stop_date=None,
     :param str value: An optional value for run metadata to filter the test
                       runs on. Must be specified with a key otherwise it does
                       nothing.
+    :param bool most_recent_first: If true order the results list by date of
+                                   test_run start_time in descending order.
 
     :return list: The list of test run objects for the specified test
     :rtype: subunit2sql.models.TestRun
@@ -827,6 +830,9 @@ def get_test_runs_by_test_test_id(test_id, start_date=None, stop_date=None,
             models.TestRun.run_id == models.RunMetadata.run_id).filter(
                 models.RunMetadata.key == key,
                 models.RunMetadata.value == value)
+    if most_recent_first:
+        test_runs_query = test_runs_query.order_by(
+            models.TestRun.start_time.desc())
     test_runs = test_runs_query.all()
     return test_runs
 
