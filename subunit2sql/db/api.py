@@ -753,6 +753,22 @@ def get_run_by_id(id, session=None):
     return run
 
 
+def get_runs_by_ids(ids, session=None):
+    """Get a list of runs by their ids.
+
+    :param list id: A list of run ids for the run
+    :param session: Optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+
+    :return: The list of the specified run objects
+    :rtype: list
+    """
+    session = session or get_session()
+    run = db_utils.model_query(models.Run, session).filter(
+        models.Run.id.in_(ids)).all()
+    return run
+
+
 def get_test_run_by_id(test_run_id, session=None):
     """Get an individual test run by it's id.
 

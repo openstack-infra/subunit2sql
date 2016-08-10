@@ -804,6 +804,15 @@ class TestDatabaseAPI(base.TestCase):
         self.assertEqual(res.id, run.id)
         self.assertEqual(res.uuid, run.uuid)
 
+    def test_get_runs_by_ids(self):
+        run_a = api.create_run()
+        run_b = api.create_run()
+        res = api.get_runs_by_ids([run_a.id, run_b.id])
+        self.assertIn(run_a.id, [x.id for x in res])
+        self.assertIn(run_b.id, [x.id for x in res])
+        self.assertIn(run_a.uuid, [x.uuid for x in res])
+        self.assertIn(run_b.uuid, [x.uuid for x in res])
+
     def test_get_test_runs_by_test_id(self):
         run_a = api.create_run()
         run_b = api.create_run()
