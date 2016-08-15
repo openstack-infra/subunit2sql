@@ -1,0 +1,15 @@
+---
+features:
+  - A new CLI / configuration option remove_test_attr_prefix
+    is available to remove the test attribute prefix from test
+    attributes before they are added to the test metadata.
+    The CLI option defaults to False, so that the current
+    behavior is preserved. It is only applicable when used in
+    combination with test_attr_prefix.
+upgrade:
+  - The test attribute prefix is removed from the
+    test attributes before they are injected into the DB,
+    when using the remove_test_attr_prefix config/CLI option.
+    If metadata was injected before, enabling
+    remove_test_attr_prefix may lead to test metadata
+    duplication, with and without prefix.

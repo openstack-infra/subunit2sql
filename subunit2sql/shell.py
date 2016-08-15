@@ -48,6 +48,10 @@ SHELL_OPTS = [
                help='An optional prefix to identify global test attrs '
                     'and treat it as test metadata instead of test_run '
                     'metadata'),
+    cfg.BoolOpt('remove_test_attr_prefix', short='x', default=False,
+                help='When True, the prefix configured in "test_attr_prefix", '
+                     'if any, is removed from the metadata before it\'s '
+                     'added to the test metadata'),
     cfg.StrOpt('run_at', default=None,
                help="The optional datetime string for the run was started, "
                     "If one isn't provided the date and time of when "
@@ -178,8 +182,13 @@ def process_results(results):
                                  test_metadata]
                 if test_attr_list:
                     for attr in test_attr_list:
-                        if ('attr', attr) not in test_metadata:
-                            test_meta_dict = {'attr': attr}
+                        if CONF.remove_test_attr_prefix:
+                            normalized_attr = attr[len(
+                                CONF.test_attr_prefix):]
+                        else:
+                            normalized_attr = attr
+                        if ('attr', normalized_attr) not in test_metadata:
+                            test_meta_dict = {'attr': normalized_attr}
                             api.add_test_metadata(test_meta_dict, db_test.id,
                                                   session=session)
             api.add_test_run_metadata(results[test]['metadata'], test_run.id,

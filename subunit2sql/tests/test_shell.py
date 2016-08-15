@@ -604,3 +604,115 @@ class TestProcessResults(base.TestCase):
             mock.call(fake_attachment, fake_db_test_run_id,
                       self.fake_session)])
         self.fake_session.close.assert_called_once()
+
+    def test_process_results_test_metadata_new_remove_prefix(self):
+        # Setup the metadata prefix configuration
+        fake_meta_prefix = '_meta_'
+        cfg.CONF.set_override(name='test_attr_prefix',
+                              override=fake_meta_prefix)
+        cfg.CONF.set_override(name='remove_test_attr_prefix',
+                              override=True)
+        fake_run_time = 'run time'
+        # Setup a common fake DB test
+        fake_db_test = mock.Mock(name='db test')
+        fake_db_test.id = 'test id'
+        fake_db_test.run_count = 3
+        fake_db_test.success = 2
+        fake_db_test.failure = 1
+        # Setup results
+        expected_metadata_list = ['a', 'b']
+        extra_metadata_list = ['c', 'd']
+        full_metadata_list = [fake_meta_prefix + x for x in
+                              expected_metadata_list] + extra_metadata_list
+        fake_results = dict(
+            test1={'status': 'fail', 'start_time': 0, 'end_time': 1,
+                   'metadata': {'attrs': ','.join(full_metadata_list)},
+                   'attachments': None})
+        fake_results_all = copy.deepcopy(fake_results)
+        fake_results_all['run_time'] = fake_run_time
+        # Mock create run
+        fake_db_run_id = 'run id'
+        fake_db_run = mock.Mock(name='db run')
+        fake_db_run.id = fake_db_run_id
+        self.db_api_mock.create_run.return_value = fake_db_run
+        # Mock create test run
+        fake_db_test_run_id = 'test run id'
+        fake_db_test_run = mock.Mock(name='db test run')
+        fake_db_test_run.id = fake_db_test_run_id
+        self.db_api_mock.create_test_run.return_value = fake_db_test_run
+        # Tests are found in the DB
+        self.db_api_mock.get_test_by_test_id.return_value = fake_db_test
+        # Test metadata is not found in the DB
+        self.db_api_mock.get_test_metadata.return_value = []
+        # Run process_results
+        shell.process_results(fake_results_all)
+        # Check only matching metadata is added to test_metadata
+        expected_add_test_metadata_calls = [
+            mock.call({'attr': x}, fake_db_test.id, session=self.fake_session)
+            for x in expected_metadata_list]
+        self.db_api_mock.add_test_metadata.assert_has_calls(
+            expected_add_test_metadata_calls, any_order=True)
+        # Check all metadata is added to test_run_metadata
+        self.db_api_mock.add_test_run_metadata.assert_has_calls([
+            mock.call(fake_results['test1']['metadata'], fake_db_test_run_id,
+                      self.fake_session)])
+        self.fake_session.close.assert_called_once()
+
+    def test_process_results_test_metadata_existing_remove_prefix(self):
+        # Setup the metadata prefix configuration
+        fake_meta_prefix = '_meta_'
+        cfg.CONF.set_override(name='test_attr_prefix',
+                              override=fake_meta_prefix)
+        cfg.CONF.set_override(name='remove_test_attr_prefix',
+                              override=True)
+        fake_run_time = 'run time'
+        # Setup a common fake DB test
+        fake_db_test = mock.Mock(name='db test')
+        fake_db_test.id = 'test id'
+        fake_db_test.run_count = 3
+        fake_db_test.success = 2
+        fake_db_test.failure = 1
+        # Setup results
+        expected_metadata_list = ['a', 'b']
+        existing_metadata_list = ['c', 'd']
+        full_metadata_list = [fake_meta_prefix + x for x in (
+            expected_metadata_list + existing_metadata_list)]
+        fake_results = dict(
+            test1={'status': 'fail', 'start_time': 0, 'end_time': 1,
+                   'metadata': {'attrs': ','.join(full_metadata_list)},
+                   'attachments': None})
+        fake_results_all = copy.deepcopy(fake_results)
+        fake_results_all['run_time'] = fake_run_time
+        # Mock create run
+        fake_db_run_id = 'run id'
+        fake_db_run = mock.Mock(name='db run')
+        fake_db_run.id = fake_db_run_id
+        self.db_api_mock.create_run.return_value = fake_db_run
+        # Mock create test run
+        fake_db_test_run_id = 'test run id'
+        fake_db_test_run = mock.Mock(name='db test run')
+        fake_db_test_run.id = fake_db_test_run_id
+        self.db_api_mock.create_test_run.return_value = fake_db_test_run
+        # Tests are found in the DB
+        self.db_api_mock.get_test_by_test_id.return_value = fake_db_test
+        # Test metadata is found in the DB
+        test_metadata_list = []
+        for value in existing_metadata_list:
+            test_metadata = mock.Mock()
+            test_metadata.key = 'attr'
+            test_metadata.value = value
+            test_metadata_list.append(test_metadata)
+        self.db_api_mock.get_test_metadata.return_value = test_metadata_list
+        # Run process_results
+        shell.process_results(fake_results_all)
+        # Check only matching metadata is added to test_metadata
+        expected_add_test_metadata_calls = [
+            mock.call({'attr': x}, fake_db_test.id, session=self.fake_session)
+            for x in expected_metadata_list]
+        self.db_api_mock.add_test_metadata.assert_has_calls(
+            expected_add_test_metadata_calls, any_order=True)
+        # Check all metadata is added to test_run_metadata
+        self.db_api_mock.add_test_run_metadata.assert_has_calls([
+            mock.call(fake_results['test1']['metadata'], fake_db_test_run_id,
+                      self.fake_session)])
+        self.fake_session.close.assert_called_once()
