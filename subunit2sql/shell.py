@@ -181,7 +181,7 @@ def process_results(results):
                         if ('attr', attr) not in test_metadata:
                             test_meta_dict = {'attr': attr}
                             api.add_test_metadata(test_meta_dict, db_test.id,
-                                                  sesion=session)
+                                                  session=session)
             api.add_test_run_metadata(results[test]['metadata'], test_run.id,
                                       session)
         if results[test]['attachments']:
