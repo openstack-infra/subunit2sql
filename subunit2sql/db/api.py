@@ -1258,6 +1258,65 @@ def get_run_times_grouped_by_run_metadata_key(key, start_date=None,
     return result
 
 
+def get_run_times_time_series_grouped_by_run_metadata_key(key, start_date=None,
+                                                          stop_date=None,
+                                                          session=None,
+                                                          match_key=None,
+                                                          match_value=None):
+    """Get a times series dict of aggregate run times grouped by a metadata key
+
+    The results of the output can be limited to runs with a different matching
+    key value run_metadata pair using the match_key and match_value parameters.
+
+    :param key: The run_metadata key to use for grouping runs
+    :param session: Optional session object if one isn't provided a new session
+                        will be acquired for the duration of this operation
+    :param str match_key: An optional key as part of a key value run_metadata
+                          pair to filter the runs used to. This can not be the
+                          same as the key parameter. If match_value is not also
+                          specified this does nothing
+    :param str match_value: An optional value as part of a key value
+                            run_metadata pair to filter the runs used to. If
+                            match_key is not also specified this does nothing.
+
+    :return: A dictionary where keys are the time stamp and the value is a dict
+             with the key being the value of the provided metadata key
+             and the values are run times for the successful runs
+    :rtype: dict
+    """
+    if key == match_key:
+        raise ValueError('match_key cannot have the same value as key')
+    session = session or get_session()
+    run_times_query = db_utils.model_query(models.Run, session).filter(
+        models.Run.fails == 0, models.Run.passes > 0).join(
+            models.RunMetadata,
+            models.Run.id == models.RunMetadata.run_id).filter(
+                models.RunMetadata.key == key)
+    if match_key and match_value:
+        subquery = session.query(models.RunMetadata.run_id).filter(
+            models.RunMetadata.key == match_key,
+            models.RunMetadata.value == match_value).subquery()
+        run_times_query = run_times_query.filter(models.Run.id.in_(subquery))
+
+    run_times_query = _filter_runs_by_date(run_times_query, start_date,
+                                           stop_date)
+    run_times = run_times_query.values(models.Run.run_at, models.Run.run_time,
+                                       models.RunMetadata.value)
+    result = {}
+    for run in run_times:
+        if run.run_at in result:
+            if run.value not in result[run.run_at]:
+                result[run.run_at][run.value] = run.run_time
+            # NOTE(mtreinish) if there is more than one run with the metadata
+            # value and the same start time, just average the results.
+            else:
+                old = result[run.run_at][run.value]
+                result[run.run_at][run.value] = float(old + run.run_time) / 2.0
+        else:
+            result[run.run_at] = {run.value: run.run_time}
+    return result
+
+
 def get_test_counts_in_date_range(test_id, start_date=None, stop_date=None,
                                   session=None):
     """Return the number of successes, failures, and skips for a single test.

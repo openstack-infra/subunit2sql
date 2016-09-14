@@ -461,6 +461,35 @@ class TestDatabaseAPI(base.TestCase):
         expected_res = {'value_a': [2.2], 'value_b': [3.5]}
         self.assertEqual(expected_res, res)
 
+    def test_get_run_time_series_grouped_by_run_metadata_key(self):
+        run_at_a = datetime.datetime(1914, 11, 11, 11, 11, 11)
+        run_a = api.create_run(run_time=2.2, passes=2, run_at=run_at_a)
+        run_at_b = datetime.datetime.utcnow().replace(microsecond=0)
+        run_b = api.create_run(run_time=3.5, passes=3, run_at=run_at_b)
+        api.add_run_metadata({'key': 'value_a'}, run_a.id)
+        api.add_run_metadata({'key': 'value_b'}, run_b.id)
+        res = api.get_run_times_time_series_grouped_by_run_metadata_key('key')
+        expected_res = {run_at_a: {'value_a': 2.2},
+                        run_at_b: {'value_b': 3.5}}
+        self.assertEqual(expected_res, res)
+
+    def test_get_run_ts_grouped_by_run_meta_key_with_match_filter(self):
+        run_at_a = datetime.datetime(1914, 11, 11, 11, 11, 11)
+        run_a = api.create_run(run_time=2.2, passes=2, run_at=run_at_a)
+        run_at_b = datetime.datetime.utcnow().replace(microsecond=0)
+        run_b = api.create_run(run_time=3.5, passes=3, run_at=run_at_b)
+        run_c = api.create_run(run_time=75.432, passes=11)
+        api.add_run_metadata({'key': 'value_a'}, run_a.id)
+        api.add_run_metadata({'match_key': 'value_c'}, run_a.id)
+        api.add_run_metadata({'key': 'value_b'}, run_b.id)
+        api.add_run_metadata({'match_key': 'value_c'}, run_b.id)
+        api.add_run_metadata({'key': 'value_b'}, run_c.id)
+        res = api.get_run_times_time_series_grouped_by_run_metadata_key(
+            'key', match_key='match_key', match_value='value_c')
+        expected_res = {run_at_a: {'value_a': 2.2},
+                        run_at_b: {'value_b': 3.5}}
+        self.assertEqual(expected_res, res)
+
     def test_get_test_run_dict_by_run_meta_key_value(self):
         timestamp_a = datetime.datetime.utcnow().replace(microsecond=0)
         timestamp_b = timestamp_a + datetime.timedelta(minutes=2)
