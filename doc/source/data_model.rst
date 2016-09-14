@@ -17,13 +17,16 @@ Properties:
 * **passes**: The total number of successful tests in the run.
 * **fails**: The total number of failed tests during the run.
 * **skips**: The total number of skipped tests during the run.
-* **run_time**: The sum of the duration of executed tests during the run. Note,
-  this is not the time it necessarily took for the run to finish. For
+* **run_time**: The run_time for the run. By default the subunit2sql CLI
+  command will use the sum of the duration of executed tests during the run.
+  Note, this is not the time it necessarily took for the run to finish. For
   example, the time for setUpClass and tearDownClass (assuming the
   stream is from a python unittest run) would not be factored in. (as
   they aren't stored in the subunit stream) Also, if the tests are
   being run in parallel since this is just a raw sum this is not
-  factored in.
+  factored in. However there is a option for the subunit2sql CLI to specify
+  using the run wall time which will take the duration from the first test's
+  start time and the last test's end time.
 * **artifacts**: An optional link to where the logs or any other artifacts from
   the run are stored.
 * **run_at**: The time at which the run was stored in the DB.

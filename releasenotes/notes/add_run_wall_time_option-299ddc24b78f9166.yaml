@@ -1,0 +1,6 @@
+---
+features:
+  - A new option is added to the subunit2sql CLI command,
+    --use_run_wall_time/-w, that is used to populate the run_time column with
+    the wall time of the run instead of the default behavior which uses the
+    sum of the individual test execution times

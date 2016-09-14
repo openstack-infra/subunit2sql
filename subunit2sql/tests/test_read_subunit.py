@@ -86,6 +86,31 @@ class TestReadSubunit(base.TestCase):
         runtime = fake_subunit.run_time()
         self.assertEqual(runtime, 5000.0)
 
+    def test_wall_run_time(self):
+        fake_subunit = subunit.ReadSubunit(mock.MagicMock(),
+                                           use_wall_time=True)
+        fake_results = {}
+        start_time = datetime.datetime(1914, 6, 28, 10, 45, 0)
+        stop_time = datetime.datetime(1914, 6, 28, 10, 45, 50)
+        fifty_sec_run_result = {
+            'start_time': start_time,
+            'end_time': stop_time,
+        }
+        fake_results['first'] = fifty_sec_run_result
+        for num in range(100):
+            test_name = 'test_fake_' + str(num)
+            start_time = start_time + datetime.timedelta(minutes=1)
+            stop_time = stop_time + datetime.timedelta(minutes=1)
+            fake_result = {
+                'start_time': start_time,
+                'end_time': stop_time,
+            }
+            fake_results[test_name] = fake_result
+        fake_subunit.results = fake_results
+        runtime = fake_subunit.run_time()
+        # Wall time should be (60 * 100) + 50
+        self.assertEqual(runtime, 6050.0)
+
     def test_parse_outcome(self):
         fake_subunit = subunit.ReadSubunit(mock.MagicMock())
 

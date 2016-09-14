@@ -159,7 +159,8 @@ class TestMain(base.TestCase):
         read_subunit_mock.assert_called_once_with(sys.stdin,
                                                   attachments=False,
                                                   attr_regex='\[(.*)\]',
-                                                  targets=[])
+                                                  targets=[],
+                                                  use_wall_time=False)
         process_results_mock.assert_called_once_with(fake_get_results)
 
     @mock.patch('subunit2sql.read_subunit.ReadSubunit')
@@ -184,7 +185,8 @@ class TestMain(base.TestCase):
         read_subunit_mock.assert_called_with(mock.ANY,
                                              attachments=False,
                                              attr_regex='\[(.*)\]',
-                                             targets=[])
+                                             targets=[],
+                                             use_wall_time=False)
         self.assertEqual(2, len(read_subunit_mock.call_args_list))
         file_1 = read_subunit_mock.call_args_list[0][0][0]
         file_1.seek(0)
@@ -214,7 +216,8 @@ class TestMain(base.TestCase):
         shell.main()
         read_subunit_mock.assert_called_once_with(
             sys.stdin, attachments=False, attr_regex='\[(.*)\]',
-            targets=[mock.sentinel.extension])
+            targets=[mock.sentinel.extension],
+            use_wall_time=False)
         process_results_mock.assert_called_once_with(fake_get_results)
 
 

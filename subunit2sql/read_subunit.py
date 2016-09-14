@@ -34,11 +34,12 @@ def get_duration(start, end):
 class ReadSubunit(object):
 
     def __init__(self, stream_file, attachments=False, attr_regex=None,
-                 targets=None):
+                 targets=None, use_wall_time=False):
         if targets is None:
             targets = []
         else:
             targets = targets[:]
+        self.use_wall_time = use_wall_time
         self.stream_file = stream_file
         self.stream = subunit.ByteStreamToStreamResult(self.stream_file)
         starts = testtools.StreamResult()
@@ -137,6 +138,16 @@ class ReadSubunit(object):
 
     def run_time(self):
         runtime = 0.0
-        for name, data in self.results.items():
-            runtime += get_duration(data['start_time'], data['end_time'])
+        if self.use_wall_time:
+            start_time = None
+            stop_time = None
+            for name, data in self.results.items():
+                if not start_time or data['start_time'] < start_time:
+                    start_time = data['start_time']
+                if not stop_time or data['end_time'] > stop_time:
+                    stop_time = data['end_time']
+            runtime = get_duration(start_time, stop_time)
+        else:
+            for name, data in self.results.items():
+                runtime += get_duration(data['start_time'], data['end_time'])
         return runtime

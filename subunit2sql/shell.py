@@ -55,7 +55,11 @@ SHELL_OPTS = [
     cfg.StrOpt('run_at', default=None,
                help="The optional datetime string for the run was started, "
                     "If one isn't provided the date and time of when "
-                    "subunit2sql is called will be used")
+                    "subunit2sql is called will be used"),
+    cfg.BoolOpt('use_run_wall_time', default=False, short='w',
+                help="When True the wall time of a run will be used for the "
+                     "run_time column in the runs table. By default the sum of"
+                     " the test executions are used instead."),
 ]
 
 _version_ = version.VersionInfo('subunit2sql').version_string()
@@ -227,13 +231,15 @@ def main():
         streams = [subunit.ReadSubunit(open(s, 'r'),
                                        attachments=CONF.store_attachments,
                                        attr_regex=CONF.attr_regex,
-                                       targets=targets)
+                                       targets=targets,
+                                       use_wall_time=CONF.use_run_wall_time)
                    for s in CONF.subunit_files]
     else:
         streams = [subunit.ReadSubunit(sys.stdin,
                                        attachments=CONF.store_attachments,
                                        attr_regex=CONF.attr_regex,
-                                       targets=targets)]
+                                       targets=targets,
+                                       use_wall_time=CONF.use_run_wall_time)]
     for stream in streams:
         process_results(stream.get_results())
 
