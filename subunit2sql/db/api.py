@@ -1207,24 +1207,43 @@ def get_ids_for_all_tests(session=None):
 
 
 def get_run_times_grouped_by_run_metadata_key(key, start_date=None,
-                                              stop_date=None, session=None):
+                                              stop_date=None, session=None,
+                                              match_key=None,
+                                              match_value=None):
     """Return the aggregate run times for all runs grouped by a metadata key
+
+    The results of the output can be limited to runs with a different matching
+    key value run_metadata pair using the match_key and match_value parameters.
 
     :param key: The run_metadata key to use for grouping runs
     :param session: Optional session object if one isn't provided a new session
                         will be acquired for the duration of this operation
+    :param str match_key: An optional key as part of a key value run_metadata
+                          pair to filter the runs used to. This can not be the
+                          same as the key parameter. If match_value is not also
+                          specified this does nothing
+    :param str match_value: An optional value as part of a key value
+                            run_metadata pair to filter the runs used to. If
+                            match_key is not also specified this does nothing.
 
     :return: A dictionary where keys are the value of the provided metadata key
              and the values are a list of run_times for successful runs with
              that metadata value
     :rtype: dict
     """
+    if key == match_key:
+        raise ValueError('match_key cannot have the same value as key')
     session = session or get_session()
     run_times_query = db_utils.model_query(models.Run, session).filter(
         models.Run.fails == 0, models.Run.passes > 0).join(
             models.RunMetadata,
             models.Run.id == models.RunMetadata.run_id).filter(
                 models.RunMetadata.key == key)
+    if match_key and match_value:
+        subquery = session.query(models.RunMetadata.run_id).filter(
+            models.RunMetadata.key == match_key,
+            models.RunMetadata.value == match_value).subquery()
+        run_times_query = run_times_query.filter(models.Run.id.in_(subquery))
 
     run_times_query = _filter_runs_by_date(run_times_query, start_date,
                                            stop_date)

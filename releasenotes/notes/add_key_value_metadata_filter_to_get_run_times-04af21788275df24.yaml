@@ -1,0 +1,5 @@
+---
+features:
+  - A new set of options, *match_key* and *match_value* to filter the results
+    to a key value runs with a particular key value metadata pair was added to
+    the DB API function get_run_times_grouped_by_run_metadata_key().

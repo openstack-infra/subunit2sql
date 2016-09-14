@@ -447,6 +447,20 @@ class TestDatabaseAPI(base.TestCase):
         expected_res = {'value_a': [2.2], 'value_b': [3.5]}
         self.assertEqual(expected_res, res)
 
+    def test_get_run_times_grouped_by_run_metadata_key_with_match_filter(self):
+        run_a = api.create_run(run_time=2.2, passes=2)
+        run_b = api.create_run(run_time=3.5, passes=3)
+        run_c = api.create_run(run_time=75.432, passes=11)
+        api.add_run_metadata({'key': 'value_a'}, run_a.id)
+        api.add_run_metadata({'match_key': 'value_c'}, run_a.id)
+        api.add_run_metadata({'key': 'value_b'}, run_b.id)
+        api.add_run_metadata({'match_key': 'value_c'}, run_b.id)
+        api.add_run_metadata({'key': 'value_b'}, run_c.id)
+        res = api.get_run_times_grouped_by_run_metadata_key(
+            'key', match_key='match_key', match_value='value_c')
+        expected_res = {'value_a': [2.2], 'value_b': [3.5]}
+        self.assertEqual(expected_res, res)
+
     def test_get_test_run_dict_by_run_meta_key_value(self):
         timestamp_a = datetime.datetime.utcnow().replace(microsecond=0)
         timestamp_b = timestamp_a + datetime.timedelta(minutes=2)
