@@ -909,6 +909,15 @@ class TestDatabaseAPI(base.TestCase):
         self.assertEqual(1, len(results))
         self.assertEqual(run_c.id, results[0].id)
 
+    def test_get_runs_count(self):
+        for i in range(0, 100):
+            api.create_run()
+        count = api.get_runs_count()
+        self.assertEqual(100, count)
+
+    def test_get_runs_count_zero(self):
+        self.assertEqual(0, api.get_runs_count())
+
     def test_get_runs_counts_by_run_metadata_no_start_date(self):
         run_a = api.create_run(fails=1)
         api.create_run()

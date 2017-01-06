@@ -1671,6 +1671,17 @@ def get_recent_failed_runs_by_run_metadata(key, value, num_runs=10,
         models.Run.run_at.desc()).limit(num_runs).all()
 
 
+def get_runs_count(session=None):
+    """Get the number of runs currently in the database
+
+    :return count: The number of runs in the DB
+    :rtype: int
+    """
+    session = session or get_session()
+    query = db_utils.model_query(models.Run, session)
+    return query.count()
+
+
 def get_runs_counts_by_run_metadata(key, value, start_date=None, session=None):
     """Check runs for a given run metadata pair
 

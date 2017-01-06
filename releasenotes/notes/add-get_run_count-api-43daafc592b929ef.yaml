@@ -1,0 +1,4 @@
+---
+features:
+  - Add a new DB API function get_runs_count() which returns the total number of
+    runs in the DB
