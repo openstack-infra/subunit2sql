@@ -2,14 +2,6 @@
 subunit2SQL README
 ==================
 
-.. image:: https://img.shields.io/pypi/v/subunit2sql.svg
-    :target: https://pypi.python.org/pypi/subunit2sql/
-    :alt: Latest Version
-
-.. image:: https://img.shields.io/pypi/dm/subunit2sql.svg
-    :target: https://pypi.python.org/pypi/subunit2sql/
-    :alt: Downloads
-
 subunit2SQL is a tool for storing test results data in a SQL database. Like
 it's name implies it was originally designed around converting `subunit`_
 streams to data in a SQL database and the packaged utilities assume a subunit
