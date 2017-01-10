@@ -723,6 +723,20 @@ def get_test_by_test_id(test_id, session=None):
     return test
 
 
+def get_tests_by_test_ids(test_ids, session=None):
+    """Get tests that match input test_ids
+
+    :param list test_ids: A list of test_ids (aka the test name) for the test
+    :param session: Optional session object if one isn't provided a new session
+                    will be acquired for the duration of this operation
+    :return: A list of the specified test objects
+    :rtype: list
+    """
+    session = session or get_session()
+    return db_utils.model_query(models.Test, session).filter(
+        models.Test.test_id.in_(test_ids)).all()
+
+
 def get_run_id_from_uuid(uuid, session=None):
     """Get the id for a run by it's uuid
 

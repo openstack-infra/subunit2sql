@@ -1,0 +1,4 @@
+---
+features:
+  - Add a new DB API function, get_tests_by_test_ids, to return a list of Test
+    model objects give an list of test_ids

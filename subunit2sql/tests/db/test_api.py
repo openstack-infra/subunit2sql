@@ -66,6 +66,28 @@ class TestDatabaseAPI(base.TestCase):
         res = api.get_test_by_test_id('fake_test')
         self.assertIsNone(res)
 
+    def test_get_tests_by_test_ids(self):
+        test_a = api.create_test('fake_test1', 2, 1, 1, 1.2)
+        test_b = api.create_test('fake_test2', 4, 2, 2, 2.3)
+        test_c = api.create_test('fake_test3', 6, 3, 3, 3.3)
+        test_d = api.create_test('fake_test4', 8, 4, 4, 4.3)
+        result = api.get_tests_by_test_ids(
+            ['fake_test1', 'fake_test2', 'fake_test3'])
+        result_ids = [x.id for x in result]
+        self.assertIn(test_a.id, result_ids)
+        self.assertIn(test_b.id, result_ids)
+        self.assertIn(test_c.id, result_ids)
+        self.assertNotIn(test_d.id, result_ids)
+
+    def test_get_tests_by_test_ids_no_matches(self):
+        api.create_test('fake_test5', 2, 1, 1, 1.2)
+        api.create_test('fake_test6', 4, 2, 2, 2.3)
+        api.create_test('fake_test7', 6, 3, 3, 3.3)
+        api.create_test('fake_test8', 8, 4, 4, 4.3)
+        result = api.get_tests_by_test_ids(
+            ['fake_test1', 'fake_test2', 'fake_test3'])
+        self.assertEqual([], result)
+
     def test_create_run_and_list(self):
         res = api.create_run()
         self.assertIsNotNone(res)
