@@ -109,6 +109,12 @@ file or the DB connection info. Running this command will print to stdout the
 subunit v2 stream for the run specified by $RUN_ID, unless the --out_path
 argument is specified to write it to a file instead.
 
+Development
+===========
+
+For development and testing, you need a local database setup. Check
+``tools/test-setup.sh`` on how the databases need to be configured.
+
 ChangeLog
 =========
 
