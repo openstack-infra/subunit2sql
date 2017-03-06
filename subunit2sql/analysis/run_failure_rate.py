@@ -35,7 +35,7 @@ def generate_series():
     else:
         start_date = None
     if CONF.stop_date:
-        stop_date = datetime.datetime.strptime(CONF.start_date, '%Y-%m-%d')
+        stop_date = datetime.datetime.strptime(CONF.stop_date, '%Y-%m-%d')
     else:
         stop_date = None
 
