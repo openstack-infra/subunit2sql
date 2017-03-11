@@ -24,6 +24,7 @@ import subunit2sql.analysis.failures
 import subunit2sql.analysis.run_failure_rate
 import subunit2sql.analysis.run_time
 import subunit2sql.analysis.run_time_meta
+import subunit2sql.analysis.test_run_time
 from subunit2sql import shell
 
 CONF = cfg.CONF
@@ -57,7 +58,7 @@ def add_command_parsers(subparsers):
     graph_commands = {}
     # Put commands from in-tree commands on init list
     for command in ['failures', 'run_time', 'agg_count', 'dailycount',
-                    'run_failure_rate', 'run_time_meta']:
+                    'run_failure_rate', 'run_time_meta', 'test_run_time']:
         graph_commands[command] = getattr(subunit2sql.analysis, command)
 
     # Load any installed out of tree commands on the init list
