@@ -64,8 +64,12 @@ def generate_series():
         fail_rate = float(fail_num / (pass_num + fail_num) * 100)
         if fail_rate > 0.0:
             perc_data[key] = fail_rate
-
+    if not CONF.title:
+        title = "Run aggregate failure rate grouped by metadata"
+    else:
+        title = CONF.title
     plt.figure()
+    plt.title(title)
     plt.barh(range(len(perc_data)), perc_data.values(), align='center')
     locs, labels = plt.yticks(range(len(perc_data)), list(perc_data.keys()))
     plt.xlabel('Failure Percentage')
