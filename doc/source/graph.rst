@@ -158,6 +158,28 @@ for a given run_metadata key to make the graph useful. To workaround this you
 specify a list of values that will be used to filter the output so that only
 matches of that key will be in the output.
 
+
+Run Failure Rate Grouped By Run Metadata
+----------------------------------------
+
+This graph generates a bar chart to show the failure rates for all runs for
+with a run_metadata value for a user provided run_metadata key.
+
+For example, running something like::
+
+  subunit2sql-graph --title "Failure Ratess by Job Name" --database-connection mysqll://test:test@localhost/subunit2sql -o test.png run_failure_rate build_name --filter_list gate-tempest-dsvm-neutron-full-ssh,gate-tempest-dsvm-full-ubuntu-xenial,gate-tempest-dsvm-full-ubuntu-trusty,gate-tempest-dsvm-py35-ubuntu-xenial
+
+will generate a graph like:
+
+.. image:: graph-run_failure_rate.png
+   :width: 115%
+
+It's also worth noting the --filter_list argument used in the command above.
+In some cases, especially larger data sets, there are too many distinct values
+for a given run_metadata key to make the graph useful. To workaround this you
+specify a list of values that will be used to filter the output so that only
+matches of that key will be in the output.
+
 subunit2sql-graph plugin interface
 ==================================
 

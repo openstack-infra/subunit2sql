@@ -26,10 +26,16 @@ matplotlib.style.use('ggplot')
 def set_cli_opts(parser):
     parser.add_argument('metadata_key',
                         help="The run_metadata key to group the runs by")
+    parser.add_argument('--filter_list', '-f',
+                        help='A comma seperated list of values to use')
 
 
 def generate_series():
     session = api.get_session()
+    if CONF.command.filter_list:
+        filter_list = CONF.command.filter_list.split(',')
+    else:
+        filter_list = []
     if CONF.start_date:
         start_date = datetime.datetime.strptime(CONF.start_date, '%Y-%m-%d')
     else:
@@ -45,6 +51,8 @@ def generate_series():
 
     perc_data = {}
     for key in run_status:
+        if key not in filter_list:
+            continue
         if run_status[key].get('pass'):
             pass_num = float(run_status[key]['pass'])
         else:
