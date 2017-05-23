@@ -258,7 +258,7 @@ class TestProcessResults(base.TestCase):
         cfg.CONF.set_override(name='artifacts', override=fake_artifacts)
         fake_run_id = 'run_id'
         cfg.CONF.set_override(name='run_id', override=fake_run_id)
-        fake_run_meta = 'run_meta'
+        fake_run_meta = {'run_meta': 'value'}
         cfg.CONF.set_override(name='run_meta', override=fake_run_meta)
         # Run process_results
         shell.process_results(fake_results)
