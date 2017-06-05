@@ -2,7 +2,8 @@
 Subunit2SQL
 ===========
 
-Contents:
+Contents
+========
 
 .. toctree::
    :maxdepth: 2
@@ -15,7 +16,7 @@ Contents:
    history
 
 
-==================
 Indices and tables
 ==================
+
 * :ref:`search`

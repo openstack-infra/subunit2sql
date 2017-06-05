@@ -13,3 +13,4 @@ os-testr
 oslo.concurrency>=3.5.0
 # releasenotes
 reno>=0.1.1 # Apache2
+openstackdocstheme>=1.5.0 # Apache-2.0
