@@ -62,7 +62,7 @@ SHELL_OPTS = [
                      " the test executions are used instead."),
 ]
 
-_version_ = version.VersionInfo('subunit2sql').version_string()
+_version_ = version.VersionInfo('subunit2sql').version_string_with_vcs()
 
 
 def cli_opts():
