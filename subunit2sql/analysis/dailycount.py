@@ -28,7 +28,17 @@ matplotlib.style.use('ggplot')
 
 
 def set_cli_opts(parser):
-    pass
+    parser.add_argument('--dcmd_key', default='build_queue',
+                        help="When running dailycount, the runs included are "
+                             "filtered based on metadata. If one is not "
+                             "provided, a default of \"build_queue\" is used "
+                             "as the metadata key.")
+    parser.add_argument('--dcmd_value', default='gate',
+                        help="When running dailycount, the runs included are "
+                             "filtered based on metadata. This option "
+                             "specifies the value that metadata should have. "
+                             "If not specified, a default of \"gate\" is "
+                             "used.")
 
 
 def generate_series():
@@ -43,10 +53,12 @@ def generate_series():
     session = api.get_session()
     test_starts = api.get_test_run_series(start_date=start_date,
                                           stop_date=stop_date,
-                                          session=session)
+                                          session=session,
+                                          key=CONF.command.dcmd_key,
+                                          value=CONF.command.dcmd_value)
     session.close()
     ts = pd.Series(test_starts)
-    daily_count = ts.resample('D').sum()
+    daily_count = ts.resample('D').sum().fillna(value=0)
     mean = daily_count.rolling(window=10, center=False).mean()
     rolling_std = daily_count.rolling(window=10, center=False).std()
     plt.figure()
