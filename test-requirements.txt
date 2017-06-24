@@ -6,7 +6,6 @@ sphinx>=1.6.2 # BSD
 testscenarios>=0.4
 stestr>=1.0.0
 testtools>=0.9.34
-oslosphinx
 PyMySql
 psycopg2
 oslo.concurrency>=3.5.0
