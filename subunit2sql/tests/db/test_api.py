@@ -88,6 +88,12 @@ class TestDatabaseAPI(base.TestCase):
             ['fake_test1', 'fake_test2', 'fake_test3'])
         self.assertEqual([], result)
 
+    def test_get_test_with_sql_injection(self):
+        api.create_test("test_terror'); DROP TABLE tests;")
+        res = api.get_all_tests()
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0].test_id, "test_terror'); DROP TABLE tests;")
+
     def test_create_run_and_list(self):
         res = api.create_run()
         self.assertIsNotNone(res)
