@@ -19,6 +19,7 @@ from oslo_config import cfg
 import stevedore
 
 import subunit2sql.analysis.agg_count
+import subunit2sql.analysis.ci_time
 import subunit2sql.analysis.dailycount
 import subunit2sql.analysis.failures
 import subunit2sql.analysis.run_failure_rate
@@ -58,7 +59,8 @@ def add_command_parsers(subparsers):
     graph_commands = {}
     # Put commands from in-tree commands on init list
     for command in ['failures', 'run_time', 'agg_count', 'dailycount',
-                    'run_failure_rate', 'run_time_meta', 'test_run_time']:
+                    'run_failure_rate', 'run_time_meta', 'test_run_time',
+                    'ci_time']:
         graph_commands[command] = getattr(subunit2sql.analysis, command)
 
     # Load any installed out of tree commands on the init list
