@@ -93,7 +93,7 @@ class TestWalkMigrations(base.TestCase):
         revisions = list(script_dir.walk_revisions("base", "head"))
 
         if not revisions:
-            raise exc.DbMigrationError('There is no suitable migrations.')
+            raise exc.DBMigrationError('There is no suitable migrations.')
 
         for rev in list(reversed(revisions)):
             # Destination, current
