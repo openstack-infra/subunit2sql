@@ -49,6 +49,10 @@ path that points to any logs or other external test artifacts related to the
 run being added. The run_meta option takes in a dictionary which will be added
 to the database as key value pairs associated with the run being added.
 
+If you want to use a subunit stream with non-subunit data mixed in you can do
+this with the optional argument --non_subunit_name. This will treat all the
+non-subunit data as a file attachment with the specified name.
+
 .. _sql2subunit:
 
 sql2subunit

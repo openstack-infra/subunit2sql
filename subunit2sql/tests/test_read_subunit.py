@@ -17,6 +17,7 @@ import datetime
 import io
 
 import mock
+import subunit as subunit_lib
 
 from subunit2sql import read_subunit as subunit
 from subunit2sql.tests import base
@@ -215,3 +216,31 @@ class TestReadSubunit(base.TestCase):
 
         self.assertEqual(ntargets1, ntargets2)
         self.assertEqual(targets, ['foo'])
+
+    def test_non_subunit_name(self):
+        non_subunit_name = 'fake_non_subunit'
+        fake_subunit = subunit.ReadSubunit(mock.MagicMock(),
+                                           non_subunit_name=non_subunit_name)
+        self.assertEqual(fake_subunit.stream.non_subunit_name,
+                         non_subunit_name)
+
+    def test_not_subunit_no_subunit_name_set(self):
+        stream_buf = io.BytesIO()
+        stream = subunit_lib.StreamResultToBytes(stream_buf)
+        stream.status(test_id='test_a', test_status='inprogress')
+        stream.status(test_id='test_a', test_status='success')
+        stream_buf.write(b'I AM NOT SUBUNIT')
+        stream_buf.seek(0)
+        result = subunit.ReadSubunit(stream_buf)
+        exc_found = False
+        try:
+            result.get_results()
+        # NOTE(mtreinish): Subunit raises the generic Exception class
+        # so manually inspect the Exception object to check the error
+        # message
+        except Exception as e:
+            self.assertIsInstance(e, Exception)
+            self.assertEqual(e.args, ('Non subunit content', b'I'))
+            exc_found = True
+        self.assertTrue(exc_found,
+                        'subunit exception not raised on invalid content')

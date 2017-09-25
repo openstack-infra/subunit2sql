@@ -60,6 +60,9 @@ SHELL_OPTS = [
                 help="When True the wall time of a run will be used for the "
                      "run_time column in the runs table. By default the sum of"
                      " the test executions are used instead."),
+    cfg.StrOpt('non_subunit_name', default=None,
+               help='Allows non-subunit content and stores it under this'
+               ' name'),
 ]
 
 _version_ = version.VersionInfo('subunit2sql').version_string_with_vcs()
@@ -232,14 +235,16 @@ def main():
                                        attachments=CONF.store_attachments,
                                        attr_regex=CONF.attr_regex,
                                        targets=targets,
-                                       use_wall_time=CONF.use_run_wall_time)
+                                       use_wall_time=CONF.use_run_wall_time,
+                                       non_subunit_name=CONF.non_subunit_name)
                    for s in CONF.subunit_files]
     else:
         streams = [subunit.ReadSubunit(sys.stdin,
                                        attachments=CONF.store_attachments,
                                        attr_regex=CONF.attr_regex,
                                        targets=targets,
-                                       use_wall_time=CONF.use_run_wall_time)]
+                                       use_wall_time=CONF.use_run_wall_time,
+                                       non_subunit_name=CONF.non_subunit_name)]
     for stream in streams:
         process_results(stream.get_results())
 

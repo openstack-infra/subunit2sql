@@ -1,0 +1,7 @@
+---
+features:
+  - A new option is added to the subunit2sql CLI command,
+    --non_subunit_name, that is used to allow subunit files with
+    mixed content. The default is to raise an error containing the
+    non-subunit byte after it has been read from the stream. By
+    using this new option, the error will not be raised.

@@ -159,6 +159,7 @@ class TestMain(base.TestCase):
         read_subunit_mock.assert_called_once_with(sys.stdin,
                                                   attachments=False,
                                                   attr_regex='\[(.*)\]',
+                                                  non_subunit_name=None,
                                                   targets=[],
                                                   use_wall_time=False)
         process_results_mock.assert_called_once_with(fake_get_results)
@@ -185,6 +186,7 @@ class TestMain(base.TestCase):
         read_subunit_mock.assert_called_with(mock.ANY,
                                              attachments=False,
                                              attr_regex='\[(.*)\]',
+                                             non_subunit_name=None,
                                              targets=[],
                                              use_wall_time=False)
         self.assertEqual(2, len(read_subunit_mock.call_args_list))
@@ -216,6 +218,7 @@ class TestMain(base.TestCase):
         shell.main()
         read_subunit_mock.assert_called_once_with(
             sys.stdin, attachments=False, attr_regex='\[(.*)\]',
+            non_subunit_name=None,
             targets=[mock.sentinel.extension],
             use_wall_time=False)
         process_results_mock.assert_called_once_with(fake_get_results)
