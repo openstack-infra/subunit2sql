@@ -9,7 +9,6 @@ testtools>=0.9.34
 oslosphinx
 PyMySql
 psycopg2
-os-testr
 oslo.concurrency>=3.5.0
 # releasenotes
 reno>=0.1.1 # Apache2
