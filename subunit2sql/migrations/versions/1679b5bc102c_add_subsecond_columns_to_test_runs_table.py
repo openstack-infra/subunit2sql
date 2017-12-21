@@ -43,7 +43,10 @@ def upgrade():
     migration_context = context.get_context()
     if migration_context.dialect.name == 'mysql':
         with open(sql_path, 'r') as sql_file:
-            op.execute(sql_file.read())
+            for line in sql_file.read().splitlines():
+                # don't execute empty or commented lines
+                if line and not line.startswith('--'):
+                    op.execute(line)
     else:
         op.add_column('test_runs', sa.Column('start_time_microsecond',
                                              sa.Integer(), default=0))
