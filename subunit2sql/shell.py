@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import copy
+import datetime
 import sys
 
 from dateutil import parser as date_parser
@@ -140,19 +141,46 @@ def _get_test_attrs_list(attrs):
         return None
 
 
-def process_results(results):
+def _override_conf(value, value_name):
+    if (not value) and hasattr(CONF, value_name):
+        return CONF[value_name]
+    else:
+        return value
+
+
+def process_results(results, run_at=None, artifacts=None, run_id=None,
+                    run_meta=None, test_attr_prefix=None):
+    """Insert converted subunit data into the database.
+
+    Allows for run-specific information to be passed in via kwargs,
+    checks CONF if no run-specific information is supplied.
+
+    :param results: subunit stream to be inserted
+    :param run_at: Optional time at which the run was started.
+    :param artifacts: Link to any artifacts from the test run.
+    :param run_id: The run id for the new run. Must be unique.
+    :param run_meta: Metadata corresponding to the new run.
+    :param test_attr_prefix: Optional test attribute prefix.
+    """
+    run_at = _override_conf(run_at, 'run_at')
+    artifacts = _override_conf(artifacts, 'artifacts')
+    run_id = _override_conf(run_id, 'run_id')
+    run_meta = _override_conf(run_meta, 'run_meta')
+    test_attr_prefix = _override_conf(test_attr_prefix, 'test_attr_prefix')
+
+    if run_at:
+        if not isinstance(run_at, datetime.datetime):
+            run_at = date_parser.parse(run_at)
+    else:
+        run_at = None
     session = api.get_session()
     run_time = results.pop('run_time')
     totals = get_run_totals(results)
-    if CONF.run_at:
-        run_at = date_parser.parse(CONF.run_at)
-    else:
-        run_at = None
     db_run = api.create_run(totals['skips'], totals['fails'],
-                            totals['success'], run_time, CONF.artifacts,
-                            id=CONF.run_id, run_at=run_at, session=session)
-    if CONF.run_meta:
-        api.add_run_metadata(CONF.run_meta, db_run.id, session)
+                            totals['success'], run_time, artifacts,
+                            id=run_id, run_at=run_at, session=session)
+    if run_meta:
+        api.add_run_metadata(run_meta, db_run.id, session)
     for test in results:
         db_test = api.get_test_by_test_id(test, session)
         if not db_test:
@@ -181,7 +209,7 @@ def process_results(results):
                                        results[test]['end_time'],
                                        session)
         if results[test]['metadata']:
-            if CONF.test_attr_prefix:
+            if test_attr_prefix:
                 attrs = results[test]['metadata'].get('attrs')
                 test_attr_list = _get_test_attrs_list(attrs)
                 test_metadata = api.get_test_metadata(db_test.id, session)
@@ -204,6 +232,7 @@ def process_results(results):
             api.add_test_run_attachments(results[test]['attachments'],
                                          test_run.id, session)
     session.close()
+    return db_run
 
 
 def get_extensions():

@@ -246,6 +246,62 @@ class TestProcessResults(base.TestCase):
             fixtures.MockPatch('subunit2sql.shell.get_run_totals',
                                return_value=self.fake_totals)).mock
 
+    def test_process_results_no_conf(self):
+        fake_run_time = 'run time'
+        # Setup a common fake DB test
+        fake_db_test = mock.Mock(name='db test')
+        fake_db_test.id = 'test id'
+        fake_db_test.run_count = 3
+        fake_db_test.success = 2
+        fake_db_test.failure = 1
+        # Setup results
+        fake_results = dict(test1={'status': 'success', 'start_time': 0,
+                                   'end_time': 1, 'metadata': None,
+                                   'attachments': None},
+                            test2={'status': 'fail', 'start_time': 0,
+                                   'end_time': 2, 'metadata': None,
+                                   'attachments': None},
+                            test3={'status': 'skip', 'start_time': 0,
+                                   'end_time': 3, 'metadata': None,
+                                   'attachments': None})
+
+        fake_results_cpy = copy.deepcopy(fake_results)
+        fake_results_cpy['run_time'] = fake_run_time
+        # create mocked resources to use in testing
+        fake_db_run_id = 'run id'
+        fake_db_run = mock.Mock(name='db run')
+        fake_db_run.id = fake_db_run_id
+        self.db_api_mock.create_run.return_value = fake_db_run
+        self.db_api_mock.get_test_by_test_id.return_value = fake_db_test
+
+        # define config objects to use in our function call
+        fake_run_at = '2018-04-03 00:01:00.000'
+        fake_artifacts = 'artifacts'
+        fake_run_id = 'run_id'
+        fake_run_meta = {'run_meta': 'value'}
+
+        # Run process_results
+        shell.process_results(fake_results_cpy,
+                              run_at=fake_run_at,
+                              artifacts=fake_artifacts,
+                              run_id=fake_run_id,
+                              run_meta=fake_run_meta)
+        # Check that we lookup all tests in the DB
+        expected_test_by_id_calls = [mock.call(x, self.fake_session) for x in
+                                     fake_results]
+        self.db_api_mock.get_test_by_test_id.assert_has_calls(
+            expected_test_by_id_calls, any_order=True)
+        # Check that a test_run for each test is created in the DB
+        expected_create_test_run_calls = [
+            mock.call(fake_db_test.id, fake_db_run_id,
+                      fake_results[x]['status'],
+                      fake_results[x]['start_time'],
+                      fake_results[x]['end_time'], self.fake_session)
+            for x in fake_results]
+        self.db_api_mock.create_test_run.assert_has_calls(
+            expected_create_test_run_calls, any_order=True)
+        self.fake_session.close.assert_called_once()
+
     def test_process_results_no_results(self):
         fake_run_time = 'run time'
         fake_results = dict(run_time=fake_run_time)
