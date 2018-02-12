@@ -74,4 +74,4 @@ def generate_series():
     locs, labels = plt.yticks(range(len(perc_data)), list(perc_data.keys()))
     plt.xlabel('Failure Percentage')
     plt.tight_layout()
-    plt.savefig(CONF.output, dpi=900)
+    plt.savefig(CONF.output, dpi=CONF.dpi)

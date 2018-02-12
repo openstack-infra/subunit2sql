@@ -75,5 +75,5 @@ def generate_series():
     print('Success Percentage: %.4f%%' % percent(success_count, run_count))
     print('Skip Percentage: %.4f%%' % percent(skip_count, run_count))
     fig = plot.get_figure()
-    fig.savefig(CONF.output)
+    fig.savefig(CONF.output, dpi=CONF.dpi)
     return ts

@@ -68,4 +68,4 @@ def generate_series():
     df.plot(kind='box', rot=90)
     plt.ylabel('Time (sec.)')
     plt.tight_layout()
-    plt.savefig(CONF.output, dpi=900)
+    plt.savefig(CONF.output, dpi=CONF.dpi)

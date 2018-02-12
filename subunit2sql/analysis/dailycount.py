@@ -84,4 +84,4 @@ def generate_series():
                      upper_std_dev[10:],
                      color='b', alpha=0.2, label='Std Dev')
     plt.legend()
-    plt.savefig(CONF.output, dpi=900)
+    plt.savefig(CONF.output, dpi=CONF.dpi)

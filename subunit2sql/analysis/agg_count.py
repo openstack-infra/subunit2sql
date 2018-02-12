@@ -78,4 +78,4 @@ def generate_series():
     df = pd.DataFrame.from_dict(test_dict, orient='index')
     plot = df.plot(kind='barh', stacked=True).set_title(title)
     fig = plot.get_figure()
-    fig.savefig(CONF.output)
+    fig.savefig(CONF.output, dpi=CONF.dpi)
