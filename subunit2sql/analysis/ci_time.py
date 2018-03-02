@@ -61,4 +61,4 @@ def generate_series():
     plt.xticks(range(len(ci_time)), ci_time.keys(), rotation=90, fontsize=8)
     plt.title(title)
     plt.tight_layout()
-    plt.savefig(CONF.output, dpi=900)
+    plt.savefig(CONF.output, dpi=CONF.dpi)
