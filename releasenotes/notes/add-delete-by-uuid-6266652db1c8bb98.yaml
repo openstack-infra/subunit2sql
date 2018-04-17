@@ -1,0 +1,6 @@
+---
+features:
+  - New option delete_run_by_uuid, which allows for the deletion of a run
+    specified by a given uuid.
+  - New option delete_test_runs_by_uuid, which allows for the deletion of
+    all test runs associated with a given run uuid.

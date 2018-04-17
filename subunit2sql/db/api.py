@@ -1194,6 +1194,50 @@ def delete_old_test_runs(expire_age=186, session=None):
             synchronize_session=False)
 
 
+def delete_run_by_uuid(run_uuid, session=None):
+    """Delete a single test run based on its uuid.
+
+    :param str uuid: The uuid of the run that will be deleted.
+    :param session: Optional session object. if one isn't provided, a
+                    new session will be created.
+    """
+    session = session or get_session()
+    run_id = get_run_id_from_uuid(run_uuid, session)
+
+    # find and delete any runs
+    db_utils.model_query(models.Run, session).filter(
+        models.Run.uuid == run_uuid).delete(synchronize_session=False)
+    # search for any metadata linked to the run uuid
+    db_utils.model_query(models.RunMetadata, session).filter(
+        models.RunMetadata.run_id == run_id).delete(synchronize_session=False)
+
+
+def delete_test_runs_by_run_uuid(run_uuid, session=None):
+    """Delete all test runs included in a given run
+
+    :param str uuid: The uuid of the run that will be deleted.
+    :param session: Optional session object. if one isn't provided, a
+                    new session will be created.
+    """
+    session = session or get_session()
+
+    # find and delete all runs associated the given run
+    test_runs = get_test_runs_by_run_id(run_uuid, session)
+    test_run_ids = [x.id for x in test_runs]
+    for test_run_id in test_run_ids:
+        db_utils.model_query(models.TestRun, session). \
+            filter(models.TestRun.id == test_run_id). \
+            delete(synchronize_session=False)
+        # Find and delete metadata for this test run
+        db_utils.model_query(models.TestRunMetadata, session). \
+            filter(models.TestRunMetadata.test_run_id == test_run_id). \
+            delete(synchronize_session=False)
+        # find and delete attachements for this test run
+        db_utils.model_query(models.Attachments, session). \
+            filter(models.Attachments.test_run_id == test_run_id). \
+            delete(synchronize_session=False)
+
+
 def get_id_from_test_id(test_id, session=None):
     """Return the id (uuid primary key) for a test given it's test_id value
 

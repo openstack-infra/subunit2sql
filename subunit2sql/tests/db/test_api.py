@@ -487,7 +487,7 @@ class TestDatabaseAPI(base.TestCase):
         self.assertIn(timestamp_b, result.keys())
         for timestamp in result:
             if timestamp.replace(
-                microsecond=0) == timestamp_a.replace(microsecond=0):
+                    microsecond=0) == timestamp_a.replace(microsecond=0):
                 self.assertEqual(5, result[timestamp])
             else:
                 self.assertEqual(2, result[timestamp])
@@ -607,6 +607,49 @@ class TestDatabaseAPI(base.TestCase):
         api.add_test_run_metadata({'key': 'not_so_much_a_value'},
                                   test_run_a.id)
         api.delete_old_test_runs()
+        test_runs = api.get_all_test_runs()
+        self.assertEqual(1, len(test_runs))
+        self.assertEqual(test_run_b.id, test_runs[0].id)
+        self.assertEqual(1, len(api.get_test_run_metadata(test_run_b.id)))
+        self.assertEqual(0, len(api.get_test_run_metadata(test_run_a.id)))
+
+    def test_delete_run_by_uuid(self):
+        metadata_a = {'key': 'This is the metadata we\'re keeping'}
+        metadata_b = {'key': 'This metadata should be removed'}
+        run_a = api.create_run()
+        run_b = api.create_run()
+        uuid_to_delete = run_a.uuid
+        api.add_run_metadata(metadata_a, run_a.id)
+        api.add_run_metadata(metadata_b, run_b.id)
+        api.delete_run_by_uuid(uuid_to_delete)
+        runs = api.get_all_runs()
+        self.assertEqual(1, len(runs))
+        self.assertEqual(1, api.get_session().query(
+            models.RunMetadata.id).count())
+        self.assertEqual(run_b.id, runs[0].id)
+        self.assertEqual(1, len(api.get_run_metadata(run_b.uuid)))
+        self.assertEqual(0, len(api.get_run_metadata(run_a.uuid)))
+
+    def test_delete_test_runs_by_run_uuid(self):
+        # create runs
+        run_a = api.create_run()
+        run_b = api.create_run()
+        uuid_to_delete = run_a.uuid
+        # create test runs
+        test = api.create_test('fake_test')
+        test_run_a = api.create_test_run(test.id, run_a.id, 'fail',
+                                         start_time=datetime.datetime(
+                                             1914, 6, 28, 10, 45, 0))
+        test_run_b = api.create_test_run(test.id, run_b.id, 'fail',
+                                         start_time=datetime.datetime.utcnow())
+        # initialize and metadata to test_runs
+        metadata_a = {
+            'key': 'this test belongs to the run we are deleting from'}
+        metadata_b = {
+            'key': 'this test belongs to the run we are leaving alone'}
+        api.add_test_run_metadata(metadata_a, test_run_a.id)
+        api.add_test_run_metadata(metadata_b, test_run_b.id)
+        api.delete_test_runs_by_run_uuid(uuid_to_delete)
         test_runs = api.get_all_test_runs()
         self.assertEqual(1, len(test_runs))
         self.assertEqual(test_run_b.id, test_runs[0].id)
