@@ -53,8 +53,9 @@ def generate_series():
     if ts.count() == 0:
         print("No data available. Check your query and try again.")
         exit(-1)
-    mean = pd.rolling_mean(ts, 20)
-    rolling_std = pd.rolling_std(ts, 20)
+    roll = ts.rolling(window=20, center=False)
+    mean = roll.mean()
+    rolling_std = roll.std()
     plt.figure()
     if not CONF.title:
         plt.title(test.test_id)
