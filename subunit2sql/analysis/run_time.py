@@ -70,8 +70,8 @@ def generate_series():
     ax.xaxis_date()
     ax.xaxis.set_major_formatter(xfmt)
 
-    plt.plot(ts.index, ts, 'k', label='Run Time')
-    plt.plot(mean.index, mean, 'b', label='Avg. Run Time')
+    plt.plot(ts.index, ts, 'ko', label='Run Time', markersize=0.45)
+    plt.plot(mean.index, mean, 'b', label='Avg. Run Time', linewidth=0.45)
     upper_std_dev = mean + 2 * rolling_std
     lower_std_dev = mean - 2 * rolling_std
     # Set negative numbers to 0
