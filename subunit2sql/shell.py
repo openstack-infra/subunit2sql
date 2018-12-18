@@ -106,10 +106,10 @@ def running_avg(test, values, result):
 def increment_counts(test, results):
     test_values = {'run_count': test.run_count + 1}
     status = results.get('status')
-    if status == 'success':
+    if status in ['success', 'xfail']:
         test_values['success'] = test.success + 1
         test_values = running_avg(test, test_values, results)
-    elif status == 'fail':
+    elif status in ['fail', 'uxsuccess']:
         test_values['failure'] = test.failure + 1
     elif status == 'skip':
         test_values = {}

@@ -138,6 +138,42 @@ class TestShell(base.TestCase):
         self.assertRaises(exceptions.UnknownStatus,
                           shell.increment_counts, fake_test, fake_result)
 
+    def test_increment_counts_success_xfail(self):
+        fake_test = mock.MagicMock()
+        fake_test.run_count = 15
+        fake_test.success = 5
+        fake_test.run_time = 45.0
+        fake_result = {
+            'status': 'xfail',
+            'start_time': datetime.datetime(1914, 6, 28, 10, 45, 0),
+            'end_time': datetime.datetime(1914, 6, 28, 10, 45, 50),
+        }
+        values = shell.increment_counts(fake_test, fake_result)
+        # Check to ensure counts incremented properly
+        self.assertEqual(values['run_count'], 16)
+        self.assertEqual(values['success'], 6)
+        # Ensure run_time is updated on success
+        expected_avg = ((5 * 45.0) + 50) / 6
+        self.assertEqual(values['run_time'], expected_avg)
+
+    def test_increment_counts_uxsuccess(self):
+        fake_test = mock.MagicMock()
+        fake_test.run_count = 15
+        fake_test.success = 5
+        fake_test.failure = 10
+        fake_test.run_time = 45.0
+        fake_result = {
+            'status': 'uxsuccess',
+            'start_time': datetime.datetime(1914, 6, 28, 10, 45, 0),
+            'end_time': datetime.datetime(1914, 6, 28, 10, 45, 50),
+        }
+        values = shell.increment_counts(fake_test, fake_result)
+        # Check to ensure counts incremented properly
+        self.assertEqual(values['run_count'], 16)
+        self.assertEqual(values['failure'], 11)
+        # Avg runtime should only be updated on success
+        self.assertNotIn('run_time', values)
+
 
 class TestMain(base.TestCase):
     def setUp(self):
