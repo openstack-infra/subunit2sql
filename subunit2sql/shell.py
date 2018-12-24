@@ -120,8 +120,10 @@ def increment_counts(test, results):
 
 
 def get_run_totals(results):
-    success = len([x for x in results if results[x]['status'] == 'success'])
-    fails = len([x for x in results if results[x]['status'] == 'fail'])
+    success = len(
+        [x for x in results if results[x]['status'] in ['success', 'xfail']])
+    fails = len(
+        [x for x in results if results[x]['status'] in ['fail', 'uxsuccess']])
     skips = len([x for x in results if results[x]['status'] == 'skip'])
     totals = {
         'success': success,
@@ -184,10 +186,10 @@ def process_results(results, run_at=None, artifacts=None, run_id=None,
     for test in results:
         db_test = api.get_test_by_test_id(test, session)
         if not db_test:
-            if results[test]['status'] == 'success':
+            if results[test]['status'] in ['success', 'xfail']:
                 success = 1
                 fails = 0
-            elif results[test]['status'] == 'fail':
+            elif results[test]['status'] in ['fail', 'uxsuccess']:
                 fails = 1
                 success = 0
             else:

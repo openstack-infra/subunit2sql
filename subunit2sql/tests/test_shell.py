@@ -49,6 +49,33 @@ class TestShell(base.TestCase):
         self.assertEqual(totals['fails'], 16)
         self.assertEqual(totals['skips'], 50)
 
+    def test_run_totals_with_xfail_and_uxsuccess(self):
+        fake_results = {}
+        # Fake Success
+        for num in range(100):
+            test_name = 'fake_test_' + str(num)
+            fake_results[test_name] = {'status': 'success'}
+        # Fake skips
+        for num in range(50):
+            test_name = 'fake_test_skip_' + str(num)
+            fake_results[test_name] = {'status': 'skip'}
+        # Fake fails
+        for num in range(16):
+            test_name = 'fake_test_fail_' + str(num)
+            fake_results[test_name] = {'status': 'fail'}
+        # Fake xfail
+        for num in range(50):
+            test_name = 'fake_test_xfail_' + str(num)
+            fake_results[test_name] = {'status': 'xfail'}
+        # Fake uxsuccess
+        for num in range(16):
+            test_name = 'fake_test_unxsuccess_' + str(num)
+            fake_results[test_name] = {'status': 'uxsuccess'}
+        totals = shell.get_run_totals(fake_results)
+        self.assertEqual(totals['success'], 150)
+        self.assertEqual(totals['fails'], 32)
+        self.assertEqual(totals['skips'], 50)
+
     def test_running_avg(self):
         fake_test = mock.MagicMock()
         fake_test.success = 150
