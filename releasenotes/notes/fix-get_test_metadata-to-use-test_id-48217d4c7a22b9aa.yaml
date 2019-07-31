@@ -1,3 +1,0 @@
----
-fixes:
-  - Fix get_test_metadata DB API using test_id to get all metadata.

@@ -1,6 +1,0 @@
----
-features:
-  - add the ability to pass in the arguments 'run_at', 'artifacts', 'run_id',
-    'run_meta', and 'test_attr_prefix' to the shell module's process_results()
-    function via a direct function call, rather than from conf, or via cli
-    flags.

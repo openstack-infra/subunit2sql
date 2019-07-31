@@ -1,6 +1,0 @@
----
-features:
-  - New db api function delete_run_by_uuid, which allows for the deletion of
-    a run specified by a given uuid.
-  - New db api function delete_test_runs_by_uuid, which allows for the deletion
-    of all test runs associated with a given run uuid.

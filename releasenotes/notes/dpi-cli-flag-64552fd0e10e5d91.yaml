@@ -1,4 +1,0 @@
----
-features:
-  - Add a new CLI flag, --dpi, for subunit2sql-graph to adjust the output image
-    DPI for the generated graphs.
